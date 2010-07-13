@@ -98,6 +98,8 @@ namespace TestCustomProblem
             // Output fitness trace.
             string traceFilename = "FitnessTrace-" + Problem.Name + ".txt";
             fitnessTrace.WriteToFile(traceFilename);
+            Console.WriteLine("Press Enter to Exit");
+            Console.ReadLine();
         }
     }
 }

@@ -7,6 +7,8 @@
 /// ------------------------------------------------------
 
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SwarmOps.Optimizers
 {
@@ -257,16 +259,16 @@ namespace SwarmOps.Optimizers
             double gFitness = Problem.MaxFitness;
 
             // Initialize velocity boundaries.
-            for (k = 0; k < n; k++)
-            {
-                double range = System.Math.Abs(upperBound[k] - lowerBound[k]);
+            Parallel.For(0, n, l =>
+                                   {
+                                       double range = System.Math.Abs(upperBound[l] - lowerBound[l]);
 
-                velocityLowerBound[k] = -range;
-                velocityUpperBound[k] = range;
-            }
+                                       velocityLowerBound[l] = -range;
+                                       velocityUpperBound[l] = range;
+                                   });
 
             // Initialize all agents.
-            // This counts as iterations below.
+            // This counts as iterations below.)
             for (j = 0; j < numAgents && Problem.RunCondition.Continue(j, gFitness); j++)
             {
                 // Refer to the j'th agent as x and v.

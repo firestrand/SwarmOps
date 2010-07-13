@@ -29,7 +29,7 @@ namespace TestBenchmarks
         static readonly int NumRuns = 50;
         static readonly int Dim = 30;
         static readonly int DimFactor = 2000;
-        static readonly int NumIterations = DimFactor* Dim;
+        static readonly int NumIterations = DimFactor* Dim; //Really the number of function evaluations
         static readonly bool DisplaceOptimum = true;
         static IRunCondition RunCondition = new RunConditionIterations(NumIterations);
 
@@ -128,6 +128,8 @@ namespace TestBenchmarks
             // Output time-usage.
             Console.WriteLine();
             Console.WriteLine("Time usage: {0}", t2 - t1);
+            Console.WriteLine("Press Enter to Exit");
+            Console.ReadLine();
         }
     }
 }

@@ -137,6 +137,8 @@ namespace TestMesh
             // Output time-usage.
             Console.WriteLine();
             Console.WriteLine("Time usage: {0}", t2 - t1);
+            Console.WriteLine("Press Enter to Exit");
+            Console.ReadLine();
         }
     }
 }

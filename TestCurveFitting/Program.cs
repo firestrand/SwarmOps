@@ -102,6 +102,8 @@ namespace TestCurveFitting
 
                 Console.WriteLine("{0}\t{1}\t{2}", x, y, computedY);
             }
+            Console.WriteLine("Press Enter to Exit");
+            Console.ReadLine();
         }
     }
 }

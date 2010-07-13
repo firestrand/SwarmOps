@@ -179,8 +179,8 @@ namespace TestMetaBenchmarks2
                 + "-" + WeightedProblems.Length + "Bnch" + "-" + DimFactor + "xDim.txt";
             fitnessTrace.WriteToFile(traceFilename);
 
-            //Console.WriteLine("Press any key to exit ...");
-            //Console.ReadKey();
+            Console.WriteLine("Press any key to exit ...");
+            Console.ReadKey();
         }
     }
 }

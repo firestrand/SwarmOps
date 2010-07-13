@@ -163,6 +163,8 @@ namespace TestMetaBenchmarks
             // Output fitness trace.
             string traceFilename = "MetaFitnessTrace-" + MetaOptimizer.Name + "-" + Optimizer.Name + ".txt";
             fitnessTrace.WriteToFile(traceFilename);
+            Console.WriteLine("Press Enter to Exit");
+            Console.ReadLine();
         }
     }
 }
