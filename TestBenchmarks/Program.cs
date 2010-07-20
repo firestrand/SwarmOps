@@ -19,14 +19,14 @@ namespace TestBenchmarks
     class Program
     {
         // Create optimizer object.
-        static Optimizer Optimizer = new MOL();
+        static Optimizer Optimizer = new SPSO();//new MOL();
 
         // Control parameters for optimizer.
-        static readonly double[] Parameters = Optimizer.DefaultParameters;
+        static readonly double[] Parameters = SPSO.Parameters.HandTuned;//Optimizer.DefaultParameters;
         //static readonly double[] Parameters = MOL.Parameters.AllBenchmarks30Dim60000Iter;
 
         // Optimization settings.
-        static readonly int NumRuns = 50;
+        static readonly int NumRuns = 10;
         static readonly int Dim = 30;
         static readonly int DimFactor = 2000;
         static readonly int NumIterations = DimFactor* Dim; //Really the number of function evaluations
