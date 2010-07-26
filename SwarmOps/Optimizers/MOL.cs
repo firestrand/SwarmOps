@@ -63,6 +63,7 @@ namespace SwarmOps.Optimizers
         /// </summary>
         public struct Parameters
         {
+            public static readonly double[] HandTuned = { 50.0, 0.72984378812835756567558911626891, 2.05 };
             /// <summary>
             /// Control parameters tuned for all benchmark problems in
             /// 30 dimensions and 60000 fitness evaluations in one optimization run.

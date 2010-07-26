@@ -7,9 +7,12 @@
 /// ------------------------------------------------------
 
 using System;
+using System.IO;
+using System.Text;
 using SwarmOps;
 using SwarmOps.Optimizers;
 using SwarmOps.Problems;
+using System.Diagnostics;
 
 namespace TestBenchmarks
 {
@@ -19,10 +22,10 @@ namespace TestBenchmarks
     class Program
     {
         // Create optimizer object.
-        static Optimizer Optimizer = new SPSO();//new MOL();
+        static Optimizer Optimizer = new PSO();//new MOL();
 
         // Control parameters for optimizer.
-        static readonly double[] Parameters = SPSO.Parameters.HandTuned;//Optimizer.DefaultParameters;
+        private static readonly double[] Parameters = Optimizer.DefaultParameters;
         //static readonly double[] Parameters = MOL.Parameters.AllBenchmarks30Dim60000Iter;
 
         // Optimization settings.
@@ -32,6 +35,7 @@ namespace TestBenchmarks
         static readonly int NumIterations = DimFactor* Dim; //Really the number of function evaluations
         static readonly bool DisplaceOptimum = true;
         static IRunCondition RunCondition = new RunConditionIterations(NumIterations);
+        static StringBuilder _resultSb = new StringBuilder();
 
         /// <summary>
         /// Optimize the given problem and output result-statistics.
@@ -83,11 +87,22 @@ namespace TestBenchmarks
             // Output fitness trace, quartiles.
             string traceFilenameQuartiles = Optimizer.Name + "-FitnessTraceQuartiles-" + problem.Name + ".txt";
             fitnessTraceQuartiles.WriteToFile(traceFilenameQuartiles);
+
+            //Add to result summary
+            _resultSb.AppendLine(String.Format("{0} & {1} & {2} & {3} & {4} & {5} & {6} & {7} \\\\",
+                                               problem.Name,
+                                               Tools.FormatNumber(Statistics.FitnessMean),
+                                               Tools.FormatNumber(Statistics.FitnessStdDev),
+                                               Tools.FormatNumber(Statistics.FitnessQuartiles.Min),
+                                               Tools.FormatNumber(Statistics.FitnessQuartiles.Q1),
+                                               Tools.FormatNumber(Statistics.FitnessQuartiles.Median),
+                                               Tools.FormatNumber(Statistics.FitnessQuartiles.Q3),
+                                               Tools.FormatNumber(Statistics.FitnessQuartiles.Max)));
         }
         static void Main(string[] args)
         {
             // Initialize PRNG.
-            Globals.Random = new RandomOps.MersenneTwister();
+            Globals.Random = new RandomOps.RanSystem();
 
             // Output optimization settings.
             Console.WriteLine("Benchmark-tests.");
@@ -100,11 +115,12 @@ namespace TestBenchmarks
             Console.WriteLine("Displace global optimum: {0}", (DisplaceOptimum) ? ("Yes") : ("No"));
             Console.WriteLine();
             Console.WriteLine("Problem & Mean & Std.Dev. & Min & Q1 & Median & Q3 & Max \\\\");
+            _resultSb.AppendLine("Problem & Mean & Std.Dev. & Min & Q1 & Median & Q3 & Max \\\\");
             Console.WriteLine("\\hline");
 
             // Starting-time.
-            DateTime t1 = DateTime.Now;
-
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 #if false
             //Optimize(new Ackley(Dim, DisplaceOptimum, RunCondition));
             //Optimize(new Rastrigin(Dim, DisplaceOptimum, RunCondition));
@@ -123,11 +139,14 @@ namespace TestBenchmarks
             }
 #endif
             // End-time.
-            DateTime t2 = DateTime.Now;
+            sw.Stop();
+
+            //Write out summary
+            File.WriteAllText(Optimizer.Name + "ResultSummary.txt",_resultSb.ToString());
 
             // Output time-usage.
             Console.WriteLine();
-            Console.WriteLine("Time usage: {0}", t2 - t1);
+            Console.WriteLine("Time usage: {0}", sw.Elapsed);
             Console.WriteLine("Press Enter to Exit");
             Console.ReadLine();
         }

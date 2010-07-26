@@ -9,6 +9,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SwarmOps.Optimizers
 {
@@ -218,7 +219,47 @@ namespace SwarmOps.Optimizers
             get { return _upperBound; }
         }
         #endregion
+        public class Swarm
+        {
+            private int _numAgents;
+            private double _omega;
+            private double _phiP;
+            private double _phiG;
+            private double[] _lowerBound;
+            private double[] _upperBound;
+            private double[] _lowerInit;
+            private double[] _upperInit;
+            private int _dimensions;
+            private double[][] _particles;
+            private double[][] _velocities;
+            private double[][] _pBest;
+            private double[] _pBestFitness;
+            private double[] _velocityLowerBound;
+            private double[] _velocityUpperBound;
+            private double[] _gBest;
+            private double _gBestFitness;
+            private ReaderWriterLockSlim _gLock = new ReaderWriterLockSlim();
 
+            Swarm(int numAgents,double omega, double phiP, double phiG, Problem problem)
+            {
+                _numAgents = numAgents;
+                _omega = omega;
+                _phiP = phiP;
+                _phiG = phiG;
+                _lowerBound = problem.LowerBound;
+                _upperBound = problem.UpperBound;
+                _lowerInit = problem.LowerInit;
+                _dimensions = problem.Dimensionality;
+                _particles = Tools.NewMatrix(_numAgents, _dimensions);
+                _velocities = Tools.NewMatrix(_numAgents, _dimensions);
+                _pBest = Tools.NewMatrix(_numAgents, _dimensions);
+                _pBestFitness = new double[_numAgents];
+                _velocityLowerBound = new double[_numAgents];
+                _velocityUpperBound = new double[_numAgents];
+                _gBestFitness = problem.MaxFitness;
+            }
+
+        }
         #region Base-class overrides, Optimizer.
         /// <summary>
         /// Perform one optimization run and return the best found solution.
@@ -268,8 +309,8 @@ namespace SwarmOps.Optimizers
                                    });
 
             // Initialize all agents.
-            // This counts as iterations below.)
-            for (j = 0; j < numAgents && Problem.RunCondition.Continue(j, gFitness); j++)
+            // This counts as iterations below.));
+            for (j = 0; j < numAgents; j++)
             {
                 // Refer to the j'th agent as x and v.
                 double[] x = agents[j];

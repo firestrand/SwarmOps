@@ -16,31 +16,27 @@ using System.Linq.Expressions;
 namespace SwarmOps.Optimizers
 {
     /// <summary>
-    /// Standard Particle Swarm Optimization (SPSO) originally due to
-    /// Eberhart et al. This the 'Standard PSO' variant which uses 
-    /// neighborhood best and can have its  parameters tuned (or 
-    /// meta-optimized) to work well on a range of optimization problems. 
+    /// Meta Particle Swarm Optimization (MPSO) 
+    /// This the 'MPSO' variant uses a swarm of swarms.
+    /// I have added in the neighborhood size concepts when N = numParticles the algorithm reverts to gBest characteristics.
     /// 
-    /// Typically when N neighborhood size = S the number of particles in
-    /// the swarm this variant reverts to the 'Plain Vanilla' gBest
-    /// performance.
+    /// Meta PSO (MPSO) uses two indicies j=1...NumSwarms and i=1...NumParticles in the swarm.
+    /// The velocity update then becomes
+    /// v[k] = omega * v[k] + phiP * rP * (p[k] - x[k]) + phiS * rS * (sBest[k] - x[k]) + phiN * rN * (nBest[k] - x[k]);
+    /// 
     /// </summary>
     /// <remarks>
     /// References:
-    /// (1) Eberhart, R. C. and Kennedy, J. A new optimizer using particle
-    ///     swarm theory. Proceedings of the Sixth International Symposium
-    ///     on Micromachine and Human Science, Nagoya, Japan pp. 39-43.
-    /// (2) J. Kennedy and R. Eberhart. Particle swarm optimization.
-    ///     In Proceedings of IEEE International Conference on Neural
-    ///     Networks, volume IV, pages 1942-1948, Perth, Australia, 1995
+    /// (1) 
     /// </remarks>
-    public class SPSO : Optimizer
+    //TODO: How does this compare to pbest, nbest, gbest with nSize = swarm size of this algorithm, if they are equivalent then why the complication of multiple swarms.
+    public class MPSO : Optimizer
     {
         #region Constructors.
         /// <summary>
         /// Construct the object.
         /// </summary>
-        public SPSO()
+        public MPSO()
             : base()
         {
         }
@@ -49,7 +45,7 @@ namespace SwarmOps.Optimizers
         /// Construct the object.
         /// </summary>
         /// <param name="problem">Problem to optimize.</param>
-        public SPSO(Problem problem)
+        public MPSO(Problem problem)
             : base(problem)
         {
             //TODO: This class is currently hardwired for minimization. Fix and allow for maximization as well based on the problem.
@@ -68,23 +64,31 @@ namespace SwarmOps.Optimizers
             /// N = Neighborhood size
             /// 
             /// </summary>
-            public static readonly double[] HandTuned = { 50.0, 2.0, 0.72984378812835756567558911626891, 1.4961797656631330096349576883494, 1.4961797656631330096349576883494 };
+            public static readonly double[] HandTuned = { 20.0, 50.0, 2.0, 0.72984378812835756567558911626891, 1.366666666, 1.366666666, 1.366666666 };
         }
         #endregion
 
         #region Get control parameters.
+        /// <summary>
+        /// Get parameter, Number of swarm
+        /// </summary>
+        /// <param name="parameters">Optimizer parameters.</param>
+        public int GetNumSwarms(double[] parameters)
+        {
+            return (int)System.Math.Round(parameters[0], System.MidpointRounding.AwayFromZero);
+        }
         /// <summary>
         /// Get parameter, Number of agents, aka. swarm-size.
         /// </summary>
         /// <param name="parameters">Optimizer parameters.</param>
         public int GetNumAgents(double[] parameters)
         {
-            return (int)System.Math.Round(parameters[0], System.MidpointRounding.AwayFromZero);
+            return (int)System.Math.Round(parameters[1], System.MidpointRounding.AwayFromZero);
         }
 
         public int GetNeighborhoodSize(double[] parameters)
         {
-            return (int) System.Math.Round(parameters[1], System.MidpointRounding.AwayFromZero);
+            return (int) System.Math.Round(parameters[2], System.MidpointRounding.AwayFromZero);
         }
         /// <summary>
         /// Get parameter, Omega.
@@ -92,7 +96,7 @@ namespace SwarmOps.Optimizers
         /// <param name="parameters">Optimizer parameters.</param>
         public double GetOmega(double[] parameters)
         {
-            return parameters[1];
+            return parameters[3];
         }
 
         /// <summary>
@@ -101,16 +105,25 @@ namespace SwarmOps.Optimizers
         /// <param name="parameters">Optimizer parameters.</param>
         public double GetPhiP(double[] parameters)
         {
-            return parameters[2];
+            return parameters[4];
         }
 
         /// <summary>
-        /// Get parameter, PhiG.
+        /// Get parameter, PhiS.
         /// </summary>
         /// <param name="parameters">Optimizer parameters.</param>
-        public double GetPhiG(double[] parameters)
+        public double GetPhiS(double[] parameters)
         {
-            return parameters[3];
+            return parameters[5];
+        }
+
+        /// <summary>
+        /// Get parameter, PhiS.
+        /// </summary>
+        /// <param name="parameters">Optimizer parameters.</param>
+        public double GetPhiN(double[] parameters)
+        {
+            return parameters[6];
         }
         #endregion
 
@@ -120,7 +133,7 @@ namespace SwarmOps.Optimizers
         /// </summary>
         public override string Name
         {
-            get { return "SPSO"; }
+            get { return "MPSO"; }
         }
 
         /// <summary>
@@ -128,10 +141,10 @@ namespace SwarmOps.Optimizers
         /// </summary>
         public override int Dimensionality
         {
-            get { return 5; }
+            get { return 7; }
         }
 
-        string[] _parameterName = { "S", "N", "omega", "phi_p", "phi_g" };
+        string[] _parameterName = { "S", "N", "omega", "phi_p", "phi_s", "phi_n" };
 
         /// <summary>
         /// Control parameter names.
@@ -151,7 +164,7 @@ namespace SwarmOps.Optimizers
             get { return _defaultParameters; }
         }
 
-        static readonly double[] _lowerBound = { 1.0, 0.0, -2.0, -4.0, -4.0 };
+        static readonly double[] _lowerBound = { 1.0, 1.0, 0.0, -2.0, -5.0, -5.0, -5.0 };
 
         /// <summary>
         /// Lower search-space boundary for control parameters.
@@ -161,7 +174,7 @@ namespace SwarmOps.Optimizers
             get { return _lowerBound; }
         }
 
-        static readonly double[] _upperBound = { 200.0, 200.0, 2.0, 4.0, 4.0 };
+        static readonly double[] _upperBound = { 100.0, 200.0, 200.0, 2.0, 5.0, 5.0, 5.0 };
 
         /// <summary>
         /// Upper search-space boundary for control parameters.
@@ -181,12 +194,16 @@ namespace SwarmOps.Optimizers
         {
             Debug.Assert(parameters != null && parameters.Length == Dimensionality);
 
-            // Retrieve parameter specific to SPSO method.
+            // Retrieve parameter specific to MPSO method.
             int numAgents = GetNumAgents(parameters);
-            int neighborhoodSize = GetNeighborhoodSize(parameters);
+            int numSwarms = GetNumSwarms(parameters);
+            Debug.Assert(numAgents > 0);
+
+            int neighborhoodSize = GetNeighborhoodSize(parameters) > numAgents?numAgents:GetNeighborhoodSize(parameters);
             double omega = GetOmega(parameters);
             double phiP = GetPhiP(parameters); // phi1
-            double phiG = GetPhiG(parameters); // phi2
+            double phiS = GetPhiS(parameters); // phi2
+            double phiN = GetPhiN(parameters); //phi3
 
 
             // Get problem-context.
@@ -200,6 +217,7 @@ namespace SwarmOps.Optimizers
             double[][] agents = Tools.NewMatrix(numAgents, n);
             double[][] velocities = Tools.NewMatrix(numAgents, n);
             double[][] bestAgentPosition = Tools.NewMatrix(numAgents, n);
+            double[][] bestSwarmPosition = Tools.NewMatrix(numSwarms, n);
             double[][] bestAgentNeighborhoodPosition = Tools.NewMatrix(numAgents, n);
             double[] bestAgentNeighborhoodFitness = new double[numAgents];
             double[] bestAgentFitness = new double[numAgents];
@@ -260,8 +278,8 @@ namespace SwarmOps.Optimizers
                 {
                     if (bestAgentFitness[j] < bestAgentNeighborhoodFitness[(l+j)%numAgents])
                     {
-                        bestAgentPosition[j].CopyTo(bestAgentNeighborhoodPosition[j],0);
-                        bestAgentNeighborhoodFitness[j] = bestAgentFitness[j];
+                        bestAgentPosition[(l + j) % numAgents].CopyTo(bestAgentNeighborhoodPosition[j], 0);
+                        bestAgentNeighborhoodFitness[(l + j) % numAgents] = bestAgentFitness[j];
                     }
                 }
                 if (bestAgentFitness[j] < gFitness)
@@ -274,26 +292,27 @@ namespace SwarmOps.Optimizers
             }
 
             // Perform actual optimization iterations. Start with numAgents to include initialization fitness evaluations in RunCondition check
-            for (i = numAgents; Problem.RunCondition.Continue(i, bestAgentNeighborhoodFitness.Max()); )
+           // for(int s = 0,GetNumSwarms())
+            for (i = numAgents; Problem.RunCondition.Continue(i, gFitness); )
             {
-                Debug.Assert(numAgents > 0);
-
-                for (j = 0; j < numAgents && Problem.RunCondition.Continue(i, bestAgentNeighborhoodFitness.Max()); j++, i++)
+                for (j = 0; j < numAgents && Problem.RunCondition.Continue(i, gFitness); j++, i++)
                 {
                     // Refer to the j'th agent as x and v.
                     double[] x = agents[j];
                     double[] v = velocities[j];
                     double[] p = bestAgentPosition[j];
+                    double[] sBest = bestSwarmPosition[i];
                     double[] nBest = bestAgentNeighborhoodPosition[j];
 
                     // Pick random weights.
                     double rP = Globals.Random.Uniform();
-                    double rG = Globals.Random.Uniform();
+                    double rS = Globals.Random.Uniform();
+                    double rN = Globals.Random.Uniform();
 
-                    // Update velocity.
+                    // Update velocity.)
                     for (int k = 0; k < n; k++)
                     {
-                        v[k] = omega * v[k] + phiP * rP * (p[k] - x[k]) + phiG * rG * (nBest[k] - x[k]);
+                        v[k] = omega * v[k] + phiP * rP * (p[k] - x[k]) + phiS * rS * (sBest[k] - x[k]) + phiN * rN * (nBest[k] - x[k]);
                     }
 
                     // Fix denormalized floating-point values in velocity.
@@ -334,7 +353,7 @@ namespace SwarmOps.Optimizers
                                 bestAgentNeighborhoodFitness[(l + j) % numAgents] = bestAgentFitness[j];
                             }
                         }
-                        if (bestAgentFitness[j] < gFitness)
+                        if (newFitness < gFitness)
                         {
                             gFitness = bestAgentFitness[j];
                             g = bestAgentPosition[j];
@@ -342,7 +361,7 @@ namespace SwarmOps.Optimizers
                     }
 
                     // Trace fitness of best found solution.
-                    Trace(j, gFitness);
+                    Trace(i, gFitness);
                 }
             }
 

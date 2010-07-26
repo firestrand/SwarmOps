@@ -67,7 +67,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Optimizers\SPSO.cs" />
+    <Compile Include="Optimizers\MTS.cs" />
+    <Compile Include="Optimizers\MPSO.cs" />
+    <Compile Include="Optimizers\LPSO.cs" />
     <Compile Include="WeightedProblem.cs" />
     <Compile Include="FitnessTraceMean.cs" />
     <Compile Include="FitnessTraceQuartiles.cs" />

@@ -7,7 +7,7 @@
 /// ------------------------------------------------------
 
 using System.Diagnostics;
-
+using System.Linq;
 namespace SwarmOps
 {
     public static partial class Tools
@@ -67,6 +67,58 @@ namespace SwarmOps
                 x[i] = upper[i] - lower[i];
 
                 Debug.Assert(x[i] >= 0);
+            }
+        }
+        /// <summary>
+        /// Simulated Orthogonal Array
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="m"></param>
+        /// <param name="lower"></param>
+        /// <param name="upper"></param>
+        public static void InitializeSOA(ref double[][] x, double[] lower, double[] upper)
+        {
+            //TODO: Assert that lengths are > 0
+            int numAgents = x.Length;
+            int dimSize = x[0].Length;
+
+            double[][] SOA = new double[dimSize][];
+            double[] M = new double[numAgents];
+            for (int i = 0; i < numAgents;i++ )
+            {
+                M[i] += i;
+            }
+            for (int i = 0; i < dimSize; i++)
+            {
+                Tools.Shuffle<double>(ref M);
+                SOA[i] = M.Clone() as double[];
+
+            }
+            for (int i = 0; i < numAgents; i++)
+            {
+                for (int j = 0; j < dimSize; j++)
+                {
+                    // Xi[j]=li+(ui-li)*SOA[i, j]/(M-1)
+                    x[i][j] = lower[j] + (upper[j] - lower[j])*(SOA[j][i])/(numAgents - 1);
+                }
+            }
+        }
+        public static void Shuffle<T>(ref T[] x)
+        {
+            //TODO: using system random for simplicity
+            System.Random rand = new System.Random();
+            int arrLen = x.Length;
+            T temp;
+            int dest;
+            for(int i = 0; i< 7;i++) //Shuffle 7 times
+            {
+                for(int j = 0; j < arrLen; j++)
+                {
+                    dest = rand.Next(arrLen);
+                    temp = x[dest];
+                    x[dest] = x[j];
+                    x[j] = temp;
+                }
             }
         }
     }
