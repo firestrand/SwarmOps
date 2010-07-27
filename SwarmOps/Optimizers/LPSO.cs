@@ -243,143 +243,137 @@ namespace SwarmOps.Optimizers
 
             // Initialize all agents.
             // This counts as iterations below.
-            Parallel.For(0, numAgents, j =>
-                                           {
-                                               // Refer to the j'th agent as x and v.
-                                               double[] x = agents[j];
-                                               double[] v = velocities[j];
+            for(int j = 0; j < numAgents; j++)
+            {
+                // Refer to the j'th agent as x and v.
+                double[] x = agents[j];
+                double[] v = velocities[j];
 
-                                               // Initialize agent-position in search-space.
-                                               for (int m = 0; m < n; m++)
-                                               {
-                                                   x[m] = pRandoms[j].NextDouble()*(upperInit[m] - lowerInit[m]) +
-                                                          lowerInit[m];
-                                                   v[m] = pRandoms[j].NextDouble()*
-                                                          (velocityUpperBound[m] - velocityLowerBound[m]) +
-                                                          velocityLowerBound[m];
-                                               }
-                                               //Tools.InitializeUniform(ref x, lowerInit, upperInit);
+                // Initialize agent-position in search-space.
+                for (int m = 0; m < n; m++)
+                {
+                    x[m] = pRandoms[j].NextDouble()*(upperInit[m] - lowerInit[m]) +
+                            lowerInit[m];
+                    v[m] = pRandoms[j].NextDouble()*
+                            (velocityUpperBound[m] - velocityLowerBound[m]) +
+                            velocityLowerBound[m];
+                }
+                //Tools.InitializeUniform(ref x, lowerInit, upperInit);
 
-                                               // Initialize velocity.
-                                               //Tools.InitializeUniform(ref v, velocityLowerBound, velocityUpperBound);
+                // Initialize velocity.
+                //Tools.InitializeUniform(ref v, velocityLowerBound, velocityUpperBound);
 
-                                               // Compute fitness of initial position.
-                                               bestAgentFitness[j] = Problem.Fitness(x);
+                // Compute fitness of initial position.
+                bestAgentFitness[j] = Problem.Fitness(x);
 
-                                               // Initialize best known position.
-                                               // Contents must be copied because the agent
-                                               // will likely move to worse positions.
-                                               x.CopyTo(bestAgentPosition[j], 0);
+                // Initialize best known position.
+                // Contents must be copied because the agent
+                // will likely move to worse positions.
+                x.CopyTo(bestAgentPosition[j], 0);
 
-                                               // Update swarm's best known position.
-                                               // This must reference the agent's best-known
-                                               // position because the current position changes.
-                                               for (int l = 0; l < neighborhoodSize; l++)
-                                               {
-                                                   if (bestAgentFitness[j] <
-                                                       bestAgentNeighborhoodFitness[(l + j)%numAgents])
-                                                   {
-                                                       bestAgentPosition[(l + j)%numAgents].CopyTo(
-                                                           bestAgentNeighborhoodPosition[j], 0);
-                                                       bestAgentNeighborhoodFitness[(l + j)%numAgents] =
-                                                           bestAgentFitness[j];
-                                                   }
-                                               }
-                                               lock (gLock)
-                                               {
-                                                   if (bestAgentFitness[j] < gFitness)
-                                                   {
+                // Update swarm's best known position.
+                // This must reference the agent's best-known
+                // position because the current position changes.
+                for (int l = 0; l < neighborhoodSize; l++)
+                {
+                    if (bestAgentFitness[j] <
+                        bestAgentNeighborhoodFitness[(l + j)%numAgents])
+                    {
+                        bestAgentPosition[(l + j)%numAgents].CopyTo(
+                            bestAgentNeighborhoodPosition[j], 0);
+                        bestAgentNeighborhoodFitness[(l + j)%numAgents] =
+                            bestAgentFitness[j];
+                    }
+                }
+                    if (bestAgentFitness[j] < gFitness)
+                    {
 
-                                                       gFitness = bestAgentFitness[j];
-                                                       g = bestAgentPosition[j];
+                        gFitness = bestAgentFitness[j];
+                        g = bestAgentPosition[j];
 
-                                                   }
-                                                   // Trace fitness of best found solution.
-                                                   Trace(j, gFitness);
-                                               }
-                                           });
+                    }
+                    // Trace fitness of best found solution.
+                    Trace(j, gFitness);
+                
+            }
 
             // Perform actual optimization iterations. Start with numAgents to include initialization fitness evaluations in RunCondition check
             i = numAgents;
             while(Problem.RunCondition.Continue(i, gFitness))
             {
-                Parallel.For(0, numAgents, j =>
-                                               {
-                                                   Interlocked.Increment(ref i);
-                                                   // Refer to the j'th agent as x and v.
-                                                   double[] x = agents[j];
-                                                   double[] v = velocities[j];
-                                                   double[] p = bestAgentPosition[j];
-                                                   double[] nBest = bestAgentNeighborhoodPosition[j];
+                for(int j = 0; j < numAgents; j++,i++)
+                {
+                    // Refer to the j'th agent as x and v.
+                    double[] x = agents[j];
+                    double[] v = velocities[j];
+                    double[] p = bestAgentPosition[j];
+                    double[] nBest = bestAgentNeighborhoodPosition[j];
 
-                                                   // Pick random weights.
-                                                   double rP = Globals.Random.Uniform();
-                                                   double rG = Globals.Random.Uniform();
+                    // Pick random weights.
+                    double rP = Globals.Random.Uniform();
+                    double rG = Globals.Random.Uniform();
 
-                                                   // Update velocity.
-                                                   for (int k = 0; k < n; k++)
-                                                   {
-                                                       v[k] = omega*v[k] + phiP*rP*(p[k] - x[k]) +
-                                                              phiG*rG*(nBest[k] - x[k]);
-                                                   }
+                    // Update velocity.
+                    for (int k = 0; k < n; k++)
+                    {
+                        v[k] = omega*v[k] + phiP*rP*(p[k] - x[k]) +
+                                phiG*rG*(nBest[k] - x[k]);
+                    }
 
-                                                   // Fix denormalized floating-point values in velocity.
-                                                   Tools.Denormalize(ref v);
+                    // Fix denormalized floating-point values in velocity.
+                    Tools.Denormalize(ref v);
 
-                                                   // Enforce velocity bounds before updating position.
-                                                   Tools.Bound(ref v, velocityLowerBound, velocityUpperBound);
+                    // Enforce velocity bounds before updating position.
+                    Tools.Bound(ref v, velocityLowerBound, velocityUpperBound);
 
-                                                   // Update position.
-                                                   for (int k = 0; k < n; k++)
-                                                   {
-                                                       x[k] = x[k] + v[k];
-                                                   }
+                    // Update position.
+                    for (int k = 0; k < n; k++)
+                    {
+                        x[k] = x[k] + v[k];
+                    }
 
-                                                   // Enforce bounds before computing new fitness.
-                                                   Tools.Bound(ref x, lowerBound, upperBound);
+                    // Enforce bounds before computing new fitness.
+                    Tools.Bound(ref x, lowerBound, upperBound);
 
-                                                   // Compute new fitness.
-                                                   double newFitness = Problem.Fitness(x, bestAgentFitness[j]);
+                    // Compute new fitness.
+                    double newFitness = Problem.Fitness(x, bestAgentFitness[j]);
 
-                                                   // Update best-known position in case of fitness improvement.
-                                                   if (newFitness < bestAgentFitness[j])
-                                                   {
-                                                       // Update best-known position.
-                                                       // Contents must be copied because the agent
-                                                       // will likely move to worse positions.
-                                                       x.CopyTo(bestAgentPosition[j], 0);
-                                                       bestAgentFitness[j] = newFitness;
+                    // Update best-known position in case of fitness improvement.
+                    if (newFitness < bestAgentFitness[j])
+                    {
+                        // Update best-known position.
+                        // Contents must be copied because the agent
+                        // will likely move to worse positions.
+                        x.CopyTo(bestAgentPosition[j], 0);
+                        bestAgentFitness[j] = newFitness;
 
-                                                       // Update swarm's best known position.
-                                                       // This must reference the agent's best-known
-                                                       // position because the current position changes.
-                                                       for (int l = 0; l < neighborhoodSize; l++)
-                                                       {
-                                                           if (bestAgentFitness[j] <
-                                                               bestAgentNeighborhoodFitness[(l + j)%numAgents])
-                                                           {
-                                                               bestAgentPosition[j].CopyTo(
-                                                                   bestAgentNeighborhoodPosition[(l + j)%numAgents], 0);
-                                                               bestAgentNeighborhoodFitness[(l + j)%numAgents] =
-                                                                   bestAgentFitness[j];
-                                                           }
-                                                       }
-                                                       lock (gLock)
-                                                       {
-                                                           if (newFitness < gFitness)
-                                                           {
-                                                               gFitness = bestAgentFitness[j];
-                                                               g = bestAgentPosition[j];
-                                                           }
-                                                       }
-                                                   }
+                        // Update swarm's best known position.
+                        // This must reference the agent's best-known
+                        // position because the current position changes.
+                        for (int l = 0; l < neighborhoodSize; l++)
+                        {
+                            if (bestAgentFitness[j] <
+                                bestAgentNeighborhoodFitness[(l + j)%numAgents])
+                            {
+                                bestAgentPosition[j].CopyTo(
+                                    bestAgentNeighborhoodPosition[(l + j)%numAgents], 0);
+                                bestAgentNeighborhoodFitness[(l + j)%numAgents] =
+                                    bestAgentFitness[j];
+                            }
+                        }
+       
+                            if (newFitness < gFitness)
+                            {
+                                gFitness = bestAgentFitness[j];
+                                g = bestAgentPosition[j];
+                            }
+                        
+                    }
 
-                                                   lock (gLock)
-                                                   {
-                                                       // Trace fitness of best found solution.
-                                                       Trace(i, gFitness);
-                                                   }
-                                               });
+                        // Trace fitness of best found solution.
+                        Trace(i, gFitness);
+                    
+                }
             }
 
             // Return best-found solution and fitness.

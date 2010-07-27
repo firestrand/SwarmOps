@@ -22,7 +22,7 @@ namespace TestBenchmarks
     class Program
     {
         // Create optimizer object.
-        static Optimizer Optimizer = new PSO();//new MOL();
+        static Optimizer Optimizer = new LPSO();//new MOL();
 
         // Control parameters for optimizer.
         private static readonly double[] Parameters = Optimizer.DefaultParameters;
