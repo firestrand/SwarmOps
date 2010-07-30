@@ -8,7 +8,7 @@
 
 using System.Diagnostics;
 
-namespace SwarmOps
+namespace SwarmOps.Optimizers
 {
     /// <summary>
     /// Compute the standard Meta-Fitness measure, that is,

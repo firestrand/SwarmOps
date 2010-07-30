@@ -21,8 +21,9 @@ namespace SwarmOps.Optimizers
     /// </summary>
     /// <remarks>
     /// References:
-    /// (1) M.E.H. Pedersen. Simplifying Swarm Optimization.
-    ///     PhD Thesis, University of Southampton, 2009.
+    /// (1) M.E.H. Pedersen. Tuning & Simplifying Heuristical
+    ///     Optimization. PhD Thesis, University of Southampton,
+    ///     2010.
     /// </remarks>
     public class LUS : Optimizer
     {

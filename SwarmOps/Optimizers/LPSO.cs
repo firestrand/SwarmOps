@@ -226,14 +226,14 @@ namespace SwarmOps.Optimizers
             object gLock = new object();
 
             //Initialize bestAgentNeighborhoodFitness and BestAgentFitness to max
-            Parallel.For(0, numAgents, l =>
+            System.Threading.Tasks.Parallel.For(0, numAgents, l =>
                                            {
                                                bestAgentFitness[l] = Problem.MaxFitness;
                                                bestAgentNeighborhoodFitness[l] = Problem.MaxFitness;
                                            });
 
             // Initialize velocity boundaries.
-            Parallel.For(0, n, l =>
+            System.Threading.Tasks.Parallel.For(0, n, l =>
                                    {
                                        double range = System.Math.Abs(upperBound[l] - lowerBound[l]);
 

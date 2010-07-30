@@ -13,7 +13,8 @@ namespace RandomOps
     /// can be drawn at random according to the given probability
     /// distribution. Probabilities are assumed to sum to one.
     /// Various functions for drawing numbers are supplied with
-    /// different time-complexity advantages.
+    /// different time-complexity advantages. Thread-safe if
+    /// supplied RNG's Uniform() is thread-safe.
     /// </summary>
     public class IndexDistribution
     {

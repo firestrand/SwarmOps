@@ -14,7 +14,7 @@ namespace RandomOps
     /// A set of integers enumerated from zero and upwards that
     /// can be drawn at random. Creation or resetting takes time
     /// O(n) where n is the size of the set, and drawing a random
-    /// element from the set takes constant time O(1).
+    /// element from the set takes constant time O(1). Not thread-safe.
     /// </summary>
     public class Set
     {

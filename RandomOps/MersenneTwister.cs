@@ -17,6 +17,7 @@ namespace RandomOps
     /// is rewritten from their C source-code originally dated 2002/1/26.
     /// This PRNG has a very long period of 2^19937-1 (approximately 4.3 x 10^6001),
     /// and is hence known as MT19937. This implementation is the 32-bit version.
+    /// Not thread-safe.
     /// </summary>
     /// <remarks>
     /// The original C source-code contains the following copyright notice which

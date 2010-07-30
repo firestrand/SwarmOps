@@ -18,6 +18,7 @@ namespace RandomOps
     {
         /// <summary>
         /// Generate a uniform random point from the unit-radius 2-dimensional disk.
+        /// Thread-safe if Uniform() is thread-safe.
         /// </summary>
         public virtual double[] Disk()
         {
@@ -32,6 +33,7 @@ namespace RandomOps
 
         /// <summary>
         /// Generate a uniform random point from the unit-radius 2-dimensional disk.
+        /// Thread-safe if Uniform() is thread-safe.
         /// </summary>
         /// <param name="x">Random point x</param>
         /// <param name="y">Random point y</param>

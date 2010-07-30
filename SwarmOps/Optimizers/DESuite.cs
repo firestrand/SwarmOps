@@ -106,13 +106,13 @@ namespace SwarmOps.Optimizers
             }
         }
 
-        DitherVariant _dither;
-        DECrossover.Variant _crossover;
+        protected DitherVariant _dither;
+        protected DECrossover.Variant _crossover;
 
         /// <summary>
         /// Name of crossover operator.
         /// </summary>
-        string CrossoverName
+        protected string CrossoverName
         {
             get
             {
@@ -123,7 +123,7 @@ namespace SwarmOps.Optimizers
         /// <summary>
         /// Name of dither variant.
         /// </summary>
-        string DitherName
+        protected string DitherName
         {
             get
             {

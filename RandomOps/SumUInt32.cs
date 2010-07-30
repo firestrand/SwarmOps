@@ -13,7 +13,8 @@ namespace RandomOps
     /// <summary>
     /// Summing the output of multiple RNGs and taking modulo 2^32.
     /// Note that this assumes the RNGs have RandMax roughly equal
-    /// to UInt32.MaxValue otherwise there will be a bias.
+    /// to UInt32.MaxValue otherwise there will be a bias. Thread-safe
+    /// if RNGs are thread-safe.
     /// </summary>
     /// <remarks>
     /// If you are using RNGs that have custom methods for generating

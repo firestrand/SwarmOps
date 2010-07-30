@@ -78,6 +78,7 @@ namespace RandomOps
         #region Base-class overrides.
         /// <summary>
         /// Draw a uniform random number in the exclusive range (0,1)
+        /// Thread-safe if Rand() is thread-safe.
         /// </summary>
         /// <remarks>
         /// Assumes that Rand() is in {0, .., RandMax}.
@@ -94,6 +95,7 @@ namespace RandomOps
 
         /// <summary>
         /// Draw a random boolean with equal probability of true or false.
+        /// Thread-safe if Rand() is thread-safe.
         /// </summary>
         public override bool Bool()
         {
@@ -102,6 +104,7 @@ namespace RandomOps
 
         /// <summary>
         /// Draw a random and uniform byte.
+        /// Thread-safe if Rand() is thread-safe.
         /// </summary>
         /// <remarks>
         /// The least significant bits are not that statistically random,

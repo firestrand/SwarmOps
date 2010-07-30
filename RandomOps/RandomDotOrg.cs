@@ -12,7 +12,7 @@ namespace RandomOps
 {
     /// <summary>
     /// Random Number Generator (RNG) that downloads random bytes from the internet
-    /// website: www.random.org.
+    /// website: www.random.org. Not thread-safe.
     /// These random bytes are generated from atmospheric noise picked up by radios.
     /// Only a certain number of bits are allowed to be downloaded from this website
     /// to your IP address each day, so this RNG is used with a Fallback-PRNG.

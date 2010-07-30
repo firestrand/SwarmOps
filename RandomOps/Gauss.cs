@@ -27,7 +27,7 @@ namespace RandomOps
 
         /// <summary>
         /// Draw a Gaussian (or normally) distributed random number, with designated
-        /// mean and deviation.
+        /// mean and deviation. Thread-safe if Gauss() is thread-safe.
         /// </summary>
         /// <param name="mean">The mean of the distribution, e.g. 0.</param>
         /// <param name="deviation">The deviation of the distribution, e.g. 1.</param>
@@ -38,7 +38,7 @@ namespace RandomOps
 
         /// <summary>
         /// Draw a Gaussian (or normally) distributed random number, with mean 0 and
-        /// deviation 1.
+        /// deviation 1. Not thread-safe.
         /// </summary>
         public virtual double Gauss()
         {

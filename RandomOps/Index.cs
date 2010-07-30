@@ -18,6 +18,7 @@ namespace RandomOps
     {
         /// <summary>
         /// Draw a random integer from the set {0, .., n-1} with uniform probability.
+        /// Thread-safe if Uniform() is thread-safe.
         /// </summary>
         /// <remarks>
         /// The default implementation uses Uniform() to generate an integer.
@@ -44,6 +45,7 @@ namespace RandomOps
 
         /// <summary>
         /// Draw two distinct integers from the set {0, .., n-1} with equal probability.
+        /// Thread-safe if Uniform() is thread-safe.
         /// </summary>
         /// <param name="index1">Reference to the first integer drawn.</param>
         /// <param name="index2">Reference to the second integer drawn.</param>
@@ -72,8 +74,8 @@ namespace RandomOps
         /// where n is the length of the probabilities-array.
         /// Use this function if you only need to draw a few random numbers,
         /// otherwise create an IndexDistribution-object.
+        /// Thread-safe if Uniform() is thread-safe.
         /// </summary>
-        /// <param name="rand">RNG object to use for random drawing.</param>
         /// <param name="probabilities">Probability distribution.</param>
         public int Index(double[] probabilities)
         {

@@ -67,9 +67,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Optimizers\MetaFitness.cs" />
+    <Compile Include="Optimizers\Parallel\MetaFitness.cs" />
+    <Compile Include="Optimizers\Parallel\DESuite.cs" />
+    <Compile Include="Optimizers\Parallel\DE.cs" />
     <Compile Include="Optimizers\MTS.cs" />
     <Compile Include="Optimizers\MPSO.cs" />
     <Compile Include="Optimizers\LPSO.cs" />
+    <Compile Include="Optimizers\Parallel\MOL.cs" />
+    <Compile Include="Optimizers\Parallel\PSO.cs" />
+    <Compile Include="Problems\SphereSleep.cs" />
     <Compile Include="WeightedProblem.cs" />
     <Compile Include="FitnessTraceMean.cs" />
     <Compile Include="FitnessTraceQuartiles.cs" />
@@ -79,7 +86,6 @@
     <Compile Include="FitnessTrace.cs" />
     <Compile Include="FitnessPrint.cs" />
     <Compile Include="Extensions\Enumerable.cs" />
-    <Compile Include="MetaFitness.cs" />
     <Compile Include="Optimizers\DECrossover.cs" />
     <Compile Include="Optimizers\JDE.cs" />
     <Compile Include="Optimizers\DESuite.cs" />

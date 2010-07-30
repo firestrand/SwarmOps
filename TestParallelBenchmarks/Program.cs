@@ -1,38 +1,42 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
+/// Copyright (C) 2003-2010 Magnus Erik Hvass Pedersen.
 /// Published under the GNU Lesser General Public License.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using SwarmOps;
 using SwarmOps.Optimizers;
 using SwarmOps.Problems;
-using System.Diagnostics;
 
-namespace TestBenchmarks
+namespace TestParallelBenchmarks
 {
     /// <summary>
-    /// Test an optimizer on various benchmark problems.
+    /// Test a parallel optimizer on various benchmark problems.
+    /// This is essentially the same as TestBenchmarks only the
+    /// QuarticNoise problem cannot be used because it is not
+    /// thread-safe, unless a thread-safe PRNG is used.
+    /// A simulation of a time-consuming problem SphereSleep is
+    /// also included here.
     /// </summary>
     class Program
     {
         // Create optimizer object.
-        static Optimizer Optimizer = new MOL();
+        static Optimizer Optimizer = new SwarmOps.Optimizers.Parallel.MOL();
 
         // Control parameters for optimizer.
-        private static readonly double[] Parameters = Optimizer.DefaultParameters;
-        //static readonly double[] Parameters = MOL.Parameters.HandTuned;
+        static readonly double[] Parameters = Optimizer.DefaultParameters;
 
         // Optimization settings.
         static readonly int NumRuns = 50;
         static readonly int Dim = 30;
         static readonly int DimFactor = 2000;
-        static readonly int NumIterations = DimFactor* Dim; //Really the number of function evaluations
+        static readonly int NumIterations = DimFactor * Dim;
         static readonly bool DisplaceOptimum = true;
         static IRunCondition RunCondition = new RunConditionIterations(NumIterations);
         static StringBuilder _resultSb = new StringBuilder();
@@ -99,13 +103,21 @@ namespace TestBenchmarks
                                                Tools.FormatNumber(Statistics.FitnessQuartiles.Q3),
                                                Tools.FormatNumber(Statistics.FitnessQuartiles.Max)));
         }
+
         static void Main(string[] args)
         {
             // Initialize PRNG.
-            Globals.Random = new RandomOps.RanSystem();
+            // If optimization problem doesn't use Globals.Random then it doesn't
+            // have to be thread-safe.
+            Globals.Random = new RandomOps.MersenneTwister();
+            // Otherwise use a fast and thread-safe PRNG, like so:
+            // Globals.Random = new RandomOps.ThreadSafe.CMWC4096();
+
+            // Set max number of threads allowed.
+            Globals.ParallelOptions.MaxDegreeOfParallelism = 8;
 
             // Output optimization settings.
-            Console.WriteLine("Benchmark-tests.");
+            Console.WriteLine("Benchmark-tests. (Parallel)");
             Console.WriteLine("Optimizer: {0}", Optimizer.Name);
             Console.WriteLine("Using following parameters:");
             Tools.PrintParameters(Optimizer, Parameters);
@@ -144,7 +156,7 @@ namespace TestBenchmarks
             swTimer.Stop();
             _resultSb.AppendLine(String.Format("Total Benchmark Run Time: {0}", swTimer.Elapsed));
             //Write out summary
-            File.WriteAllText(Optimizer.Name + "ResultSummary.txt",_resultSb.ToString());
+            File.WriteAllText(Optimizer.Name + "ResultSummary.txt", _resultSb.ToString());
 
             // Output time-usage.
             Console.WriteLine();

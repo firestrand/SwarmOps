@@ -13,7 +13,7 @@ namespace RandomOps
 {
     /// <summary>
     /// Pseudo-Random Number Generator (PRNG) based on the RanQD1 (Quick and Dirty)
-    /// algorithm from the book: 'Numerical Recipes in C' chapter 7.1.
+    /// algorithm from the book: 'Numerical Recipes in C' chapter 7.1. Not thread-safe.
     /// </summary>
     public class RanQD : RanUInt32
     {

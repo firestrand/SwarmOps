@@ -16,23 +16,20 @@ using SwarmOps.Optimizers;
 namespace TestMetaBenchmarks2
 {
     /// <summary>
-    /// Similar to TestMetaBenchmark, only we here use the MetaFitness
-    /// class for simplicity, instead of using a combination of the
-    /// Repeat- and Multi-classes. This is much simpler to setup and is
-    /// also closer to how meta-optimization is described in the research
-    /// papers.
+    /// Similar to TestMetaBenchmark only using the parallel version
+    /// of MetaFitness and a thread-safe PRNG.
     /// </summary>
     class Program
     {
         // Settings for the optimization layer.
-        static readonly int NumRuns = 50;
+        static readonly int NumRuns = 64;       // Set this close to 50 and a multiple of the number of processors, e.g. 8.
         static readonly int Dim = 30;
         static readonly int DimFactor = 2000;
         static readonly int NumIterations = DimFactor * Dim;
         static readonly bool DisplaceOptimum = true;
 
         // The optimizer whose control paramters are to be tuned.
-        static Optimizer Optimizer = new MOL();
+        static Optimizer Optimizer = new DE();
 
         // Problems to optimize. That is, the optimizer is having its control
         // parameters tuned to work well on these problems. The numbers are weights
@@ -42,17 +39,17 @@ namespace TestMetaBenchmarks2
             new WeightedProblem[]
             {
                 new WeightedProblem(1.0, new Ackley(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new Griewank(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new Penalized1(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new Penalized2(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new QuarticNoise(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new Rastrigin(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new Rosenbrock(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Griewank(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Penalized1(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Penalized2(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new QuarticNoise(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Rastrigin(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Rosenbrock(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
                 new WeightedProblem(1.0, new Schwefel12(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new Schwefel221(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new Schwefel222(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new Sphere(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new Step(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Schwefel221(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Schwefel222(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Sphere(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Step(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
             };
 
         // Settings for the meta-optimization layer.
@@ -68,7 +65,7 @@ namespace TestMetaBenchmarks2
         // for the problems listed above over several optimization runs and
         // sum the results, so we wrap the Optimizer-object in a
         // MetaFitness-object which takes of this.
-        static MetaFitness MetaFitness = new MetaFitness(Optimizer, WeightedProblems, NumRuns);
+        static SwarmOps.Optimizers.Parallel.MetaFitness MetaFitness = new SwarmOps.Optimizers.Parallel.MetaFitness(Optimizer, WeightedProblems, NumRuns);
 
         // Log all candidate solutions.
         static int LogCapacity = 20;
@@ -92,7 +89,11 @@ namespace TestMetaBenchmarks2
         static void Main(string[] args)
         {
             // Initialize the PRNG.
-            Globals.Random = new RandomOps.MersenneTwister();
+            // Parallel version uses a ThreadSafe PRNG.
+            Globals.Random = new RandomOps.ThreadSafe.CMWC4096();
+
+            // Set max number of threads allowed.
+            Globals.ParallelOptions.MaxDegreeOfParallelism = 8;
 
             // Create a fitness trace for tracing the progress of optimization.
             int MaxMeanIntervals = 3000;
@@ -105,7 +106,7 @@ namespace TestMetaBenchmarks2
             MetaOptimizer.FitnessTrace = fitnessTrace;
 
             // Output settings.
-            Console.WriteLine("Meta-Optimization of benchmark problems.");
+            Console.WriteLine("Meta-Optimization of benchmark problems. (Parallel)");
             Console.WriteLine();
             Console.WriteLine("Meta-method: {0}", MetaOptimizer.Name);
             Console.WriteLine("Using following parameters:");

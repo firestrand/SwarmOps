@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("RandomOps")]
-[assembly: AssemblyDescription("(Pseudo) Random Number Generator For C#")]
+[assembly: AssemblyTitle("TestParallelMetaBenchmarks")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hvass Laboratories")]
-[assembly: AssemblyProduct("RandomOps")]
-[assembly: AssemblyCopyright("Copyright © Magnus Erik Hvass Pedersen 2010")]
+[assembly: AssemblyCompany("Hewlett-Packard")]
+[assembly: AssemblyProduct("TestParallelMetaBenchmarks")]
+[assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4f976f4f-658d-411d-884e-faae5b1439e6")]
+[assembly: Guid("7d9d8ba4-64d7-48e7-91bb-240a5d4caa03")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.0.0")]
-[assembly: AssemblyFileVersion("2.0.0.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

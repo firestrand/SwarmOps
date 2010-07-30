@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TestMetaBenchmarks2")]
+[assembly: AssemblyTitle("TestParallelBenchmarks")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hvass Laboratories")]
-[assembly: AssemblyProduct("TestMetaBenchmarks2")]
-[assembly: AssemblyCopyright("Copyright © Magnus Erik Hvass Pedersen 2009")]
+[assembly: AssemblyCompany("Hewlett-Packard")]
+[assembly: AssemblyProduct("TestParallelBenchmarks")]
+[assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("af7646e5-ff4d-4bc9-93fc-283c8ecabfc6")]
+[assembly: Guid("77271752-3309-4612-83e2-d5dbe5070f2a")]
 
 // Version information for an assembly consists of the following four values:
 //
