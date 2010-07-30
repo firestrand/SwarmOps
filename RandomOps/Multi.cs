@@ -11,7 +11,8 @@ namespace RandomOps
     /// <summary>
     /// Abstract class for using multiple RNGs that can be switched
     /// between. Example implementation is the Switcher-class which
-    /// does the RNG-switching randomly.
+    /// does the RNG-switching randomly. Thread-safe if supplied RNGs
+    /// are thread-safe, and if SelectRand() is made thread-safe.
     /// </summary>
     /// <remarks>
     /// If you are using RNGs that have custom methods for generating

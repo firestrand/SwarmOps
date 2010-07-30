@@ -9,14 +9,16 @@
 using System;
 using System.Threading;
 
-namespace RandomOps
+namespace RandomOps.ThreadSafe
 {
     /// <summary>
     /// Wrapper for an RNG that makes the calls to Uniform(), Bool(), Byte(), and
     /// Bytes() thread-safe by locking the object. Note that it is the ThreadSafe
     /// object that is being locked and not the RNG object it wraps around, so calls
     /// to methods should always be made to the ThreadSafe-object and not to the
-    /// RNG object directly.
+    /// RNG object directly. This works well for infrequent access to the RNG but
+    /// for frequent access you should use e.g. ThreadSafe.MWC256 instead for
+    /// performance reasons.
     /// </summary>
     /// <remarks>
     /// Derived calls are also thread-safe because they in turn call Uniform()
@@ -29,14 +31,14 @@ namespace RandomOps
     /// e.g. for Ran2 we could instead implement a threadsafe version of the
     /// internal Rand() method.
     /// </remarks>
-    public partial class ThreadSafe : Random
+    public partial class Wrapper : Random
     {
         #region Constructor.
         /// <summary>
         /// Construct the thread-safe RNG wrapper.
         /// </summary>
         /// <param name="rand">The RNG to be made thread-safe.</param>
-        public ThreadSafe(Random rand)
+        public Wrapper(Random rand)
         {
             _rand = rand;
         }

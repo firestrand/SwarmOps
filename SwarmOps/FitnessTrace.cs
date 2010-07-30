@@ -96,9 +96,10 @@ namespace SwarmOps
             {
                 int index = (iteration - Offset) / Stride;
 
-                Debug.Assert(index < MaxIntervals);
-
-                Log(index, fitness);
+                if (index < MaxIntervals)
+                {
+                    Log(index, fitness);
+                }
             }
 
             // Call chained fitness-tracer.

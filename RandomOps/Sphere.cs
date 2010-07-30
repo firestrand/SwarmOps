@@ -23,6 +23,7 @@ namespace RandomOps
     {
         /// <summary>
         /// Generate a uniform random point on the unit-radius 3-dimensional sphere.
+        /// Thread-safe if Disk() is thread-safe.
         /// </summary>
         public virtual double[] Sphere3()
         {
@@ -35,6 +36,7 @@ namespace RandomOps
 
         /// <summary>
         /// Generate a uniform random point on the unit-radius 3-dimensional sphere.
+        /// Thread-safe if Disk() is thread-safe.
         /// </summary>
         /// <param name="x">Array to hold the random point.</param>
         public virtual void Sphere3(ref double[] x)
@@ -53,6 +55,7 @@ namespace RandomOps
 
         /// <summary>
         /// Generate a uniform random point on the unit-radius 4-dimensional sphere.
+        /// Thread-safe if Disk() is thread-safe.
         /// </summary>
         public virtual double[] Sphere4()
         {
@@ -65,6 +68,7 @@ namespace RandomOps
 
         /// <summary>
         /// Generate a uniform random point on the unit-radius 4-dimensional sphere.
+        /// Thread-safe if Disk() is thread-safe.
         /// </summary>
         /// <param name="x">Array to hold the random point.</param>
         public virtual void Sphere4(ref double[] x)
@@ -85,6 +89,7 @@ namespace RandomOps
 
         /// <summary>
         /// Generate a uniform random point on the n-dimensional hypersphere.
+        /// Thread-safe if Gauss() is thread-safe.
         /// </summary>
         /// <param name="n">Dimensionality of hypersphere.</param>
         /// <param name="r">Radius of hypersphere.</param>
@@ -101,6 +106,8 @@ namespace RandomOps
 
         /// <summary>
         /// Generate a uniform random point on the n-dimensional hypersphere.
+        /// Thread-safe if Gauss() is thread-safe, and each thread supplies
+        /// its own array x.
         /// </summary>
         /// <param name="x">Array to hold the random point.</param>
         /// <param name="r">Radius of hypersphere.</param>

@@ -15,7 +15,7 @@ namespace RandomOps
     /// Pseudo-Random Number Generator (PRNG) based on the Ran2 algorithm from the book:
     /// 'Numerical Recipes in C' chapter 7.1 and which is originally
     /// due to L'Ecuyer with Bays-Durham shuffle and added safeguards.
-    /// Period is greater than 2 * 10^18.
+    /// Period is greater than 2 * 10^18. Not thread-safe.
     /// </summary>
     /// <remarks>
     /// We MUST use division when generating random integers in a certain range.

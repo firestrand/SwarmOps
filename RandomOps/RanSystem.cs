@@ -9,7 +9,8 @@
 namespace RandomOps
 {
     /// <summary>
-    /// Wrapper for the .NET built-in PRNG.
+    /// Wrapper for the .NET built-in PRNG. Not thread-safe by
+    /// default.
     /// </summary>
     /// <remarks>
     /// Since the .NET implementation may change we cannot

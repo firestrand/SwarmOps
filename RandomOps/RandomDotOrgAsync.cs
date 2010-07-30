@@ -15,6 +15,7 @@ namespace RandomOps
     /// of the random bytes, which is preferrable in time-critical applications.
     /// If bytes are not available in the downloaded buffer, then a thread is
     /// woken up to fill the buffer. In the meantime a Fallback RNG is used instead.
+    /// Not thread-safe.
     /// </summary>
     /// <remarks>
     /// Be sure to call Dispose() after you are done using this RNG,

@@ -38,7 +38,8 @@ namespace RandomOps
         public abstract double Uniform();
 
         /// <summary>
-        /// Draw a uniform random number in the exclusive range (low,high)
+        /// Draw a uniform random number in the exclusive range (low,high).
+        /// Thread-safe if Uniform() is thread-safe.
         /// </summary>
         /// <param name="low">The lowest value in the range.</param>
         /// <param name="high">The highest value in the range.</param>
@@ -51,6 +52,7 @@ namespace RandomOps
 
         /// <summary>
         /// Draw a random boolean with equal probability of true or false.
+        /// Thread-safe if Uniform() is thread-safe.
         /// </summary>
         public virtual bool Bool()
         {
@@ -60,6 +62,7 @@ namespace RandomOps
 
         /// <summary>
         /// Draw a random boolean with probability p of true and (1-p) of false.
+        /// Thread-safe if Uniform() is thread-safe.
         /// </summary>
         public virtual bool Bool(double p)
         {
@@ -69,6 +72,7 @@ namespace RandomOps
 
         /// <summary>
         /// Draw a random and uniform byte.
+        /// Thread-safe if Index() is thread-safe.
         /// </summary>
         /// <remarks>
         /// The default implementation uses Index() which in turn uses
@@ -87,6 +91,7 @@ namespace RandomOps
 
         /// <summary>
         /// Draw an array of random and uniform bytes.
+        /// Thread-safe if Byte() is thread-safe.
         /// </summary>
         /// <param name="length">The array length requested.</param>
         public virtual byte[] Bytes(int length)

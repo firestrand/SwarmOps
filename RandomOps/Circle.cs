@@ -21,6 +21,7 @@ namespace RandomOps
     {
         /// <summary>
         /// Generate a uniform random point from the unit-radius 2-dimensional circle.
+        /// Thread-safe if Disk() is thread-safe.
         /// </summary>
         public virtual double[] Circle()
         {
@@ -33,6 +34,7 @@ namespace RandomOps
 
         /// <summary>
         /// Generate a uniform random point from the unit-radius 2-dimensional circle.
+        /// Thread-safe if Disk() is thread-safe.
         /// </summary>
         /// <param name="x">Random point x</param>
         /// <param name="y">Random point y</param>

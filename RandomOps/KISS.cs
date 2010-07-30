@@ -15,7 +15,7 @@ namespace RandomOps
     /// Pseudo-Random Number Generator (PRNG) based on KISS as
     /// described in the paper: G. Marsaglia, Random Number Generators,
     /// Journal of Modern Applied Statistical Methods, 2003, vol. 2, no. 1,
-    /// p. 2-13. Period of this PRNG is greater than 2^124.
+    /// p. 2-13. Period of this PRNG is greater than 2^124. Not thread-safe.
     /// </summary>
     /// <remarks>
     /// This is a translation of the C source-code published in the

@@ -145,7 +145,7 @@ namespace SwarmOps.Optimizers
             for (i = 1; Problem.RunCondition.Continue(i, fitness); i++)
             {
                 // Compute gradient.
-                i += Problem.Gradient(x, ref v);
+                int gradientIterations = Problem.Gradient(x, ref v);
 
                 // Compute norm of gradient-vector.
                 double gradientNorm = Tools.Norm(v);
@@ -177,6 +177,10 @@ namespace SwarmOps.Optimizers
 
                 // Trace fitness of best found solution.
                 Trace(i, fitness);
+
+                // Add iterations for gradient computation.
+                // This is incompatible with FitnessTrace.
+                //i += gradientIterations;
             }
 
             // Return best-found solution and fitness.

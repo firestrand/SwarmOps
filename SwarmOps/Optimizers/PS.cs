@@ -22,8 +22,9 @@ namespace SwarmOps.Optimizers
     /// References:
     /// (1) W.C. Davidon. Variable metric method for minimization.
     ///     SIAM Journal on Optimization, 1(1):1{17, 1991
-    /// (2) M.E.H. Pedersen. Simplifying Swarm Optimization.
-    ///     PhD Thesis, University of Southampton, 2009.
+    /// (2) M.E.H. Pedersen. Tuning & Simplifying Heuristical
+    ///     Optimization. PhD Thesis, University of Southampton,
+    ///     2010.
     /// </remarks>
     public class PS : Optimizer
     {

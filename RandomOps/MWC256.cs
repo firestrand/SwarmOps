@@ -14,6 +14,7 @@ namespace RandomOps
     /// <summary>
     /// Pseudo-Random Number Generator (PRNG) based on MWC256 by
     /// George Marsaglia. Period of this PRNG is about 2^8222.
+    /// Not thread-safe.
     /// </summary>
     /// <remarks>
     /// This is a translation of the C source-code published 2003-05-13

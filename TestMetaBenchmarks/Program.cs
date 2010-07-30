@@ -7,6 +7,7 @@
 /// ------------------------------------------------------
 
 using System;
+
 using SwarmOps;
 using SwarmOps.Problems;
 using SwarmOps.Optimizers;
@@ -16,42 +17,40 @@ namespace TestMetaBenchmarks
     /// <summary>
     /// Test meta-optimization, that is, tuning of control parameters
     /// for an optimizer by applying an additional layer of optimization.
-    /// You may want to use TestMetaBenchmarks2 instead which also supports
-    /// weights in meta-optimization.
+    /// See TestParallelMetaBenchmarks for the parallel version of this.
     /// </summary>
     class Program
     {
         // Settings for the optimization layer.
-        static readonly int NumRuns = 50;
-        static readonly int Dim = 5;
-        static readonly int DimFactor = 200;
+        static readonly int NumRuns = 64;
+        static readonly int Dim = 30;
+        static readonly int DimFactor = 2000;
         static readonly int NumIterations = DimFactor * Dim;
-        static readonly bool DisplaceOptimum = false;
+        static readonly bool DisplaceOptimum = true;
 
         // The optimizer whose control paramters are to be tuned.
         static Optimizer Optimizer = new DE();
 
-        // Wrap the optimizer in a repeater to conduct several optimization runs.
-        // This could be replaced with RepeatMin or another Repeat-object, so as
-        // to change the type of meta-fitness being computed.
-        static Repeat Repeat = new RepeatSum(Optimizer, NumRuns);
-
         // Problems to optimize. That is, the optimizer is having its control
-        // parameters tuned to work well on these problems.
-        static Problem[] Problems =
-            new Problem[]
+        // parameters tuned to work well on these problems. The numbers are weights
+        // that significy mutual importance of the problems in tuning. Higher weight
+        // means more importance.
+        static WeightedProblem[] WeightedProblems =
+            new WeightedProblem[]
             {
-                new Step(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations)),
-                new Sphere(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations)),
-                new Rosenbrock(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations)),
-                new Griewank(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations)),
-                new Rastrigin(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))
+                new WeightedProblem(1.0, new Ackley(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Griewank(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Penalized1(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Penalized2(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                //new WeightedProblem(1.0, new QuarticNoise(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Rastrigin(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Rosenbrock(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Schwefel12(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Schwefel221(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Schwefel222(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Sphere(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, new Step(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
             };
-
-        // The meta-fitness consists of computing optimization performance
-        // for the problems listed above and sum the results, so we wrap
-        // the Repeat-object in a Multi-object which takes of this summing.
-        static Multi MetaFitness = new Multi(Problems, Repeat);
 
         // Settings for the meta-optimization layer.
         static readonly int MetaNumRuns = 5;
@@ -62,20 +61,28 @@ namespace TestMetaBenchmarks
         // Continue meta-optimization for a certain number of iterations.
         static IRunCondition RunCondition = new RunConditionIterations(MetaNumIterations);
 
-        // Wrap the MetaFitness in a fitness-printer so we can follow the progress.
-        static readonly bool FormatAsArray = false;
-        static FitnessPrint Printer = new FitnessPrint(MetaFitness, FormatAsArray);
+        // The meta-fitness consists of computing optimization performance
+        // for the problems listed above over several optimization runs and
+        // sum the results, so we wrap the Optimizer-object in a
+        // MetaFitness-object which takes of this.
+        static MetaFitness MetaFitness = new MetaFitness(Optimizer, WeightedProblems, NumRuns);
 
         // Log all candidate solutions.
         static int LogCapacity = 20;
-        static LogSolutions LogSolutions = new LogSolutions(Printer, LogCapacity);
+        static LogSolutions LogSolutions = new LogSolutions(MetaFitness, LogCapacity);
 
         // The meta-optimizer.
         static Optimizer MetaOptimizer = new LUS(LogSolutions);
 
+        // Control parameters to use for the meta-optimizer.
+        static double[] MetaParameters = MetaOptimizer.DefaultParameters;
+
+        // If using DE as meta-optimizer, use these control parameters.
+        //static double[] MetaParameters = DE.Parameters.ForMetaOptimization;
+
         // Wrap the meta-optimizer in a Statistics object for logging results.
         static Statistics Statistics = new Statistics(MetaOptimizer);
-        
+
         // Repeat a number of meta-optimization runs.
         static Repeat MetaRepeat = new RepeatMin(Statistics, MetaNumRuns);
 
@@ -85,30 +92,33 @@ namespace TestMetaBenchmarks
             Globals.Random = new RandomOps.MersenneTwister();
 
             // Create a fitness trace for tracing the progress of optimization.
-            int NumMeanIntervals = 3000;
-            FitnessTrace fitnessTrace = new FitnessTraceMean(MetaNumIterations, NumMeanIntervals);
-
-            // Assign the fitness trace to the meta-optimizer.
-            MetaOptimizer.FitnessTrace = fitnessTrace;
+            int MaxMeanIntervals = 3000;
+            FitnessTrace fitnessTrace = new FitnessTraceMean(MetaNumIterations, MaxMeanIntervals);
 
             // Assign the RunCondition to the optimizer.
             Optimizer.RunCondition = RunCondition;
+
+            // Assign the fitness trace to the meta-optimizer.
+            MetaOptimizer.FitnessTrace = fitnessTrace;
 
             // Output settings.
             Console.WriteLine("Meta-Optimization of benchmark problems.");
             Console.WriteLine();
             Console.WriteLine("Meta-method: {0}", MetaOptimizer.Name);
             Console.WriteLine("Using following parameters:");
-            Tools.PrintParameters(MetaOptimizer, MetaOptimizer.DefaultParameters);
+            Tools.PrintParameters(MetaOptimizer, MetaParameters);
             Console.WriteLine("Number of meta-runs: {0}", MetaNumRuns);
             Console.WriteLine("Number of meta-iterations: {0}", MetaNumIterations);
             Console.WriteLine();
             Console.WriteLine("Method to be meta-optimized: {0}", Optimizer.Name);
-            Console.WriteLine("Number of benchmark problems: {0}", Problems.Length);
+            Console.WriteLine("Number of benchmark problems: {0}", WeightedProblems.Length);
 
-            for (int i = 0; i < Problems.Length; i++)
+            for (int i = 0; i < WeightedProblems.Length; i++)
             {
-                Console.WriteLine("\t{0}", Problems[i].Name);
+                Problem problem = WeightedProblems[i].Problem;
+                double weight = WeightedProblems[i].Weight;
+
+                Console.WriteLine("\t({0})\t{1}", weight, problem.Name);
             }
 
             Console.WriteLine("Dimensionality for each benchmark problem: {0}", Dim);
@@ -124,7 +134,7 @@ namespace TestMetaBenchmarks
             DateTime t1 = DateTime.Now;
 
             // Perform the meta-optimization runs.
-            double fitness = MetaRepeat.Fitness();
+            double fitness = MetaRepeat.Fitness(MetaParameters);
 
             // End-time.
             DateTime t2 = DateTime.Now;
@@ -161,8 +171,13 @@ namespace TestMetaBenchmarks
             Console.WriteLine("Time usage: {0}", t2 - t1);
 
             // Output fitness trace.
-            string traceFilename = "MetaFitnessTrace-" + MetaOptimizer.Name + "-" + Optimizer.Name + ".txt";
+            string traceFilename
+                = "MetaFitnessTrace-" + MetaOptimizer.Name + "-" + Optimizer.Name
+                + "-" + WeightedProblems.Length + "Bnch" + "-" + DimFactor + "xDim.txt";
             fitnessTrace.WriteToFile(traceFilename);
+
+            //Console.WriteLine("Press any key to exit ...");
+            //Console.ReadKey();
         }
     }
 }

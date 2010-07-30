@@ -10,6 +10,7 @@ namespace RandomOps
 {
     /// <summary>
     /// Randomly switch between different RNGs.
+    /// Thread-safe if RNGs are thread-safe.
     /// </summary>
     /// <remarks>
     /// This basically just implements the SelectRand() method
