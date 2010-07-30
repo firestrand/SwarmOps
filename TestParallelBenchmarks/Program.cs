@@ -7,6 +7,7 @@
 /// ------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using SwarmOps;
 using SwarmOps.Optimizers;
 using SwarmOps.Problems;
@@ -115,33 +116,35 @@ namespace TestParallelBenchmarks
             Console.WriteLine("\\hline");
 
             // Starting-time.
-            DateTime t1 = DateTime.Now;
-
+            Stopwatch swTimer = new Stopwatch();
+            swTimer.Start();
             // Simulates a time-consuming optimization problem.
-            Optimize(new SphereSleep(1, Dim, DisplaceOptimum, RunCondition));
+            //Optimize(new SphereSleep(1, Dim, DisplaceOptimum, RunCondition));
 
             // Thread-safe benchmark problems.
-            //Optimize(new Ackley(Dim, DisplaceOptimum, RunCondition));
-            //Optimize(new Griewank(Dim, DisplaceOptimum, RunCondition));
-            //Optimize(new Penalized1(Dim, DisplaceOptimum, RunCondition));
-            //Optimize(new Penalized2(Dim, DisplaceOptimum, RunCondition));
-            //Optimize(new Rastrigin(Dim, DisplaceOptimum, RunCondition));
-            //Optimize(new Rosenbrock(Dim, DisplaceOptimum, RunCondition));
-            //Optimize(new Schwefel12(Dim, DisplaceOptimum, RunCondition));
-            //Optimize(new Schwefel221(Dim, DisplaceOptimum, RunCondition));
-            //Optimize(new Schwefel222(Dim, DisplaceOptimum, RunCondition));
-            //Optimize(new Sphere(Dim, DisplaceOptimum, RunCondition));
-            //Optimize(new Step(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Ackley(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Griewank(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Penalized1(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Penalized2(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Rastrigin(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Rosenbrock(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Schwefel12(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Schwefel221(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Schwefel222(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Sphere(Dim, DisplaceOptimum, RunCondition));
+            Optimize(new Step(Dim, DisplaceOptimum, RunCondition));
 
             // Benchmark problem using Globals.Random (see note above.)
             //Optimize(new QuarticNoise(Dim, DisplaceOptimum, RunCondition));
 
             // End-time.
-            DateTime t2 = DateTime.Now;
+            swTimer.Stop();
 
             // Output time-usage.
             Console.WriteLine();
-            Console.WriteLine("Time usage: {0}", t2 - t1);
+            Console.WriteLine("Time usage: {0}", swTimer.Elapsed);
+            Console.WriteLine("Press Enter to Exit");
+            Console.ReadLine();
         }
     }
 }
