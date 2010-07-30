@@ -68,7 +68,7 @@ namespace SwarmOps.Optimizers
             /// N = Neighborhood size
             /// 
             /// </summary>
-            public static readonly double[] HandTuned = { 50.0, 2.0, 0.72984378812835756567558911626891, 2.05, 2.05 };
+            public static readonly double[] HandTuned = { 50.0, 5.0, 0.72984378812835756567558911626891, 1.49445, 1.49445 };
         }
         #endregion
 
@@ -242,6 +242,7 @@ namespace SwarmOps.Optimizers
                                    });
 
             // Initialize all agents.
+            Tools.InitializeSOA(ref agents, lowerInit, upperInit);
             // This counts as iterations below.
             for(int j = 0; j < numAgents; j++)
             {
@@ -252,8 +253,7 @@ namespace SwarmOps.Optimizers
                 // Initialize agent-position in search-space.
                 for (int m = 0; m < n; m++)
                 {
-                    x[m] = pRandoms[j].NextDouble()*(upperInit[m] - lowerInit[m]) +
-                            lowerInit[m];
+                    //x[m] = pRandoms[j].NextDouble()*(upperInit[m] - lowerInit[m]) + lowerInit[m];
                     v[m] = pRandoms[j].NextDouble()*
                             (velocityUpperBound[m] - velocityLowerBound[m]) +
                             velocityLowerBound[m];
@@ -279,10 +279,8 @@ namespace SwarmOps.Optimizers
                     if (bestAgentFitness[j] <
                         bestAgentNeighborhoodFitness[(l + j)%numAgents])
                     {
-                        bestAgentPosition[(l + j)%numAgents].CopyTo(
-                            bestAgentNeighborhoodPosition[j], 0);
-                        bestAgentNeighborhoodFitness[(l + j)%numAgents] =
-                            bestAgentFitness[j];
+                        bestAgentPosition[(l + j)%numAgents].CopyTo(bestAgentNeighborhoodPosition[j], 0);
+                        bestAgentNeighborhoodFitness[(l + j)%numAgents] =bestAgentFitness[j];
                     }
                 }
                     if (bestAgentFitness[j] < gFitness)

@@ -22,11 +22,11 @@ namespace TestBenchmarks
     class Program
     {
         // Create optimizer object.
-        static Optimizer Optimizer = new LPSO();//new MOL();
+        static Optimizer Optimizer = new MOL();
 
         // Control parameters for optimizer.
-        private static readonly double[] Parameters = Optimizer.DefaultParameters;
-        //static readonly double[] Parameters = MOL.Parameters.AllBenchmarks30Dim60000Iter;
+        //private static readonly double[] Parameters = Optimizer.DefaultParameters;
+        static readonly double[] Parameters = MOL.Parameters.HandTuned;
 
         // Optimization settings.
         static readonly int NumRuns = 10;

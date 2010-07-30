@@ -103,6 +103,40 @@ namespace SwarmOps
                 }
             }
         }
+        /// <summary>
+        /// Simulated Orthogonal Array
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="m"></param>
+        /// <param name="lower"></param>
+        /// <param name="upper"></param>
+        public static void InitializeSOA(ref double[,] x, double[] lower, double[] upper)
+        {
+            //TODO: Assert that lengths are > 0
+            int numAgents = x.GetUpperBound(0);
+            int dimSize = x.GetUpperBound(1);
+
+            var SOA = new double[dimSize][];
+            var M = new double[numAgents];
+            for (int i = 0; i < numAgents; i++)
+            {
+                M[i] += i;
+            }
+            for (int i = 0; i < dimSize; i++)
+            {
+                Tools.Shuffle<double>(ref M);
+                SOA[i] = M.Clone() as double[];
+
+            }
+            for (int i = 0; i < numAgents; i++)
+            {
+                for (int j = 0; j < dimSize; j++)
+                {
+                    // Xi[j]=li+(ui-li)*SOA[i, j]/(M-1)
+                    x[i,j] = lower[j] + (upper[j] - lower[j]) * (SOA[j][i]) / (numAgents - 1);
+                }
+            }
+        }
         public static void Shuffle<T>(ref T[] x)
         {
             //TODO: using system random for simplicity
