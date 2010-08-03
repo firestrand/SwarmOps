@@ -134,6 +134,8 @@ namespace SwarmOps
         /// <param name="x">Un-sorted array of values.</param>
         public void ComputeUnsortedInplace(double[] x)
         {
+            if (x.Length == 0)
+                return;
             System.Array.Sort(x);
 
             Compute(x);

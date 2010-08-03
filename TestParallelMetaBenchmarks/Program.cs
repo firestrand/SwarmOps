@@ -13,7 +13,7 @@ using SwarmOps;
 using SwarmOps.Problems;
 using SwarmOps.Optimizers;
 
-namespace TestMetaBenchmarks2
+namespace TestParallelMetaBenchmarks
 {
     /// <summary>
     /// Similar to TestMetaBenchmark only using the parallel version
@@ -29,7 +29,7 @@ namespace TestMetaBenchmarks2
         static readonly bool DisplaceOptimum = true;
 
         // The optimizer whose control paramters are to be tuned.
-        static Optimizer Optimizer = new DE();
+        static Optimizer Optimizer = new DE();//new SwarmOps.Optimizers.Parallel.DE();
 
         // Problems to optimize. That is, the optimizer is having its control
         // parameters tuned to work well on these problems. The numbers are weights
@@ -42,7 +42,7 @@ namespace TestMetaBenchmarks2
                 new WeightedProblem(1.0, new Griewank(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
                 new WeightedProblem(1.0, new Penalized1(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
                 new WeightedProblem(1.0, new Penalized2(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new QuarticNoise(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                //new WeightedProblem(1.0, new QuarticNoise(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
                 new WeightedProblem(1.0, new Rastrigin(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
                 new WeightedProblem(1.0, new Rosenbrock(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
                 new WeightedProblem(1.0, new Schwefel12(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
