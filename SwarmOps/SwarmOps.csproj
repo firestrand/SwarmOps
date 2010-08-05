@@ -67,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Optimizers\SPSO.cs" />
     <Compile Include="Optimizers\MetaFitness.cs" />
     <Compile Include="Optimizers\Parallel\MetaFitness.cs" />
     <Compile Include="Optimizers\Parallel\DESuite.cs" />
@@ -76,6 +77,9 @@
     <Compile Include="Optimizers\LPSO.cs" />
     <Compile Include="Optimizers\Parallel\MOL.cs" />
     <Compile Include="Optimizers\Parallel\PSO.cs" />
+    <Compile Include="Problems\GearTrain.cs" />
+    <Compile Include="Problems\RosenbrockF6.cs" />
+    <Compile Include="Problems\Tripod.cs" />
     <Compile Include="Problems\SphereSleep.cs" />
     <Compile Include="WeightedProblem.cs" />
     <Compile Include="FitnessTraceMean.cs" />

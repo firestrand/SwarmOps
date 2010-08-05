@@ -29,7 +29,7 @@ namespace TestBenchmarks
         //static readonly double[] Parameters = MOL.Parameters.HandTuned;
 
         // Optimization settings.
-        static readonly int NumRuns = 50;
+        static readonly int NumRuns = 10;
         static readonly int Dim = 30;
         static readonly int DimFactor = 2000;
         static readonly int NumIterations = DimFactor* Dim; //Really the number of function evaluations

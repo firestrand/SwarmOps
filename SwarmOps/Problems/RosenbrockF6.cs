@@ -1,20 +1,25 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
 /// Published under the GNU Lesser General Public License.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
 
+using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace SwarmOps.Problems
 {
     /// <summary>
-    /// Rosenbrock benchmark problem.
+    /// Rosenbrock F6 benchmark problem. This variant is from "A mini-benchmark" by Clerc
+    /// http://clerc.maurice.free.fr/pso/mini%20benchmark.pdf
     /// </summary>
-    public class Rosenbrock : Benchmark
+    public class RosenbrockF6 : Problem
     {
+        private readonly double[] _offset = new[]{81.0232,-48.395,19.2316,-2.5231,70.4338,47.1774,-7.8358,-86.6693,57.8532,-9.9533};
+        public double[] Offset
+        { get { return _offset; } }
         #region Constructors.
         /// <summary>
         /// Construct the object.
@@ -24,13 +29,10 @@ namespace SwarmOps.Problems
         /// <param name="runCondition">
         /// Determines for how long to continue optimization.
         /// </param>
-        public Rosenbrock(int dimensionality, bool displaceOptimum, IRunCondition runCondition)
-            :this(dimensionality,25.0,displaceOptimum,runCondition)
+
+        public RosenbrockF6()
         {
         }
-        public Rosenbrock(int dimensionality,double displacement,bool displaceOptimum,IRunCondition runCondition)
-            : base(dimensionality, -100, 100, 15, 30, displacement, displaceOptimum, runCondition)
-        {}
         #endregion
 
         #region Base-class overrides.
@@ -39,7 +41,7 @@ namespace SwarmOps.Problems
         /// </summary>
         public override string Name
         {
-            get { return "Rosenbrock"; }
+            get { return "RosenbrockF6"; }
         }
 
         /// <summary>
@@ -47,9 +49,15 @@ namespace SwarmOps.Problems
         /// </summary>
         public override double MinFitness
         {
-            get { return 0; }
+            get { return 390.0d; }
         }
-
+        public override double AcceptableFitness
+        {
+            get
+            {
+                return 390.01d;
+            }
+        }
         /// <summary>
         /// Compute and return fitness for the given parameters.
         /// </summary>
@@ -58,17 +66,13 @@ namespace SwarmOps.Problems
         {
             Debug.Assert(x != null && x.Length == Dimensionality);
 
-            double value = 0;
-
-            for (int i = 0; i < Dimensionality - 1; i++)
+            double value = 390.0d;
+            double z0, z1;
+            for (int i = 1; i < Dimensionality; i++)
             {
-                double elm = Displace(x[i]);
-                double nextElm = Displace(x[i + 1]);
-
-                double minusOne = elm - 1;
-                double nextMinusSqr = nextElm - elm * elm;
-
-                value += 100 * nextMinusSqr * nextMinusSqr + minusOne * minusOne;
+                z0 = x[i - 1] - _offset[i - 1];
+                z1 = x[i] - _offset[i];
+                value += 100.0* Math.Pow(Math.Pow(z0,2) - z1,2) + Math.Pow(z0-1.0,2);
             }
 
             return value;
@@ -79,7 +83,7 @@ namespace SwarmOps.Problems
         /// </summary>
         public override bool HasGradient
         {
-            get { return true; }
+            get { return false; }
         }
 
         /// <summary>
@@ -89,27 +93,25 @@ namespace SwarmOps.Problems
         /// <param name="v">Array for holding the gradient.</param>
         public override int Gradient(double[] x, ref double[] v)
         {
-            Debug.Assert(x != null && x.Length == Dimensionality);
-            Debug.Assert(v != null && v.Length == Dimensionality);
-
-            for (int i = 0; i < Dimensionality - 1; i++)
-            {
-                double elm = Displace(x[i]);
-                double nextElm = Displace(x[i + 1]);
-
-                v[i] = -400 * (nextElm - elm * elm) * elm + 2 * (elm - 1);
-            }
-
-            // Gradient for the last dimension.
-            {
-                double elm = Displace(x[Dimensionality - 1]);
-                double prevElm = Displace(x[Dimensionality - 2]); ;
-
-                v[Dimensionality - 1] = 200 * (elm - prevElm * prevElm);
-            }
-
-            return 0;
+            throw new NotImplementedException();
         }
         #endregion
+
+        private readonly double[] _lowerBound = Enumerable.Repeat(-100.0, 10).ToArray();
+        public override double[] LowerBound
+        {
+            get { return _lowerBound; }
+        }
+
+        private readonly double[] _upperBound = Enumerable.Repeat(100.0, 10).ToArray();
+        public override double[] UpperBound
+        {
+            get { return _upperBound; }
+        }
+
+        public override int Dimensionality
+        {
+            get { return 10; }
+        }
     }
 }

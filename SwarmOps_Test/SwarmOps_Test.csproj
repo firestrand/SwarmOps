@@ -45,10 +45,15 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProblemTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToolTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RandomOps\RandomOps.csproj">
+      <Project>{F5DFAFED-C786-4DC3-9818-16C992DE3990}</Project>
+      <Name>RandomOps</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SwarmOps\SwarmOps.csproj">
       <Project>{8F45EFAA-9EAC-403F-B2B0-123F0321056E}</Project>
       <Name>SwarmOps</Name>
