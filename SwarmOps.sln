@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestParallelBenchmarks", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestParallelMetaBenchmarks", "TestParallelMetaBenchmarks\TestParallelMetaBenchmarks.csproj", "{9078D04E-C93A-4713-AF6F-B827CC7C7C4B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "RandomOps_Test\Test.csproj", "{2D884DDA-A3B6-45C3-92E0-1D66F318C441}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = SwarmOps.vsmdi
@@ -141,6 +143,16 @@ Global
 		{9078D04E-C93A-4713-AF6F-B827CC7C7C4B}.Release|Mixed Platforms.Build.0 = Release|x86
 		{9078D04E-C93A-4713-AF6F-B827CC7C7C4B}.Release|x86.ActiveCfg = Release|x86
 		{9078D04E-C93A-4713-AF6F-B827CC7C7C4B}.Release|x86.Build.0 = Release|x86
+		{2D884DDA-A3B6-45C3-92E0-1D66F318C441}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D884DDA-A3B6-45C3-92E0-1D66F318C441}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D884DDA-A3B6-45C3-92E0-1D66F318C441}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2D884DDA-A3B6-45C3-92E0-1D66F318C441}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2D884DDA-A3B6-45C3-92E0-1D66F318C441}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2D884DDA-A3B6-45C3-92E0-1D66F318C441}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D884DDA-A3B6-45C3-92E0-1D66F318C441}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D884DDA-A3B6-45C3-92E0-1D66F318C441}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2D884DDA-A3B6-45C3-92E0-1D66F318C441}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2D884DDA-A3B6-45C3-92E0-1D66F318C441}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

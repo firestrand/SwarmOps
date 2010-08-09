@@ -67,8 +67,9 @@
     <Compile Include="ByteStream.cs" />
     <Compile Include="ByteStreamAsync.cs" />
     <Compile Include="Circle.cs" />
+    <Compile Include="RandomAlgorithm.cs" />
     <Compile Include="ThreadSafe\CMWC4096.cs" />
-    <Compile Include="ThreadSafe\Independent.cs" />
+    <Compile Include="ThreadSafe\ThreadSafeIndependent.cs" />
     <Compile Include="ThreadSafe\MWC256.cs" />
     <Compile Include="Disk.cs" />
     <Compile Include="Sphere.cs" />

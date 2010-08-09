@@ -6,6 +6,8 @@
 /// RandomOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
 
+using System;
+
 namespace RandomOps
 {
     /// <summary>
@@ -106,6 +108,84 @@ namespace RandomOps
             }
 
             return arr;
+        }
+        public static Random GetNewInstance(RandomAlgorithm algorithm)
+        {
+            switch (algorithm)
+            {
+                case RandomAlgorithm.CMWC4096:
+                    return new CMWC4096();
+                case RandomAlgorithm.CMWC4096ThreadSafe:
+                    return new ThreadSafe.CMWC4096();
+                case RandomAlgorithm.KISS:
+                    return new KISS();
+                case RandomAlgorithm.MersenneTwister:
+                    return new MersenneTwister();
+                case RandomAlgorithm.MWC256:
+                    return new MWC256();
+                case RandomAlgorithm.MWC256ThreadSafe:
+                    return new ThreadSafe.MWC256();
+                case RandomAlgorithm.Ran2:
+                    return new Ran2();
+                case RandomAlgorithm.RanQD:
+                    return new RanQD();
+                case RandomAlgorithm.RanSystem:
+                    return new RanSystem();
+                case RandomAlgorithm.XorShift:
+                    return new XorShift();
+                default:
+                    return new RanSystem();
+            }
+        }
+        public static Random GetNewInstance(RandomAlgorithm algorithm, Random random)
+        {
+            switch (algorithm)
+            {
+                case RandomAlgorithm.CMWC4096:
+                    return new CMWC4096(random);
+                case RandomAlgorithm.CMWC4096ThreadSafe:
+                    return new ThreadSafe.CMWC4096();
+                case RandomAlgorithm.KISS:
+                    return new KISS(random);
+                case RandomAlgorithm.MersenneTwister:
+                    return new MersenneTwister(Convert.ToUInt32(random.Bytes(4)));
+                case RandomAlgorithm.MWC256:
+                    return new MWC256(random);
+                case RandomAlgorithm.MWC256ThreadSafe:
+                    return new ThreadSafe.MWC256();
+                case RandomAlgorithm.Ran2:
+                    return new Ran2(Convert.ToInt32(random.Bytes(4)));
+                case RandomAlgorithm.RanQD:
+                    return new RanQD(Convert.ToUInt32(random.Bytes(4)));
+                case RandomAlgorithm.RanSystem:
+                    return new RanSystem(Convert.ToInt32(random.Bytes(4)));
+                case RandomAlgorithm.XorShift:
+                    return new XorShift(random);
+                default:
+                    return new RanSystem(Convert.ToInt32(random.Bytes(4)));
+            }
+        }
+        public static Int32 GetInt32FromBytes(byte[] bytes)
+        {
+            if(bytes.Length != 4)
+                throw new ArgumentOutOfRangeException("bytes","Method requires 4 bytes to convert.");
+            Int32 retVal = 0;
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                retVal |= bytes[i] << i*8;
+            }
+            return retVal;
+        }
+        public static UInt32 GetUInt32FromBytes(byte[] bytes)
+        {
+            if (bytes.Length != 4)
+                throw new ArgumentOutOfRangeException("bytes", "Method requires 4 bytes to convert.");
+            UInt32 retVal = 0;
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                retVal |= (UInt32) bytes[i] << i * 8;
+            }
+            return retVal;
         }
     }
 }

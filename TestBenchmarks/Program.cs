@@ -22,7 +22,7 @@ namespace TestBenchmarks
     class Program
     {
         // Create optimizer object.
-        static Optimizer Optimizer = new LPSO();
+        static Optimizer Optimizer = new SPSO();
 
         // Control parameters for optimizer.
         private static readonly double[] Parameters = Optimizer.DefaultParameters;

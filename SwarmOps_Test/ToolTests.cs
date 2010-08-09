@@ -30,5 +30,6 @@ namespace SwarmOps_Test
             Tools.Shuffle(ref result);
             Assert.IsFalse(result.Equals(array));
         }
+
     }
 }
