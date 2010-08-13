@@ -120,6 +120,9 @@ namespace SwarmOps.Optimizers
         {
             Debug.Assert(parameters != null && parameters.Length == Dimensionality);
             //TODO: Use parameters
+            //TODO: Replace with Random Strategy
+            if (Globals.Random == null)
+                Globals.Random = new RandomOps.RanSystem();
             // Retrieve parameter specific to method.
             int numAgents = 5;
             int numOfForeground = 3;

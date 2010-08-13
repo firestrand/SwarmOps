@@ -177,7 +177,7 @@ namespace SwarmOps.Optimizers
             double[][] agents = Tools.NewMatrix(S, n);
             double[][] velocities = Tools.NewMatrix(S, n);
             double[][] bestAgentPosition = Tools.NewMatrix(S, n);
-            bool[,] links = new bool[S,n];
+            bool[,] links = new bool[S,S];
             double[] agentFitness = new double[S];
             double[] bestAgentFitness = new double[S];
 
@@ -219,7 +219,7 @@ namespace SwarmOps.Optimizers
                 }
 
                 // Compute fitness of initial position.
-                bestAgentFitness[j] = Problem.Fitness(x);
+                agentFitness[j] = bestAgentFitness[j] = Problem.Fitness(x);
 
                 // Initialize best known position.
                 // Contents must be copied because the agent
@@ -244,6 +244,7 @@ namespace SwarmOps.Optimizers
             // Perform actual optimization iterations. Start with numAgents to include initialization fitness evaluations in RunCondition check
             int i = S;
             bool initLinks = true;
+            double prevBestFitness = gFitness;
             while(Problem.RunCondition.Continue(i, gFitness))
             {
                 if(initLinks)
@@ -256,8 +257,18 @@ namespace SwarmOps.Optimizers
                         }
                         links[j, j] = true;//Always inform self
                     }
-                    
                 }
+
+                //for (int j = 0; j < S; j++)
+                //{
+                //    for (int k = 0; k < S; k++)
+                //    {
+                //        Console.Write((links[j, k] ? "1" : "0") + " ");
+                //    }
+                //    Console.WriteLine();
+                //}
+
+
                 for(int j = 0; j < S; j++,i++)
                 {
                     // Refer to the j'th agent as x and v.
@@ -265,33 +276,34 @@ namespace SwarmOps.Optimizers
                     double[] v = velocities[j];
                     double[] pBest = bestAgentPosition[j];
 
-
-                    // Pick random weights.
-                    double rP = pRandoms[j].Uniform();
-                    double rG = pRandoms[j].Uniform();
-
                     //Find best informant
                     int lBest = j;
                     for(int m = 0; m < S; m++) 
 			        {	    
-				        if (links[j,m] && agentFitness[m] < agentFitness[lBest])
+				        if (links[j,m] && bestAgentFitness[m] < bestAgentFitness[lBest])
 					        lBest = m;
 			        }
-                    double[] nBest = agents[lBest];
+                    double[] nBest = bestAgentPosition[lBest];
 
                     // Update velocity.
-                    for (int k = 0; k < n; k++)
+                    
+                    if(j != lBest)
                     {
-                        if(j != lBest)
+                        for (int k = 0; k < n; k++)
                         {
-                            v[k] = w*v[k] + c*rP*(pBest[k] - x[k]) +
-                                   c*rG*(nBest[k] - x[k]);
-                        }
-                        else
-                        {
-                            v[k] = w*v[k] + c*rP*(pBest[k] - x[k]);
+                            v[k] = w * v[k] + c * pRandoms[j].Uniform() * (pBest[k] - x[k]) +
+                                    c * pRandoms[j].Uniform() * (nBest[k] - x[k]);
+
                         }
                     }
+                    else
+                    {
+                        for (int k = 0; k < n; k++)
+                        {
+                            v[k] = w * v[k] + c * pRandoms[j].Uniform() * (pBest[k] - x[k]);
+                        }
+                    }
+                    
 
                     // Fix denormalized floating-point values in velocity.
                     Tools.Denormalize(ref v);
@@ -309,32 +321,33 @@ namespace SwarmOps.Optimizers
                     Tools.Bound(ref x, lowerBound, upperBound);
 
                     // Compute new fitness.
-                    double newFitness = Problem.Fitness(x, bestAgentFitness[j]);
+                    agentFitness[j] = Problem.Fitness(x);
 
                     // Update best-known position in case of fitness improvement.
-                    if (newFitness < bestAgentFitness[j])
+                    if (agentFitness[j] < bestAgentFitness[j])
                     {
                         // Update best-known position.
                         // Contents must be copied because the agent
                         // will likely move to worse positions.
                         x.CopyTo(bestAgentPosition[j], 0);
-                        bestAgentFitness[j] = newFitness;
+                        bestAgentFitness[j] = agentFitness[j];
 
                         // Update swarm's best known position.
                         // This must reference the agent's best-known
                         // position because the current position changes.
-                        if (newFitness < gFitness)
+                        if (agentFitness[j] < gFitness)
                         {
                             gFitness = bestAgentFitness[j];
-                            g = bestAgentPosition[j];
+                            bestAgentPosition[j].CopyTo(g,0);
                         }
                         
                     }
 
                         // Trace fitness of best found solution.
-                        Trace(i, gFitness);
-                    
+                        Trace(i, gFitness); 
                 }
+                //Reset information network if no improvement
+                initLinks = gFitness < prevBestFitness ? false : true;
             }
 
             // Return best-found solution and fitness.

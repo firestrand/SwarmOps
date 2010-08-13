@@ -31,8 +31,11 @@ namespace SwarmOps.Problems
         /// </param>
 
         public RosenbrockF6()
+            : base()
         {
+            Iterations = 100000;
         }
+        
         #endregion
 
         #region Base-class overrides.

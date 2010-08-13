@@ -178,6 +178,8 @@ namespace SwarmOps
         {
             throw new NotImplementedException();
         }
+
+        public virtual int Iterations { get; set; } //Iterations to run
         #endregion
     }
 }

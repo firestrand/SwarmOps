@@ -24,6 +24,7 @@ namespace SwarmOps.Problems
         public GearTrain()
             : base()
         {
+            Iterations = 20000;
         }
         #endregion
 

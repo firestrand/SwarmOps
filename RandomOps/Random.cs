@@ -148,21 +148,21 @@ namespace RandomOps
                 case RandomAlgorithm.KISS:
                     return new KISS(random);
                 case RandomAlgorithm.MersenneTwister:
-                    return new MersenneTwister(Convert.ToUInt32(random.Bytes(4)));
+                    return new MersenneTwister(GetUInt32FromBytes(random.Bytes(4)));
                 case RandomAlgorithm.MWC256:
                     return new MWC256(random);
                 case RandomAlgorithm.MWC256ThreadSafe:
                     return new ThreadSafe.MWC256();
                 case RandomAlgorithm.Ran2:
-                    return new Ran2(Convert.ToInt32(random.Bytes(4)));
+                    return new Ran2(GetInt32FromBytes(random.Bytes(4)));
                 case RandomAlgorithm.RanQD:
-                    return new RanQD(Convert.ToUInt32(random.Bytes(4)));
+                    return new RanQD(GetUInt32FromBytes(random.Bytes(4)));
                 case RandomAlgorithm.RanSystem:
-                    return new RanSystem(Convert.ToInt32(random.Bytes(4)));
+                    return new RanSystem(GetInt32FromBytes(random.Bytes(4)));
                 case RandomAlgorithm.XorShift:
                     return new XorShift(random);
                 default:
-                    return new RanSystem(Convert.ToInt32(random.Bytes(4)));
+                    return new RanSystem(GetInt32FromBytes(random.Bytes(4)));
             }
         }
         public static Int32 GetInt32FromBytes(byte[] bytes)

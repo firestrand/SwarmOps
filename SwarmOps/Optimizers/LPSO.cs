@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Linq.Expressions;
+using RandomOps;
 
 namespace SwarmOps.Optimizers
 {
@@ -52,7 +53,7 @@ namespace SwarmOps.Optimizers
         public LPSO(Problem problem)
             : base(problem)
         {
-            //TODO: This class is currently hardwired for minimization. Fix and allow for maximization as well based on the problem.
+            RandomChoice = RandomAlgorithm.MersenneTwister; //Default Random Choice
         }
         #endregion
 
@@ -112,6 +113,7 @@ namespace SwarmOps.Optimizers
         {
             return parameters[4];
         }
+        public RandomAlgorithm RandomChoice { get; set; }
         #endregion
 
         #region Base-class overrides, Problem.
@@ -191,10 +193,12 @@ namespace SwarmOps.Optimizers
             double phiG = GetPhiG(parameters); // phi2
 
             //Initialize Random for each particle
-            Random[] pRandoms = new Random[numAgents];
-            for(int h = 0; h< numAgents;h++)
+            //Initialize Random for each particle
+            RandomOps.Random rInit = RandomOps.Random.GetNewInstance(RandomChoice);
+            RandomOps.Random[] pRandoms = new RandomOps.Random[numAgents];
+            for (int h = 0; h < numAgents; h++)
             {
-                pRandoms[h] = new Random();
+                pRandoms[h] = RandomOps.Random.GetNewInstance(RandomChoice, rInit);
             }
 
             // Get problem-context.
@@ -254,7 +258,7 @@ namespace SwarmOps.Optimizers
                 for (int m = 0; m < n; m++)
                 {
                     //x[m] = pRandoms[j].NextDouble()*(upperInit[m] - lowerInit[m]) + lowerInit[m];
-                    v[m] = pRandoms[j].NextDouble()*
+                    v[m] = pRandoms[j].Uniform()*
                             (velocityUpperBound[m] - velocityLowerBound[m]) +
                             velocityLowerBound[m];
                 }
@@ -308,8 +312,8 @@ namespace SwarmOps.Optimizers
                     double[] nBest = bestAgentNeighborhoodPosition[j];
 
                     // Pick random weights.
-                    double rP = Globals.Random.Uniform();
-                    double rG = Globals.Random.Uniform();
+                    double rP = pRandoms[j].Uniform();
+                    double rG = pRandoms[j].Uniform();
 
                     // Update velocity.
                     for (int k = 0; k < n; k++)

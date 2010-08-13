@@ -67,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RepeatCount.cs" />
     <Compile Include="Optimizers\SPSO.cs" />
     <Compile Include="Optimizers\MetaFitness.cs" />
     <Compile Include="Optimizers\Parallel\MetaFitness.cs" />

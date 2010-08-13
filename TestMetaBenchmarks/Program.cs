@@ -84,7 +84,7 @@ namespace TestMetaBenchmarks
         static Statistics Statistics = new Statistics(MetaOptimizer);
 
         // Repeat a number of meta-optimization runs.
-        static Repeat MetaRepeat = new RepeatMin(Statistics, MetaNumRuns);
+        static Repeat MetaRepeat = new RepeatCount(Statistics, MetaNumRuns);
 
         static void Main(string[] args)
         {

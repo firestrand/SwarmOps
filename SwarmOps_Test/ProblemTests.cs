@@ -64,7 +64,7 @@ namespace SwarmOps_Test
         public void TestRosenbrockF6GlobalMinimum()
         {
             RosenbrockF6 problem = new RosenbrockF6();
-            double[]optimal = new double[problem.Dimensionality];
+            double[] optimal = new double[problem.Dimensionality];
             for (int i = 0; i < problem.Dimensionality; i++)
             {
                 optimal[i] = problem.Offset[i] + 1.0;
