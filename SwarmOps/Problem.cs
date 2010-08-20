@@ -180,6 +180,25 @@ namespace SwarmOps
         }
 
         public virtual int Iterations { get; set; } //Iterations to run
+        public virtual double[] Quantizations { get; set; } //Quantization Array
         #endregion
+        public static void Quantize(double[] x,double[] q)
+        {
+            /*
+             Quantisatition of a position
+             Only values like x+k*q (k integer) are admissible 
+             */
+            if(x.Length != q.Length)
+                throw new ArgumentOutOfRangeException("x,q","Arrays are not the same length.");
+
+            for (int d = 0; d < q.Length; d++)
+            {
+                if (q[d] > 0.0)	// Note that qd can't be < 0
+                {
+                    //qd = qd * (SS.max[d] - SS.min[d]) / 2;	      
+                    x[d] = q[d] * Math.Floor(0.5 + x[d] / q[d]);
+                }
+            }
+        }
     }
 }

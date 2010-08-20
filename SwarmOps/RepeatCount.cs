@@ -5,6 +5,8 @@
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
 
+using System;
+
 namespace SwarmOps
 {
     /// <summary>
@@ -60,7 +62,7 @@ namespace SwarmOps
             {
                 // Perform one optimization run.
                 Result result = Optimizer.Optimize(parameters);
-
+                Console.WriteLine(String.Format("{0} {1} {2}",Optimizer.Problem.Name,result.Iterations, result.Fitness));
                 // Count where Fitness is acceptable
                 if (result.Fitness <= Optimizer.Problem.AcceptableFitness)
                 {

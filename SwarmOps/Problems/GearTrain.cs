@@ -25,6 +25,7 @@ namespace SwarmOps.Problems
             : base()
         {
             Iterations = 20000;
+            Quantizations = new[] {1.0, 1.0, 1.0, 1.0};
         }
         #endregion
 
@@ -61,11 +62,12 @@ namespace SwarmOps.Problems
         {
             Debug.Assert(x != null && x.Length == Dimensionality);
             //This problem uses integer values only. Round and enforce
-            for (int i = 0; i < x.Length; i++)
-            {
-                x[i] = Math.Round(x[i], MidpointRounding.AwayFromZero);
-            }
-            return Math.Pow((1.0 / 6.931) - ((x[0] * x[1]) / (x[2] * x[3])), 2);
+            double x1 = x[0];
+            double x2 =x[1];
+            double x3 = x[2];
+            double x4 = x[3];
+            double f = 1.0/6.931 - x1*x2/(x3*x4);
+            return f*f;
         }
         #endregion
         private readonly double[] _lowerBound = Enumerable.Repeat(12.0d,4).ToArray();

@@ -34,10 +34,6 @@ namespace SwarmOps.Optimizers
     /// </remarks>
     public class SPSO : Optimizer
     {
-        private const int D_max = 114;		// Max number of dimensions of the search space
-        private const int R_max = 500;		// Max number of runs
-        private const int S_max = 910;		// Max swarm size
-        private const int zero = 0;			// 1.0e-30 // To avoid numerical instabilities
         #region Constructors.
         /// <summary>
         /// Construct the object.
@@ -188,7 +184,6 @@ namespace SwarmOps.Optimizers
             // Best-found position and fitness.
             double[] g = null;
             double gFitness = Problem.MaxFitness;
-            object gLock = new object();
 
             // Initialize
             System.Threading.Tasks.Parallel.For(0, n, l =>
@@ -212,12 +207,13 @@ namespace SwarmOps.Optimizers
                 for (int m = 0; m < n; m++)
                 {
                     x[m] = pRandoms[j].Uniform()*(upperInit[m] - lowerInit[m]) + lowerInit[m];
-                    v[m] = ((pRandoms[j].Uniform()*
-                           (velocityUpperBound[m] - velocityLowerBound[m]) +
-                           velocityLowerBound[m]) - x[m])/2.0;
-                    //TODO: Add quanitzation support for each dimension. Ex: Contrain each dimension to steps of .1
+                    v[m] = (pRandoms[j].Uniform(velocityLowerBound[m], velocityUpperBound[m]) - x[m]) / 2.0;
                 }
-
+                //Quantize
+                if (Problem.Quantizations != null)
+                {
+                    Quantize(x, Problem.Quantizations);
+                }
                 // Compute fitness of initial position.
                 agentFitness[j] = bestAgentFitness[j] = Problem.Fitness(x);
 
@@ -253,7 +249,7 @@ namespace SwarmOps.Optimizers
                     {
                         for (int k = 0; k < S; k++)
                         {
-                            links[j,k] = pRandoms[j].Uniform() < p ? true : false;
+                            links[k,j] = pRandoms[j].Uniform() < p ? true : false;
                         }
                         links[j, j] = true;//Always inform self
                     }
@@ -277,10 +273,14 @@ namespace SwarmOps.Optimizers
                     double[] pBest = bestAgentPosition[j];
 
                     //Find best informant
-                    int lBest = j;
+                    int s1 = 0;
+                    while (links[s1, j] == false) s1++;
+
+                    // Find the best informant			
+                    int lBest = s1;
                     for(int m = 0; m < S; m++) 
 			        {	    
-				        if (links[j,m] && bestAgentFitness[m] < bestAgentFitness[lBest])
+				        if (links[m,j] && bestAgentFitness[m] < bestAgentFitness[lBest])
 					        lBest = m;
 			        }
                     double[] nBest = bestAgentPosition[lBest];
@@ -291,25 +291,26 @@ namespace SwarmOps.Optimizers
                     {
                         for (int k = 0; k < n; k++)
                         {
-                            v[k] = w * v[k] + c * pRandoms[j].Uniform() * (pBest[k] - x[k]) +
-                                    c * pRandoms[j].Uniform() * (nBest[k] - x[k]);
-
+                            double r1 = pRandoms[j].Uniform(0,c);
+                            double r2 = pRandoms[j].Uniform(0,c);
+                            v[k] = w * v[k] + r1 * (pBest[k] - x[k]) + r2 * (nBest[k] - x[k]);
                         }
                     }
                     else
                     {
                         for (int k = 0; k < n; k++)
                         {
-                            v[k] = w * v[k] + c * pRandoms[j].Uniform() * (pBest[k] - x[k]);
+                            double r1 = pRandoms[j].Uniform(0, c);
+                            v[k] = w * v[k] + r1 * (pBest[k] - x[k]);
                         }
                     }
                     
 
                     // Fix denormalized floating-point values in velocity.
-                    Tools.Denormalize(ref v);
+                    //Tools.Denormalize(ref v);
 
                     // Enforce velocity bounds before updating position.
-                    Tools.Bound(ref v, velocityLowerBound, velocityUpperBound);
+                    //Tools.Bound(ref v, velocityLowerBound, velocityUpperBound);
 
                     // Update position.
                     for (int k = 0; k < n; k++)
@@ -317,8 +318,16 @@ namespace SwarmOps.Optimizers
                         x[k] = x[k] + v[k];
                     }
 
+                    //Quantize
+                    if (Problem.Quantizations != null)
+                    {
+                        Problem.Quantize(x, Problem.Quantizations);
+                    }
+
                     // Enforce bounds before computing new fitness.
-                    Tools.Bound(ref x, lowerBound, upperBound);
+                    Tools.Clamp(x, v, lowerBound, upperBound);
+
+                    
 
                     // Compute new fitness.
                     agentFitness[j] = Problem.Fitness(x);
@@ -340,7 +349,6 @@ namespace SwarmOps.Optimizers
                             gFitness = bestAgentFitness[j];
                             bestAgentPosition[j].CopyTo(g,0);
                         }
-                        
                     }
 
                         // Trace fitness of best found solution.
@@ -348,6 +356,7 @@ namespace SwarmOps.Optimizers
                 }
                 //Reset information network if no improvement
                 initLinks = gFitness < prevBestFitness ? false : true;
+                prevBestFitness = gFitness;
             }
 
             // Return best-found solution and fitness.

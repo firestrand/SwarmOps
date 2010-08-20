@@ -6,6 +6,7 @@
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
 
+using System;
 using System.Diagnostics;
 
 namespace SwarmOps

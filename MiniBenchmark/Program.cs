@@ -16,16 +16,14 @@ namespace MiniBenchmark
     class Program
     {
         // Create optimizer object.
-        static SPSO Optimizer = new SPSO();
-        //static Optimizer Optimizer = new MTS();
+        //static SPSO Optimizer = new SPSO();
+        static Optimizer Optimizer = new SPSO();
         // Control parameters for optimizer.
         private static readonly double[] Parameters = Optimizer.DefaultParameters;
         
 
         // Optimization settings.
         const int NumRuns = 100;
-        const int NumIterations = 10000;
-        const bool DisplaceOptimum = true;
         //static IRunCondition RunCondition = new RunConditionFitness(NumIterations);
         static readonly StringBuilder _resultSb = new StringBuilder();
 
@@ -43,8 +41,8 @@ namespace MiniBenchmark
             Repeat Repeat = new RepeatCount(Optimizer, NumRuns);
 
             // Perform the optimization runs.
-            //double successPercent = Repeat.Fitness(Parameters);
-            double successPercent = Repeat.Fitness(Optimizer.CalculateParameters(Optimizer.Problem.Dimensionality, 3));
+            double successPercent = Repeat.Fitness(Parameters);
+            //double successPercent = Repeat.Fitness(Optimizer.CalculateParameters(Optimizer.Problem.Dimensionality, 3));
 
             // Output result-statistics.
             Console.WriteLine("{0} & {1} \\\\",
@@ -61,12 +59,12 @@ namespace MiniBenchmark
         {
             //Create list of problems
             var problems = new List<Problem>();
-            problems.Add(new Tripod());
-            problems.Add(new RosenbrockF6());
+            //problems.Add(new Tripod());
+            //problems.Add(new RosenbrockF6());
             problems.Add(new GearTrain());
 
             // Initialize PRNG.
-            //Globals.Random = new RandomOps.RanSystem();
+            Globals.Random = new RandomOps.RanSystem();
 
             // Output optimization settings.
             Console.WriteLine("Mini-Benchmark-tests.");

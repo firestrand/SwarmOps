@@ -52,13 +52,13 @@ namespace SwarmOps.Problems
         /// </summary>
         public override double MinFitness
         {
-            get { return 390.0d; }
+            get { return 0.0d; }
         }
         public override double AcceptableFitness
         {
             get
             {
-                return 390.01d;
+                return 0.01d;
             }
         }
         /// <summary>
@@ -77,8 +77,7 @@ namespace SwarmOps.Problems
                 z1 = x[i] - _offset[i];
                 value += 100.0* Math.Pow(Math.Pow(z0,2) - z1,2) + Math.Pow(z0-1.0,2);
             }
-
-            return value;
+            return Math.Abs(390.0-value);
         }
 
         /// <summary>
