@@ -41,6 +41,7 @@ namespace SwarmOps.Optimizers
         public SPSO()
             : base()
         {
+            RandomChoice = RandomAlgorithm.MersenneTwister;
         }
 
         /// <summary>
@@ -149,18 +150,12 @@ namespace SwarmOps.Optimizers
             int S = (int)System.Math.Round(parameters[0], System.MidpointRounding.AwayFromZero);
             Debug.Assert(S > 0);
 
-            int K = (int)System.Math.Round(parameters[1], System.MidpointRounding.AwayFromZero);
             double p = parameters[2]; //This is what matters for informed particles
             double w = parameters[3];
             double c = parameters[4];
 
             //Initialize Random for each particle
-            RandomOps.Random rInit = RandomOps.Random.GetNewInstance(RandomChoice);
-            RandomOps.Random[] pRandoms = new RandomOps.Random[S];
-            for(int h = 0; h< S;h++)
-            {
-                pRandoms[h] = RandomOps.Random.GetNewInstance(RandomChoice,rInit);
-            }
+            Random rand = new Random();
 
             // Get problem-context.
             double[] lowerBound = Problem.LowerBound;
@@ -173,194 +168,162 @@ namespace SwarmOps.Optimizers
             double[][] agents = Tools.NewMatrix(S, n);
             double[][] velocities = Tools.NewMatrix(S, n);
             double[][] bestAgentPosition = Tools.NewMatrix(S, n);
-            bool[,] links = new bool[S,S];
+
+            int[,] links = new int[S, S];
+            int[] index = new int[S];
+            int g;
+            double[] px = new double[n];
+            double[] gx = new double[n];
+            int nEval = 0;
+
             double[] agentFitness = new double[S];
             double[] bestAgentFitness = new double[S];
 
-            // Allocate velocity boundaries.
-            double[] velocityLowerBound = new double[n];
-            double[] velocityUpperBound = new double[n];
-
-            // Best-found position and fitness.
-            double[] g = null;
-            double gFitness = Problem.MaxFitness;
-
             // Initialize
-            System.Threading.Tasks.Parallel.For(0, n, l =>
-                                   {
-                                       double range = System.Math.Abs(upperBound[l] - lowerBound[l]);
-
-                                       velocityLowerBound[l] = -range;
-                                       velocityUpperBound[l] = range;
-                                   });
-
             // Initialize all agents.
             // This counts as iterations below.
-            for(int j = 0; j < S; j++)
+            // Position and velocity
+            for (int s = 0; s < S; s++)
             {
-
-                // Refer to the j'th agent as x and v.
-                double[] x = agents[j];
-                double[] v = velocities[j];
-
-                // Initialize.
-                for (int m = 0; m < n; m++)
+                for (int d = 0; d < n; d++)
                 {
-                    x[m] = pRandoms[j].Uniform()*(upperInit[m] - lowerInit[m]) + lowerInit[m];
-                    v[m] = (pRandoms[j].Uniform(velocityLowerBound[m], velocityUpperBound[m]) - x[m]) / 2.0;
+                    agents[s][d] = rand.NextDouble(lowerInit[d], upperInit[d]);
+                    velocities[s][d] = (rand.NextDouble(lowerBound[d], upperBound[d]) - agents[s][d]) / 2;
                 }
-                //Quantize
-                if (Problem.Quantizations != null)
-                {
-                    Quantize(x, Problem.Quantizations);
-                }
-                // Compute fitness of initial position.
-                agentFitness[j] = bestAgentFitness[j] = Problem.Fitness(x);
-
-                // Initialize best known position.
-                // Contents must be copied because the agent
-                // may move to worse positions.
-                x.CopyTo(bestAgentPosition[j], 0);
-
-                // Update swarm's best known position.
-                // This must reference the agent's best-known
-                // position because the current position changes.
-                    if (bestAgentFitness[j] < gFitness)
-                    {
-
-                        gFitness = bestAgentFitness[j];
-                        g = bestAgentPosition[j];
-
-                    }
-                    // Trace fitness of best found solution.
-                    Trace(j, gFitness);
-                
             }
 
-            // Perform actual optimization iterations. Start with numAgents to include initialization fitness evaluations in RunCondition check
-            int i = S;
-            bool initLinks = true;
-            double prevBestFitness = gFitness;
-            while(Problem.RunCondition.Continue(i, gFitness))
+            // First evaluations
+            for (int s = 0; s < S; s++)
             {
-                if(initLinks)
+                agentFitness[s] = Problem.Fitness(agents[s]);
+                nEval++;
+                agents[s].CopyTo(bestAgentPosition[s], 0);	// Best position = current one
+                bestAgentFitness[s] = agentFitness[s];
+            }
+
+            // Find the best
+            int best = 0;
+            double errorPrev = bestAgentFitness[best];
+
+            for (int s = 1; s < S; s++)
+            {
+                if (bestAgentFitness[s] < errorPrev)
                 {
-                    for (int j = 0; j < S; j++)
+                    best = s;
+                    errorPrev = bestAgentFitness[s];
+                }
+            }
+
+            int initLinks = 1;		// So that information links will beinitialized
+            int noStop = 0;
+            // ---------------------------------------------- ITERATIONS
+            while (noStop == 0)
+            {
+                if (initLinks == 1)	// Random topology
+                {
+                    // Who informs who, at random
+                    for (int s = 0; s < S; s++)
                     {
-                        for (int k = 0; k < S; k++)
+                        for (int m = 0; m < S; m++)
                         {
-                            links[k,j] = pRandoms[j].Uniform() < p ? true : false;
+                            if (rand.NextDouble() < p) links[m, s] = 1;	// Probabilistic method
+                            else links[m, s] = 0;
                         }
-                        links[j, j] = true;//Always inform self
+                        links[s, s] = 1;
                     }
                 }
 
-                //for (int j = 0; j < S; j++)
-                //{
-                //    for (int k = 0; k < S; k++)
-                //    {
-                //        Console.Write((links[j, k] ? "1" : "0") + " ");
-                //    }
-                //    Console.WriteLine();
-                //}
+                // The swarm MOVES
+                for (int i = 0; i < S; i++)
+                    index[i] = i;
 
-
-                for(int j = 0; j < S; j++,i++)
+                for (int s0 = 0; s0 < S; s0++)	// For each particle ...
                 {
-                    // Refer to the j'th agent as x and v.
-                    double[] x = agents[j];
-                    double[] v = velocities[j];
-                    double[] pBest = bestAgentPosition[j];
-
-                    //Find best informant
+                    int s = index[s0];
+                    // ... find the first informant
                     int s1 = 0;
-                    while (links[s1, j] == false) s1++;
+                    while (links[s1, s] == 0) s1++;
+                    if (s1 >= S) s1 = s;
 
                     // Find the best informant			
-                    int lBest = s1;
-                    for(int m = 0; m < S; m++) 
-			        {	    
-				        if (links[m,j] && bestAgentFitness[m] < bestAgentFitness[lBest])
-					        lBest = m;
-			        }
-                    double[] nBest = bestAgentPosition[lBest];
-
-                    // Update velocity.
-                    
-                    if(j != lBest)
+                    g = s1;
+                    for (int m = s1; m < S; m++)
                     {
-                        for (int k = 0; k < n; k++)
+                        if (links[m, s] == 1 && bestAgentFitness[m] < bestAgentFitness[g])
+                            g = m;
+                    }
+
+                    //.. compute the new velocity, and move
+                    // Exploration tendency
+                    if(g!=s)
+                    {
+                        for (int d = 0; d < n; d++)
                         {
-                            double r1 = pRandoms[j].Uniform(0,c);
-                            double r2 = pRandoms[j].Uniform(0,c);
-                            v[k] = w * v[k] + r1 * (pBest[k] - x[k]) + r2 * (nBest[k] - x[k]);
+                            velocities[s][d] = w*velocities[s][d];
+                            px[d] = bestAgentPosition[s][d] - agents[s][d];
+                            gx[d] = bestAgentPosition[g][d] - agents[s][d];
+                            velocities[s][d] += rand.NextDouble(0.0, c) * px[d];
+                            velocities[s][d] += rand.NextDouble(0.0, c) * gx[d];
+                            agents[s][d] = agents[s][d] + velocities[s][d];
                         }
                     }
                     else
                     {
-                        for (int k = 0; k < n; k++)
+                        for (int d = 0; d < n; d++)
                         {
-                            double r1 = pRandoms[j].Uniform(0, c);
-                            v[k] = w * v[k] + r1 * (pBest[k] - x[k]);
-                        }
-                    }
-                    
-
-                    // Fix denormalized floating-point values in velocity.
-                    //Tools.Denormalize(ref v);
-
-                    // Enforce velocity bounds before updating position.
-                    //Tools.Bound(ref v, velocityLowerBound, velocityUpperBound);
-
-                    // Update position.
-                    for (int k = 0; k < n; k++)
-                    {
-                        x[k] = x[k] + v[k];
-                    }
-
-                    //Quantize
-                    if (Problem.Quantizations != null)
-                    {
-                        Problem.Quantize(x, Problem.Quantizations);
-                    }
-
-                    // Enforce bounds before computing new fitness.
-                    Tools.Clamp(x, v, lowerBound, upperBound);
-
-                    
-
-                    // Compute new fitness.
-                    agentFitness[j] = Problem.Fitness(x);
-
-                    // Update best-known position in case of fitness improvement.
-                    if (agentFitness[j] < bestAgentFitness[j])
-                    {
-                        // Update best-known position.
-                        // Contents must be copied because the agent
-                        // will likely move to worse positions.
-                        x.CopyTo(bestAgentPosition[j], 0);
-                        bestAgentFitness[j] = agentFitness[j];
-
-                        // Update swarm's best known position.
-                        // This must reference the agent's best-known
-                        // position because the current position changes.
-                        if (agentFitness[j] < gFitness)
-                        {
-                            gFitness = bestAgentFitness[j];
-                            bestAgentPosition[j].CopyTo(g,0);
+                            velocities[s][d] = w * velocities[s][d];
+                            px[d] = bestAgentPosition[s][d] - agents[s][d];
+                            velocities[s][d] += rand.NextDouble(0.0, c) * px[d];
+                            agents[s][d] = agents[s][d] + velocities[s][d];
                         }
                     }
 
-                        // Trace fitness of best found solution.
-                        Trace(i, gFitness); 
-                }
-                //Reset information network if no improvement
-                initLinks = gFitness < prevBestFitness ? false : true;
-                prevBestFitness = gFitness;
-            }
+                    if (!Problem.RunCondition.Continue(nEval, bestAgentFitness[best]))
+                    {
+                        //error= fabs(error - pb.objective);
+                        goto end;
+                    }
+
+                    for (int d = 0; d < n; d++)
+                    {
+                        if (agents[s][d] < lowerBound[d])
+                        {
+                            agents[s][d] = lowerBound[d];
+                            velocities[s][d] = 0;
+                        }
+
+                        if (agents[s][d] > upperBound[d])
+                        {
+                            agents[s][d] = upperBound[d];
+                            velocities[s][d] = 0;
+                        }
+                    }
+
+                    agentFitness[s] = Problem.Fitness(agents[s]);
+                    nEval++;
+                    // ... update the best previous position
+                    if (agentFitness[s] < bestAgentFitness[s])	// Improvement
+                    {
+                        agents[s].CopyTo(bestAgentPosition[s], 0);
+                        bestAgentFitness[s] = agentFitness[s];
+                        // ... update the best of the bests
+                        if (bestAgentFitness[s] < bestAgentFitness[best])
+                        {
+                            best = s;
+                        }
+                    }
+                }			// End of "for (s0=0 ...  "	
+                // Check if finished
+                initLinks = bestAgentFitness[best] < errorPrev ? 0 : 1;
+                errorPrev = bestAgentFitness[best];
+                // Trace fitness of best found solution.
+                Trace(nEval, bestAgentFitness[best]);
+            end:
+                noStop = Problem.RunCondition.Continue(nEval, bestAgentFitness[best]) ? 0 : 1;
+            } // End of "while nostop ...
 
             // Return best-found solution and fitness.
-            return new Result(g, gFitness, i);
+            return new Result(bestAgentPosition[best], bestAgentFitness[best], nEval);
         }
         #endregion
         public double[] CalculateParameters(int dimensions, int numInformed)

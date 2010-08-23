@@ -198,6 +198,8 @@ namespace SwarmOps
         #region Public Static Methods
         public static void Quantize(double[] x,double[] q)
         {
+            if (q == null)
+                return;
             /*
              Quantisatition of a position
              Only values like x+k*q (k integer) are admissible 

@@ -17,7 +17,7 @@ namespace MiniBenchmark
     {
         // Create optimizer object.
         //static SPSO Optimizer = new SPSO();
-        static Optimizer Optimizer = new SPSO();
+        static Optimizer Optimizer = new DE();
         // Control parameters for optimizer.
         private static readonly double[] Parameters = Optimizer.DefaultParameters;
         
@@ -60,7 +60,11 @@ namespace MiniBenchmark
             //Create list of problems
             var problems = new List<Problem>();
             problems.Add(new Tripod());
+<<<<<<< HEAD
             //problems.Add(new RosenbrockF6());
+=======
+            problems.Add(new RosenbrockF6());
+>>>>>>> SPSO-Fix
             problems.Add(new GearTrain());
 
             // Initialize PRNG.

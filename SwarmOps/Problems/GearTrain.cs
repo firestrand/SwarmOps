@@ -62,11 +62,12 @@ namespace SwarmOps.Problems
         {
             Debug.Assert(x != null && x.Length == Dimensionality);
             //This problem uses integer values only. Round and enforce
+            Quantize(x,Quantizations);
             double x1 = x[0];
             double x2 = x[1];
             double x3 = x[2];
             double x4 = x[3];
-            double f = 1.0/6.931 - x1*x2/(x3*x4);
+            double f = 1.0 / 6.931 - x1 * x2 / (x3 * x4);
             return f*f;
         }
         #endregion
