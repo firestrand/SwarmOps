@@ -40,5 +40,9 @@ namespace SwarmOps
                 }
             }
         }
+        public static double NextDouble(this Random rand, double lowerBound, double upperBound)
+        {
+            return lowerBound + rand.NextDouble() * (upperBound - lowerBound);
+        }
     }
 }
