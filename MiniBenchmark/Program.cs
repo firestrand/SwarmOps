@@ -59,7 +59,7 @@ namespace MiniBenchmark
         {
             //Create list of problems
             var problems = new List<Problem>();
-            //problems.Add(new Tripod());
+            problems.Add(new Tripod());
             //problems.Add(new RosenbrockF6());
             problems.Add(new GearTrain());
 

@@ -96,6 +96,12 @@ namespace SwarmOps
         }
 
         /// <summary>
+        /// Upper initialization boundary,
+        /// if different from search-space boundary.
+        /// </summary>
+        public virtual double[] Optimal { get { return LowerBound; } }
+
+        /// <summary>
         /// Maximum (i.e. worst) fitness possible.
         /// </summary>
         public virtual double MaxFitness
@@ -122,6 +128,12 @@ namespace SwarmOps
         {
             get { return MinFitness; }
         }
+
+        /// <summary>
+        /// Acceptable Error, typically requires a known optimal solution.
+        /// Added for use in benchmark problems.
+        /// </summary>
+        public virtual double AcceptableError { get { return MinFitness; } }
 
         /// <summary>
         /// Return dimensionality of the problem, that is, the number
@@ -182,6 +194,8 @@ namespace SwarmOps
         public virtual int Iterations { get; set; } //Iterations to run
         public virtual double[] Quantizations { get; set; } //Quantization Array
         #endregion
+        //TODO: Add constraints
+        #region Public Static Methods
         public static void Quantize(double[] x,double[] q)
         {
             /*
@@ -194,11 +208,11 @@ namespace SwarmOps
             for (int d = 0; d < q.Length; d++)
             {
                 if (q[d] > 0.0)	// Note that qd can't be < 0
-                {
-                    //qd = qd * (SS.max[d] - SS.min[d]) / 2;	      
+                {	      
                     x[d] = q[d] * Math.Floor(0.5 + x[d] / q[d]);
                 }
             }
         }
+        #endregion
     }
 }

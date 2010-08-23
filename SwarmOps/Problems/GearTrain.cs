@@ -51,7 +51,7 @@ namespace SwarmOps.Problems
         /// </summary>
         public override double AcceptableFitness
         {
-            get { return 2.7e-12d; }
+            get { return 2.71e-12d; }
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace SwarmOps.Problems
             Debug.Assert(x != null && x.Length == Dimensionality);
             //This problem uses integer values only. Round and enforce
             double x1 = x[0];
-            double x2 =x[1];
+            double x2 = x[1];
             double x3 = x[2];
             double x4 = x[3];
             double f = 1.0/6.931 - x1*x2/(x3*x4);
@@ -80,7 +80,11 @@ namespace SwarmOps.Problems
         {
             get { return _upperBound; }
         }
-
+        private readonly double[] _optimal = new[]{19.0,16.0,43.0,49.0};
+        public override double[] Optimal
+        {
+            get { return _optimal; }
+        }
         public override int Dimensionality
         {
             get { return 4; }

@@ -87,9 +87,8 @@ namespace SwarmOps_Test
         public void TestGearTrainGlobalMinimum()
         {
             Problem problem = new GearTrain();
-            double[] optimal = new[]{19.0,16.0,43.0,49.0};
             double expected = 2.7e-12d;
-            double result = Math.Round(problem.Fitness(optimal),14);
+            double result = Math.Round(problem.Fitness(problem.Optimal),14);
             Assert.AreEqual(expected, result);
         }
     }
