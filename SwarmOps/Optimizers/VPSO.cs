@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -149,11 +150,14 @@ namespace SwarmOps.Optimizers
 
             // Retrieve parameter specific to SPSO method.
             int S = (int)System.Math.Round(parameters[0], System.MidpointRounding.AwayFromZero);
+            int SMax = 200; //Maximum number of particles in a swarm.
             Debug.Assert(S > 0);
 
             double p = parameters[2]; //This is what matters for informed particles
             double w = parameters[3];
             double c = parameters[4];
+            //Memory
+            Memory memory = new Memory(500);
 
             //TODO: Initialize Random for each particle
             Random rand = new Random();
@@ -166,19 +170,24 @@ namespace SwarmOps.Optimizers
             int n = Problem.Dimensionality;
 
             // Allocate agent positions and associated fitnesses.
-            double[][] agents = Tools.NewMatrix(S, n);
-            double[][] velocities = Tools.NewMatrix(S, n);
-            double[][] bestAgentPosition = Tools.NewMatrix(S, n);
+            double[][] agents = Tools.NewMatrix(SMax, n);
+            double[][] velocities = Tools.NewMatrix(SMax, n);
+            double[][] bestAgentPosition = Tools.NewMatrix(SMax, n);
 
-            int[,] links = new int[S, S];
-            int[] index = new int[S];
+            int[,] links = new int[SMax, SMax];
+            int[] index = new int[SMax];
             int g;
             double[] px = new double[n];
             double[] gx = new double[n];
             int nEval = 0;
 
-            double[] agentFitness = new double[S];
-            double[] bestAgentFitness = new double[S];
+            double[] agentFitness = new double[SMax];
+            double[] bestAgentFitness = new double[SMax];
+
+            double spreadProba = 0.9d;
+            int spreadFormula = 3;
+            int spread = spreadIter(spreadProba,S,spreadFormula);
+            int improvTot = 0;
 
             // Initialize
             // Initialize all agents.
@@ -188,9 +197,10 @@ namespace SwarmOps.Optimizers
             {
                 for (int d = 0; d < n; d++)
                 {
-                    agents[s][d] = rand.NextDouble(lowerInit[d], upperInit[d]);
+                    agents[s][d] = rand.NextDouble(lowerInit[d], upperInit[d]); 
                     velocities[s][d] = (rand.NextDouble(lowerBound[d], upperBound[d]) - agents[s][d]) / 2;
                 }
+                memory.Save(agents[s]);
             }
 
             // First evaluations
@@ -218,11 +228,15 @@ namespace SwarmOps.Optimizers
             }
 
             int initLinks = 1;		// So that information links will beinitialized
-            int initLinkNb;
+            int initLinkNb = 0;
             int noStop = 0;
             // ---------------------------------------------- ITERATIONS
+            int sWorst;
+            int stagnation = 0;
+            int swarmMod;
             while (noStop == 0)
             {
+                index = Enumerable.Range(0, S).ToArray();
                 // Random numbering of the particles
                 Tools.Shuffle(ref index);
 
@@ -238,33 +252,33 @@ namespace SwarmOps.Optimizers
                         {
                             links[m, s] = 0;
                         }
+                    }
+                    for (int s = 0; s < S-1; s++)
+                    {
                         // Information links (bidirectional ring)
                         links[index[s],index[s + 1]] = 1;
                         links[index[s + 1],index[s]] = 1;
+                    }
+                    for (int s = 0; s < S; s++)
+                    {
                         // Each particle informs itself
                         links[s, s] = 1;
                     }
-
                     links[index[0],index[S - 1]] = 1;
                     links[index[S - 1],index[0]] = 1;
                 }
-
+                // Loop on particles, for move
+                improvTot = 0;
                 // The swarm MOVES
-                for (int i = 0; i < S; i++)
-                    index[i] = i;
-
                 for (int s0 = 0; s0 < S; s0++)	// For each particle ...
                 {
                     int s = index[s0];
-                    // ... find the first informant
-                    int s1 = 0;
-                    while (links[s1, s] == 0) s1++;
-                    if (s1 >= S) s1 = s;
 
                     // Find the best informant			
-                    g = s1;
-                    for (int m = s1; m < S; m++)
+                    g = s;
+                    for (int m = 0; m < S; m++)
                     {
+                        if (m == s) continue;
                         if (links[m, s] == 1 && bestAgentFitness[m] < bestAgentFitness[g])
                             g = m;
                     }
@@ -320,8 +334,11 @@ namespace SwarmOps.Optimizers
                     // ... update the best previous position
                     if (agentFitness[s] < bestAgentFitness[s])	// Improvement
                     {
+                        memory.Save(agents[s]);
                         agents[s].CopyTo(bestAgentPosition[s], 0);
                         bestAgentFitness[s] = agentFitness[s];
+
+                        improvTot++;
                         // ... update the best of the bests
                         if (bestAgentFitness[s] < bestAgentFitness[best])
                         {
@@ -329,9 +346,106 @@ namespace SwarmOps.Optimizers
                         }
                     }
                 }			// End of "for (s0=0 ...  "	
+                /*-------------------------------------------------- Adaptations
+		         Rule 1:
+		         Check every "spread" iterations after each re-init of the links
+		         If no improvement of the global best
+		         => reinit links before the next iteration
+
+		         Rule 2:
+		         if no improvement of the global best during "spread" iterations
+		         => Try to add a particle (and initialise it in a non-searched area)
+		         => re-init links before the next iteration
+		         Note that the condition is slightly different from the one of Rule 1
+
+		         Rule 3:
+		         if "enough" local improvements during the iteration
+		         => try to remove a particle (keep at least D+1 ones)
+
+		         */
+
+                // Rule 1 - Re-initializing the information links
+                // Check if improvement since last re-init of the links
+                initLinkNb = initLinkNb + 1; // Number of iterations since the last check 
+
+                if (initLinkNb >= spread) // It's time to check
+                {
+                    initLinkNb = 0; // Reset to zero the number of iterations since the last check
+                    // The swarm size may have been modified, so must be "spread"                    
+                    spread = spreadIter(spreadProba, S, spreadFormula);
+
+                    initLinks = bestAgentFitness[best] < errorPrev ? 0 : 1;	
+                }
+                else 
+                {
+                    initLinks = 0;  // To early, no need to check 
+                }
+
+                sWorst = worst(bestAgentFitness,S); // Rank of the worst particle, before any adaptation
+
+                // Rule 2 - Adding a particle
+                // Check global stagnation (improvement of the global best) 
+                if (bestAgentFitness[best] < errorPrev) stagnation = 0;	// Improvement
+                else stagnation++; // No improvement during this iteration
+
+                swarmMod = 0; // Information flag
+                int sVal = 0;
+                if (stagnation >= spread)  // Too many iterations without global improvement =>  add a particle
+                {
+                    if (S < SMax) // if not too many particles
+                    {
+                        sVal = S;
+                        agents[sVal] = memory.InitializeFar(); // Init in a non-searched area
+                        agentFitness[sVal] = Problem.Fitness(agents[sVal]);	 // Evaluation
+                        nEval++;
+                        for (int d = 0; d < n; d++)
+                        {
+                            velocities[sVal][d] = (rand.NextDouble(lowerBound[d], upperBound[d]) - agents[sVal][d]) / 2;// Init velocity						
+                        }
+                        agents[sVal].CopyTo(bestAgentPosition[sVal],0); // Previous best = current position								
+                        S = S + 1; // Increase the swarm size
+
+                        initLinks = 1; // Links will be reinitialised
+                        stagnation = 0; // Reset the count for stagnation
+                        swarmMod = 1; // A particle has been added
+                    }
+                }
+
+                // Rule 3 - Removing a particle
+                // If enough improvements of some particles, remove the worst 
+                // (but keep at least D+1 particles)
+                // NOTE: this is "the worst" without taking into account the particle
+                // that has (possibly) been added
+                // NOTE: it is perfectly possible to have a particle added
+                // (because of no improvement of the global best)  AND
+                // a particle removed (because enough _local_ improvements)
+
+                
+                if (S > Problem.Dimensionality + 1 && improvTot > 0.5 * S)
+                {
+                    if ((swarmMod == 0 && sWorst < S - 1) || swarmMod == 1)
+                    // if the worst is not the last 
+                    {
+                        bestAgentPosition[sWorst] = (double[])bestAgentPosition[S - 1].Clone(); // ... replace it by the last
+                        bestAgentFitness[sWorst] = bestAgentFitness[S - 1];
+                        velocities[sWorst] = (double[])velocities[S - 1].Clone();
+                        agents[sWorst] = (double[])agents[S - 1].Clone();
+
+                        // Compact the matrix of the links
+                        for (int s1 = 0; s1 < S; s1++)  // For each line, compact the columns
+                            for (int s2 = sWorst; s2 < S - 1; s2++) links[s1,s2] = links[s1,s2 + 1];
+
+                        for (int s2 = 0; s2 < S - 1; s2++)	// For each column, compact the lines
+                            for (int s1 = sWorst; s1 < S - 1; s1++) links[s1,s2] = links[s1 + 1,s2];
+                    }
+                    S = S - 1; // Decrease the swarm size
+                    if (sVal < best) best = best - 1; // The rank of the best may have been modified
+                }
+
                 // Check if finished
-                initLinks = bestAgentFitness[best] < errorPrev ? 0 : 1;
+                //initLinks = bestAgentFitness[best] < errorPrev ? 0 : 1;
                 errorPrev = bestAgentFitness[best];
+
                 // Trace fitness of best found solution.
                 Trace(nEval, bestAgentFitness[best]);
             end:
@@ -361,6 +475,136 @@ namespace SwarmOps.Optimizers
             double c = 0.5 + Math.Log(2.0); // 1.193
             return new[] {S, K, p, w, c};
         }
-    
+        int spreadIter(double spreadProba, int S, int formula)
+        {
+            double val;
+            // Number of iterations to spread information
+            switch(formula)
+            {
+	            case 2:
+                    val = 0.5 + Math.Log(1.0 - spreadProba)/Math.Log(1.0 - 2.0/S);
+	            return (int)val;
+	            case 3:
+                    val = 0.5 + Math.Log(1.0 - spreadProba)/Math.Log(1.0 - 3.0/S);
+	            return (int)val;
+                default: // 1
+                    val = Math.Ceiling(0.5 + spreadProba * 0.5 * S);
+	            return (int)val;
+            }
+        }
+        int worst(double[] agentFitness, int size)
+        {
+	        // Find the rank of the worst position
+	        int worst = 0;
+
+	        for (int s = 1; s < size; s++)     
+	        {
+		        if(agentFitness[worst] > agentFitness[s])
+			        worst = s;
+	        }
+	        return worst;
+        }
+        int best(double[] agentFitness, int size)
+        {
+	        // Find the rank of the best position
+	        // 	Remember that f is fabs(fitness-objective)
+	        // 	We want to minimise it
+	        int best = 0;
+	        for (int s = 1; s < size; s++)     
+	        {
+		        if(agentFitness[s] < agentFitness[best])
+			        best = s;
+	        }
+	        return best;
+        }
+        
+        private class Memory
+        {
+            public int MaxSize { get; private set; }
+            public int Size { get; set; }
+            public int Rank { get; set; }
+            public double[][] Positions { get; private set; }
+            public Memory(int maxSize)
+            {
+                MaxSize = maxSize;
+                Positions = new double[maxSize][];
+                Size = 0;
+                Rank = 0;
+            }
+            public void Save(double[] P)
+            {
+	            // Save a position
+	            // Is useful to generate a new particle in a promising area
+	            // The Positions list is a global variable
+				Positions[Rank]=(double[])P.Clone();
+
+				if(Size<MaxSize-1)
+				{
+					Size++;
+					Rank++;
+				}
+				else Rank=0; // We re-use the memory cyclically 
+
+            }
+            public double[] InitializeFar()
+            {
+                if(Size < 2)
+                    throw new InvalidOperationException("Can't Initialize until there are at least two values in memory.");
+                // Try to find a new position that is "far" from all the memorised ones
+
+	            //Note: memPos is a global variable
+	            double[] coord = new double[MaxSize];
+                int dimensionality = Positions[0].Length;
+	            double delta;
+	            double[] interv = new double[2];
+
+	            int n;
+	            double[] XFar = new double[dimensionality];;
+
+	            for(int d=0;d<dimensionality;d++) // For each dimension
+	            {
+
+	                for(n=0;n<Size;n++)
+                        coord[n]=Positions[n][d]; // All the coordinates on this dimension
+	
+		            Array.Sort(coord); // Sort them by increasing order
+
+		            // Find the biggest intervall
+		            interv[0]=coord[0];
+		            interv[1]=coord[1];
+		            delta=interv[1]-interv[0];
+
+		            for(n=1;n<Size-1;n++)
+		            {
+			            if(coord[n+1]-coord[n] < delta) continue;
+
+			            interv[0]=coord[n];
+			            interv[1]=coord[n+1];
+			            delta=interv[1]-interv[0];
+		            }
+
+		            XFar[d]=0.5*(interv[1]+interv[0]); // Take the middle
+
+                    //NOTE: The caller is responsible for bounds checks and fitness evaluation
+		            // Particular case, xMax
+                    //if(pb.SS.max[d]-coord[memPos.size-1] > delta)
+                    //{
+                    //    XFar.x[d]=pb.SS.max[d];
+                    //    delta=pb.SS.max[d]-coord[memPos.size-1]; 
+                    //}
+
+                    //// Particular case, xMin
+                    //if(coord[0]-pb.SS.min[d]> delta)
+                    //{
+                    //    XFar.x[d]=pb.SS.min[d];
+                    //}
+	            }
+
+                //XFar=discrete(XFar, pb);
+                //XFar.f=perf (XFar, pb);
+	            return XFar;
+            }
+        }
+        
     }
 }

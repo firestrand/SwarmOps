@@ -155,5 +155,29 @@ namespace SwarmOps
                 }
             }
         }
+        /// <summary>
+        /// Shuffle the first count elements
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="x"></param>
+        /// <param name="count"></param>
+        public static void Shuffle<T>(ref T[] x, int count)
+        {
+            //TODO: using system random for simplicity
+            System.Random rand = new System.Random();
+            int arrLen = count;
+            T temp;
+            int dest;
+            for (int i = 0; i < 7; i++) //Shuffle 7 times
+            {
+                for (int j = 0; j < arrLen; j++)
+                {
+                    dest = rand.Next(arrLen);
+                    temp = x[dest];
+                    x[dest] = x[j];
+                    x[j] = temp;
+                }
+            }
+        }
     }
 }
