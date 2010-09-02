@@ -179,5 +179,43 @@ namespace SwarmOps
                 }
             }
         }
+        //Shuffle for VPSO
+        public static void Shuffle(this System.Random rand, int[] x)
+        {
+            //TODO: use one of the other shuffles eventually
+            var s = x.Length;
+            var indexTemp = new int[x.Length];
+            int length = x.Length;
+            for (int i = 0; i < s; i++)
+                indexTemp[i] = i; //=index[s];
+
+            for (int i = 0; i < s; i++)
+            {
+                int rank = rand.Next(0, length - 1);
+                x[i] = indexTemp[rank];
+                //printf("\nalea152 s %i rank %i",s,rank);//printf("  ");
+                if (rank < length - 1)	// Compact
+                {
+                    for (int t = rank; t < length - 1; t++)
+                        indexTemp[t] = indexTemp[t + 1];
+                }
+                length = length - 1;
+            }
+        }
+        public static void Shuffle<T>(T[] x, RandomOps.Random rand)
+        {
+            //TODO: using system random for simplicity
+            int arrLen = x.Length;
+            for (int i = 0; i < 7; i++) //Shuffle 7 times
+            {
+                for (int j = 0; j < arrLen; j++)
+                {
+                    int dest = rand.Index(arrLen);
+                    T temp = x[dest];
+                    x[dest] = x[j];
+                    x[j] = temp;
+                }
+            }
+        }
     }
 }

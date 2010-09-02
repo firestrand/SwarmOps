@@ -17,7 +17,8 @@ namespace MiniBenchmark
     {
         // Create optimizer object.
         //static SPSO Optimizer = new SPSO();
-        static Optimizer Optimizer = new VPSO();
+        static VPSO Optimizer = new VPSO();
+        //static Optimizer Optimizer = new VPSO();
         // Control parameters for optimizer.
         private static readonly double[] Parameters = Optimizer.DefaultParameters;
         
@@ -41,8 +42,8 @@ namespace MiniBenchmark
             Repeat Repeat = new RepeatCount(Optimizer, NumRuns);
 
             // Perform the optimization runs.
-            double successPercent = Repeat.Fitness(Parameters);
-            //double successPercent = Repeat.Fitness(Optimizer.CalculateParameters(Optimizer.Problem.Dimensionality, 3));
+            //double successPercent = Repeat.Fitness(Parameters);
+            double successPercent = Repeat.Fitness(Optimizer.CalculateParameters(Optimizer.Problem.Dimensionality, 3));
 
             // Output result-statistics.
             Console.WriteLine("{0} & {1} \\\\",
@@ -60,7 +61,7 @@ namespace MiniBenchmark
             //Create list of problems
             var problems = new List<Problem>();
             problems.Add(new Tripod());
-            //problems.Add(new RosenbrockF6());
+            problems.Add(new RosenbrockF6());
             problems.Add(new GearTrain());
 
             // Initialize PRNG.

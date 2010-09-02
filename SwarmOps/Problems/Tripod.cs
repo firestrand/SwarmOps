@@ -60,12 +60,25 @@ namespace SwarmOps.Problems
         {
             Debug.Assert(x != null && x.Length == Dimensionality);
 
+            //double x1 = x[0];
+            //double x2 = x[1];
+            //double value = ((1.0 - Sign(x2)) / 2.0) * (Math.Abs(x1) + Math.Abs(x2 + 50.0)) +
+            //        ((1.0 + Sign(x2)) / 2.0) * ((1.0 - Sign(x1)) / 2.0) * (1.0 + Math.Abs(x1 + 50.0) + Math.Abs(x2 - 50.0)) +
+            //        ((1.0 + Sign(x1)) / 2.0) * (2.0 + Math.Abs(x1 - 50.0) + Math.Abs(x2 - 50.0));
+            //return value;
+
             double x1 = x[0];
             double x2 = x[1];
-            double value = ((1.0 - Sign(x2)) / 2.0) * (Math.Abs(x1) + Math.Abs(x2 + 50.0)) +
-                    ((1.0 + Sign(x2)) / 2.0) * ((1.0 - Sign(x1)) / 2.0) * (1.0 + Math.Abs(x1 + 50.0) + Math.Abs(x2 - 50.0)) +
-                    ((1.0 + Sign(x1)) / 2.0) * (2.0 + Math.Abs(x1 - 50.0) + Math.Abs(x2 - 50.0));
-            return value;
+            double s11 = (1.0 - Sign(x1)) / 2;
+            double s12 = (1.0 + Sign(x1)) / 2;
+            double s21 = (1.0 - Sign(x2)) / 2;
+            double s22 = (1.0 + Sign(x2)) / 2;
+
+            //f = s21 * (Math.Abs(x1) - x2); // Solution on (0,0)
+            double f = s21 * (Math.Abs(x1) + Math.Abs(x2 + 50)); // Solution on (0,-50)  
+            f = f + s22 * (s11 * (1 + Math.Abs(x1 + 50) + Math.Abs(x2 - 50))
+                           + s12 * (2 + Math.Abs(x1 - 50) + Math.Abs(x2 - 50)));
+            return f;
         }
         #endregion
         private readonly double[] _lowerBound = new[] { -100.0, -100.0 };
@@ -83,12 +96,16 @@ namespace SwarmOps.Problems
         {
             get { return 2; }
         }
-        private double Sign(double val)
+        public override double[] Optimal
         {
-            if (val <= 0.0d)
-                return -1.0d;
-            else
-                return 1.0d;
+            get
+            {
+                return new[]{0.0,-50.0};
+            }
+        }
+        private static double Sign(double val)
+        {
+            return val <= 0.0d ? -1.0d : 1.0d;
         }
     }
 }

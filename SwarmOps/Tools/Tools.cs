@@ -44,5 +44,9 @@ namespace SwarmOps
         {
             return lowerBound + rand.NextDouble() * (upperBound - lowerBound);
         }
+        public static double NextDouble(this RandomOps.Random rand, double lowerBound, double upperBound)
+        {
+            return lowerBound + rand.Uniform() * (upperBound - lowerBound);
+        }
     }
 }
