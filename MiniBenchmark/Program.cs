@@ -17,7 +17,7 @@ namespace MiniBenchmark
     {
         // Create optimizer object.
         //static SPSO Optimizer = new SPSO();
-        static VPSO Optimizer = new VPSO();
+        static PSOM Optimizer = new PSOM();
         //static Optimizer Optimizer = new VPSO();
         // Control parameters for optimizer.
         private static readonly double[] Parameters = Optimizer.DefaultParameters;

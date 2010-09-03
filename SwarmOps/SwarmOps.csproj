@@ -67,6 +67,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Optimizers\FPSO.cs" />
+    <Compile Include="Optimizers\PSOM.cs" />
     <Compile Include="Optimizers\VPSO.cs" />
     <Compile Include="RepeatCount.cs" />
     <Compile Include="Optimizers\SPSO.cs" />

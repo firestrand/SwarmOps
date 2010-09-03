@@ -60,13 +60,6 @@ namespace SwarmOps.Problems
         {
             Debug.Assert(x != null && x.Length == Dimensionality);
 
-            //double x1 = x[0];
-            //double x2 = x[1];
-            //double value = ((1.0 - Sign(x2)) / 2.0) * (Math.Abs(x1) + Math.Abs(x2 + 50.0)) +
-            //        ((1.0 + Sign(x2)) / 2.0) * ((1.0 - Sign(x1)) / 2.0) * (1.0 + Math.Abs(x1 + 50.0) + Math.Abs(x2 - 50.0)) +
-            //        ((1.0 + Sign(x1)) / 2.0) * (2.0 + Math.Abs(x1 - 50.0) + Math.Abs(x2 - 50.0));
-            //return value;
-
             double x1 = x[0];
             double x2 = x[1];
             double s11 = (1.0 - Sign(x1)) / 2;

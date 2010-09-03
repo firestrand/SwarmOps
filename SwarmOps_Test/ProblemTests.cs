@@ -96,8 +96,7 @@ namespace SwarmOps_Test
         {
             Problem problem = new Tripod();
             double expected = problem.AcceptableFitness;
-            double result = Math.Round(problem.Fitness(new[] { 59.228857587663839, -55.95482017656547 }), 14);
-            //double result = Math.Round(problem.Fitness(problem.Optimal), 14);
+            double result = Math.Round(problem.Fitness(problem.Optimal), 14);
             Assert.IsTrue(expected >= result);
         }
     }
