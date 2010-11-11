@@ -70,6 +70,7 @@
     <Compile Include="Optimizers\FPSO.cs" />
     <Compile Include="Optimizers\PSOM.cs" />
     <Compile Include="Optimizers\VPSO.cs" />
+    <Compile Include="Problems\NonLinearMatrixFactorization.cs" />
     <Compile Include="RepeatCount.cs" />
     <Compile Include="Optimizers\SPSO.cs" />
     <Compile Include="Optimizers\MetaFitness.cs" />

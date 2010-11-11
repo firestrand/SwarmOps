@@ -1,10 +1,10 @@
-﻿/// ------------------------------------------------------
-/// RandomOps - (Pseudo) Random Number Generator For C#
-/// Copyright (C) 2003-2010 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
-/// Please see the file license.txt for license details.
-/// RandomOps on the internet: http://www.Hvass-Labs.org/
-/// ------------------------------------------------------
+﻿/* ------------------------------------------------------
+ RandomOps - (Pseudo) Random Number Generator For C#
+ Copyright (C) 2003-2010 Magnus Erik Hvass Pedersen.
+ Published under the GNU Lesser General Public License.
+ Please see the file license.txt for license details.
+ RandomOps on the internet: http://www.Hvass-Labs.org/
+ ------------------------------------------------------*/
 
 using System;
 using System.Diagnostics;
@@ -57,15 +57,15 @@ namespace RandomOps
     /// http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
     /// email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
     /// </remarks>
-    public class MersenneTwister : RanUInt32
+    public sealed class MersenneTwister : RanUInt32
     {
         #region Constructors.
+
         /// <summary>
         /// Constructs the PRNG-object and seeds the PRNG with the current time of day.
         /// This is what you will mostly want to use.
         /// </summary>
         public MersenneTwister()
-            : base()
         {
             Seed();
         }
@@ -76,7 +76,6 @@ namespace RandomOps
         /// same sequence of pseudo-random numbers.
         /// </summary>
         public MersenneTwister(UInt32 seed)
-            : base()
         {
             Seed(seed);
         }
@@ -86,40 +85,52 @@ namespace RandomOps
         /// of seeds. Use this if you need to seed with more than 32 bits.
         /// </summary>
         public MersenneTwister(UInt32[] seeds)
-            : base()
         {
             Seed(seeds);
         }
+
         #endregion
 
         #region Internal definitions and variables
-        static readonly UInt32 N = 624;                     // Array-length.
-        static readonly UInt32 M = 397;
-        static readonly UInt32 MATRIX_A = 0x9908b0df;       // Constant vector a.
-        static readonly UInt32 UPPER_MASK = 0x80000000;     // Most significant w-r bits.
-        static readonly UInt32 LOWER_MASK = 0x7fffffff;     // Least significant r bits.
-        static readonly UInt32[] mag01 = { 0x0, MATRIX_A };
 
-        UInt32[] mt = new UInt32[N];                        // The array for the state vector.
-        UInt32 mti;                                         // Index into mt-array.
+        private const UInt32 N = 624; // Array-length.
+        private const UInt32 M = 397;
+        private const UInt32 MatrixA = 0x9908b0df; // Constant vector a.
+        private const UInt32 UpperMask = 0x80000000; // Most significant w-r bits.
+        private const UInt32 LowerMask = 0x7fffffff; // Least significant r bits.
+        private static readonly UInt32[] Mag01 = {0x0, MatrixA};
+
+        private readonly UInt32[] _mt = new UInt32[N]; // The array for the state vector.
 
         /// <summary>
         /// Is PRNG ready for use?
         /// </summary>
-        bool IsReady = false;
+        private bool _isReady;
+
+        private UInt32 _mti; // Index into mt-array.
+
         #endregion
 
         #region PRNG Implementation.
+
+        /// <summary>
+        /// The maximum possible value returned by Rand().
+        /// </summary>
+        public override UInt32 RandMax
+        {
+            get { return UInt32.MaxValue; }
+        }
+
         /// <summary>
         /// Draw a random number in inclusive range {0, .., RandMax}
         /// </summary>
-        public sealed override UInt32 Rand()
+        public override UInt32 Rand()
         {
-            Debug.Assert(IsReady);
+            Debug.Assert(_isReady);
 
             UInt32 y;
 
-            if (mti >= N)
+            if (_mti >= N)
             {
                 // Generate N words.
 
@@ -127,23 +138,23 @@ namespace RandomOps
 
                 for (kk = 0; kk < N - M; kk++)
                 {
-                    y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
-                    mt[kk] = mt[kk + M] ^ (y >> 1) ^ mag01[y & 0x1];
+                    y = (_mt[kk] & UpperMask) | (_mt[kk + 1] & LowerMask);
+                    _mt[kk] = _mt[kk + M] ^ (y >> 1) ^ Mag01[y & 0x1];
                 }
 
                 for (; kk < N - 1; kk++)
                 {
-                    y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
-                    mt[kk] = mt[kk + M - N] ^ (y >> 1) ^ mag01[y & 0x1];
+                    y = (_mt[kk] & UpperMask) | (_mt[kk + 1] & LowerMask);
+                    _mt[kk] = _mt[kk + M - N] ^ (y >> 1) ^ Mag01[y & 0x1];
                 }
 
-                y = (mt[N - 1] & UPPER_MASK) | (mt[0] & LOWER_MASK);
-                mt[N - 1] = mt[M - 1] ^ (y >> 1) ^ mag01[y & 0x1];
+                y = (_mt[N - 1] & UpperMask) | (_mt[0] & LowerMask);
+                _mt[N - 1] = _mt[M - 1] ^ (y >> 1) ^ Mag01[y & 0x1];
 
-                mti = 0;
+                _mti = 0;
             }
 
-            y = mt[mti++];
+            y = _mt[_mti++];
 
             /* Tempering */
             y ^= (y >> 11);
@@ -157,51 +168,43 @@ namespace RandomOps
         }
 
         /// <summary>
-        /// The maximum possible value returned by Rand().
-        /// </summary>
-        public sealed override UInt32 RandMax
-        {
-            get { return UInt32.MaxValue; }
-        }
-
-        /// <summary>
         /// Seed with an integer.
         /// </summary>
-        protected sealed override void Seed(UInt32 seed)
+        protected override void Seed(UInt32 seed)
         {
-            mt[0] = seed;
+            _mt[0] = seed;
 
-            for (mti = 1; mti < N; mti++)
+            for (_mti = 1; _mti < N; _mti++)
             {
-                UInt32 lcg = 1812433253;
-                mt[mti] = (lcg * (mt[mti - 1] ^ (mt[mti - 1] >> 30)) + mti);
+                const uint lcg = 1812433253;
+                _mt[_mti] = (lcg*(_mt[_mti - 1] ^ (_mt[_mti - 1] >> 30)) + _mti);
             }
 
-            IsReady = true;
+            _isReady = true;
         }
 
         /// <summary>
         /// Seed with an array of integers.
         /// </summary>
-        protected void Seed(UInt32[] seeds)
+        private void Seed(UInt32[] seeds)
         {
             Seed(19650218);
 
             UInt32 i = 1;
             UInt32 j = 0;
-            UInt32 k = (N > seeds.Length) ? (N) : ((UInt32)seeds.Length);
+            UInt32 k = (N > seeds.Length) ? (N) : ((UInt32) seeds.Length);
 
             for (; k > 0; k--)
             {
                 // Non-linear.
-                mt[i] = (mt[i] ^ ((mt[i - 1] ^ (mt[i - 1] >> 30)) * 1664525)) + seeds[j] + j;
+                _mt[i] = (_mt[i] ^ ((_mt[i - 1] ^ (_mt[i - 1] >> 30))*1664525)) + seeds[j] + j;
 
                 i++;
                 j++;
 
                 if (i >= N)
                 {
-                    mt[0] = mt[N - 1];
+                    _mt[0] = _mt[N - 1];
                     i = 1;
                 }
 
@@ -214,23 +217,25 @@ namespace RandomOps
             for (k = N - 1; k > 0; k--)
             {
                 // Non-linear.
-                mt[i] = (mt[i] ^ ((mt[i - 1] ^ (mt[i - 1] >> 30)) * 1566083941)) - i;
+                _mt[i] = (_mt[i] ^ ((_mt[i - 1] ^ (_mt[i - 1] >> 30))*1566083941)) - i;
 
                 i++;
 
                 if (i >= N)
                 {
-                    mt[0] = mt[N - 1];
+                    _mt[0] = _mt[N - 1];
                     i = 1;
                 }
             }
 
             // MSB is 1; assuring non-zero initial array.
-            mt[0] = 0x80000000;
+            _mt[0] = 0x80000000;
         }
+
         #endregion
 
         #region Base-class overrides.
+
         /// <summary>
         /// Name of the RNG.
         /// </summary>
@@ -238,6 +243,7 @@ namespace RandomOps
         {
             get { return "MersenneTwister19937"; }
         }
+
         #endregion
     }
 }

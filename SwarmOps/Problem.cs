@@ -19,7 +19,7 @@ namespace SwarmOps
         /// <summary>
         /// Create the object.
         /// </summary>
-        public Problem()
+        protected Problem()
         {
         }
 
@@ -29,7 +29,7 @@ namespace SwarmOps
         /// <param name="runCondition">
         /// Determines for how long to continue optimization.
         /// </param>
-        public Problem(IRunCondition runCondition)
+        protected Problem(IRunCondition runCondition)
         {
             RunCondition = runCondition;
         }
@@ -95,10 +95,7 @@ namespace SwarmOps
             get { return UpperBound; }
         }
 
-        /// <summary>
-        /// Upper initialization boundary,
-        /// if different from search-space boundary.
-        /// </summary>
+
         public virtual double[] Optimal { get { return LowerBound; } }
 
         /// <summary>
@@ -145,7 +142,7 @@ namespace SwarmOps
         }
 
         /// <summary>
-        /// Has the gradient has been implemented?
+        /// Has the gradient been implemented?
         /// </summary>
         public virtual bool HasGradient
         {
@@ -205,7 +202,7 @@ namespace SwarmOps
              Only values like x+k*q (k integer) are admissible 
              */
             if(x.Length != q.Length)
-                throw new ArgumentOutOfRangeException("x,q","Arrays are not the same length.");
+                throw new ArgumentOutOfRangeException("x","Arrays are not the same length.");
 
             for (int d = 0; d < q.Length; d++)
             {

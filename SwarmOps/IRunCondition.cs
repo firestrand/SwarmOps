@@ -18,7 +18,7 @@ namespace SwarmOps
         /// <summary>
         /// Return whether optimization is allowed to continue.
         /// </summary>
-        /// <param name="iterations">Number of iterations performed in optimization run.</param>
+        /// <param name="iteration">Number of iterations performed in optimization run.</param>
         /// <param name="fitness">Best fitness found in optimization run.</param>
         bool Continue(int iteration, double fitness);
     }
