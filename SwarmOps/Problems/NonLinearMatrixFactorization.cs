@@ -26,7 +26,7 @@ namespace SwarmOps.Problems
             double x2 = x[1];
             double x3 = x[2];
             double x4 = x[3];
-            double f = 
+            double f = 0.0D;
             return f * f;
         }
         public override double[] Optimal

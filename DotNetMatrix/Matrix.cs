@@ -193,7 +193,36 @@ namespace DotNetMatrix
                 }
             }
         }
-
+        /// <summary>
+        ///   Construct a matrix from a one-dimensional packed array
+        /// </summary>
+        /// <param name = "vals">One-dimensional array of doubles, packed by rows.
+        /// </param>
+        /// <param name = "m">   Number of rows.
+        /// </param>
+        /// <exception cref = "System.ArgumentException">   Array length must be a multiple of m.
+        /// </exception>
+        public GeneralMatrix(int m, double[] vals)
+        {
+            _m = m;
+            _n = (m != 0 ? vals.Length / m : 0);
+            if (m * _n != vals.Length)
+            {
+                throw new ArgumentException("Array length must be a multiple of m.");
+            }
+            _a = new double[m][];
+            for (int i = 0; i < m; i++)
+            {
+                _a[i] = new double[_n];
+            }
+            for (int i = 0; i < m; i++)
+            {
+                for (int j = 0; j < _n; j++)
+                {
+                    _a[i][j] = vals[i * _n + j];
+                }
+            }
+        }
         #endregion //  Constructors
 
         #region Public Properties
@@ -1342,5 +1371,26 @@ namespace DotNetMatrix
         }
 
         #endregion
+
+        public static bool operator ==(GeneralMatrix m1, GeneralMatrix m2)
+        {
+            if (m1.ColumnDimension != m2.ColumnDimension || m1.RowDimension != m2.RowDimension)
+                return false;
+            double sumDiff = 0.0d;
+            for (int i = 0; i < m1.RowDimension; i++)
+            {
+                for (int j = 0; j < m1.ColumnDimension; j++)
+                {
+                    sumDiff += m1.GetElement(i,j) - m2.GetElement(1,j);
+                }
+            }
+            if (sumDiff == 0.0d)
+                return true;
+            return false;
+        }
+        public static bool operator !=(GeneralMatrix m1, GeneralMatrix m2)
+        {
+            return !(m1 == m2);
+        }
     }
 }
