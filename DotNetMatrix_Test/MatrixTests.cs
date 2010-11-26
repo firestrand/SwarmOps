@@ -191,5 +191,15 @@ namespace DotNetMatrix_Test
             var matrix = new GeneralMatrix(array);
             matrix.GetElement(matrix.RowDimension, matrix.ColumnDimension-1);
         }
+        [TestMethod]
+        public void ZeroBasedGetElementMethodReturnsCorrectElement()
+        {
+            double[][] array = { new[] { 1.0, 4.0, 7.0, 10.0 }, new[] { 2.0, 5.0, 8.0, 11.0 }, new[] { 3.0, 6.0, 9.0, 12.0 } };
+            var matrix = new GeneralMatrix(array);
+            var expected = 12.0;
+            var actual = matrix.GetElement(matrix.RowDimension-1, matrix.ColumnDimension-1);
+            Assert.AreEqual(expected,actual);
+        }
+
     }
 }

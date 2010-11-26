@@ -70,7 +70,8 @@
     <Compile Include="Optimizers\FPSO.cs" />
     <Compile Include="Optimizers\PSOM.cs" />
     <Compile Include="Optimizers\VPSO.cs" />
-    <Compile Include="Problems\NonLinearMatrixFactorization.cs" />
+    <Compile Include="Problems\NonNegativeMatrixFactorization.cs" />
+    <Compile Include="Problems\SeperatedNonNegativeMatrixFactorization.cs" />
     <Compile Include="RepeatCount.cs" />
     <Compile Include="Optimizers\SPSO.cs" />
     <Compile Include="Optimizers\MetaFitness.cs" />
@@ -175,6 +176,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DotNetMatrix\DotNetMatrix.csproj">
+      <Project>{33769BE4-931F-4D02-AC39-2A2FC6368411}</Project>
+      <Name>DotNetMatrix</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RandomOps\RandomOps.csproj">
       <Project>{F5DFAFED-C786-4DC3-9818-16C992DE3990}</Project>
       <Name>RandomOps</Name>

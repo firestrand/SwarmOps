@@ -22,7 +22,6 @@ namespace SwarmOps.Optimizers
     /// Particle Swarm Optimization Model with Centroid (PSOM)
     /// This variant uses the following features:
     /// 1. Adds a fourth term which involves the centroid of the particle positions and pbest positions
-    /// 
     /// NOTE:benchmark results showed a degredation of performance on the mini-benchmark problems
     /// </summary>
     /// <remarks>

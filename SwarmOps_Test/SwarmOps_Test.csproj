@@ -50,6 +50,10 @@
     <Compile Include="ToolTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DotNetMatrix\DotNetMatrix.csproj">
+      <Project>{33769BE4-931F-4D02-AC39-2A2FC6368411}</Project>
+      <Name>DotNetMatrix</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RandomOps\RandomOps.csproj">
       <Project>{F5DFAFED-C786-4DC3-9818-16C992DE3990}</Project>
       <Name>RandomOps</Name>

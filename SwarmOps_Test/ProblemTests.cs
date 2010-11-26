@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SwarmOps;
 using SwarmOps.Optimizers;
 using SwarmOps.Problems;
-
+using DotNetMatrix;
 namespace SwarmOps_Test
 {
     [TestClass]
@@ -34,7 +34,9 @@ namespace SwarmOps_Test
             // Initialize PRNG.
             Globals.Random = new RandomOps.MersenneTwister();
 
-            Optimizer optimizer = new MTS();
+            MPSO optimizer = new MPSO();
+            // Assign the problem etc. to the optimizer.
+
             double[] parameters = optimizer.DefaultParameters;
             Problem problem = new RosenbrockF6();
             int numIterations = 100000;
@@ -98,6 +100,66 @@ namespace SwarmOps_Test
             double expected = problem.AcceptableFitness;
             double result = Math.Round(problem.Fitness(problem.Optimal), 14);
             Assert.IsTrue(expected >= result);
+        }
+        [TestMethod]
+        public void TestNonLinearMatrixFactorization()
+        {
+            SPSO optimizer = new SPSO();
+            double[] parameters = optimizer.DefaultParameters;
+            var packedKnownW = new[] {1.0, 3.0, 2.0, 5.0, 1.0, 7.0};
+            var packedKnownH = new[] {3.0, 8.0, 1.0, 3.0, 4.0, 7.0};
+            var w = new GeneralMatrix(packedKnownW,3);
+            var h = new GeneralMatrix(packedKnownH, 2);
+            var v = w*h;
+
+            var packedWRows = 3;
+            var packedHRows = 2;
+            SeperatedNonNegativeMatrixFactorization problem = new SeperatedNonNegativeMatrixFactorization(packedWRows,packedHRows,v.ColumnPackedCopy);
+
+            int numIterations = 1000000;
+            IRunCondition runCondition = new RunConditionFitness(numIterations, problem.AcceptableFitness);
+            problem.RunCondition = runCondition;
+            optimizer.Problem = problem;
+            Result result = optimizer.Optimize(parameters);
+            var best = result.Parameters;
+            Assert.IsTrue(result.Fitness <= problem.AcceptableFitness);
+        }
+        [TestMethod]
+        public void TestNonLinearMatrixFactorizationOptimum()
+        {
+            var packedKnownW = new[] { 1.0, 3.0, 2.0, 5.0, 1.0, 7.0 };
+            var packedKnownH = new[] { 3.0, 8.0, 1.0, 3.0, 4.0, 7.0 };
+            var w = new GeneralMatrix(packedKnownW, 3);
+            var h = new GeneralMatrix(packedKnownH, 2);
+            var v = w * h;
+
+            var packedWRows = 3;
+            var packedHRows = 2;
+            SeperatedNonNegativeMatrixFactorization problem = new SeperatedNonNegativeMatrixFactorization(packedWRows, packedHRows, v.ColumnPackedCopy);
+
+            var solution = new[] {3.0,9.0,6.0,1.0,3.0,2.0,4.0,12.0,8.0,40.0,8.0,56.0,15.0,3.0,21.0,35.0,7.0,49.0};
+            var best = problem.Fitness(solution);
+            Assert.IsTrue(best == 0.0);
+        }
+        [TestMethod]
+        public void TestNonLinearMatrixFactorizationDistanceFromOptimum()
+        {
+            var packedKnownW = new[] { 1.0, 3.0, 2.0, 5.0, 1.0, 7.0 };
+            var packedKnownH = new[] { 3.0, 8.0, 1.0, 3.0, 4.0, 7.0 };
+            var w = new GeneralMatrix(packedKnownW, 3);
+            var h = new GeneralMatrix(packedKnownH, 2);
+            var v = w * h;
+
+            var packedWRows = 3;
+            var packedHRows = 2;
+            NonNegativeMatrixFactorization problem = new NonNegativeMatrixFactorization(packedWRows, packedHRows, v.ColumnPackedCopy);
+
+            var solution = new[] { 4.0, 3.0, 2.0, 5.0, 1.0, 6.0, 3.0, 8.0, 1.0, 3.0, 4.0, 8.0 };
+            var twoFromOpt = problem.Fitness(solution);
+            solution[0] = 0.0;
+            solution[6] = 1.0;
+            var oneFromOpt = problem.Fitness(solution);
+            Assert.IsTrue(oneFromOpt < twoFromOpt);
         }
     }
 }

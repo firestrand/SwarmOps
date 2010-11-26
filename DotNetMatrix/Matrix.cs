@@ -193,6 +193,31 @@ namespace DotNetMatrix
                 }
             }
         }
+        public GeneralMatrix(double[] vals, int m,int n, int startIndex)
+        {
+            _m = m;
+            _n = n;
+            if (!(_m * _n <= vals.Length - startIndex))
+            {
+                throw new ArgumentException("Array length must be a multiple of m and sized correctly.");
+            }
+            double[] subArray = new double[_m*_n];
+            System.Array.Copy(vals, startIndex, subArray, 0, _m*_n);
+
+            _a = new double[_m][];
+            for (int i = 0; i < _m; i++)
+            {
+                _a[i] = new double[_n];
+            }
+            for (int i = 0; i < _m; i++)
+            {
+                for (int j = 0; j < _n; j++)
+                {
+                    _a[i][j] = subArray[i + j * _m];
+                }
+            }
+            
+        }
         /// <summary>
         ///   Construct a matrix from a one-dimensional packed array
         /// </summary>
@@ -1374,23 +1399,47 @@ namespace DotNetMatrix
 
         public static bool operator ==(GeneralMatrix m1, GeneralMatrix m2)
         {
-            if (m1.ColumnDimension != m2.ColumnDimension || m1.RowDimension != m2.RowDimension)
-                return false;
-            double sumDiff = 0.0d;
-            for (int i = 0; i < m1.RowDimension; i++)
-            {
-                for (int j = 0; j < m1.ColumnDimension; j++)
-                {
-                    sumDiff += m1.GetElement(i,j) - m2.GetElement(1,j);
-                }
-            }
-            if (sumDiff == 0.0d)
-                return true;
-            return false;
+            return m1.Equals(m2);
         }
         public static bool operator !=(GeneralMatrix m1, GeneralMatrix m2)
         {
-            return !(m1 == m2);
+            return !m1.Equals(m2);
+        }
+
+        public bool Equals(GeneralMatrix other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            if (_m != other._m || _n != other._n) return false;
+            bool result = true;
+            for (int i = 0; i < _m; i++)
+            {
+                for (int j = 0; j < _n; j++)
+                {
+                    if (_a[i][j] != other._a[i][j])
+                        result = false;
+                }
+            }
+            return result;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (GeneralMatrix)) return false;
+            return Equals((GeneralMatrix) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int result = (_a != null ? _a.GetHashCode() : 0);
+                result = (result*397) ^ _m;
+                result = (result*397) ^ _n;
+                return result;
+            }
         }
     }
 }
