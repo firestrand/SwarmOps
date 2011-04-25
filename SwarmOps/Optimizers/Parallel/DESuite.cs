@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2010 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -161,6 +160,9 @@ namespace SwarmOps.Optimizers.Parallel
         {
             Debug.Assert(parameters != null && parameters.Length == Dimensionality);
 
+            // Signal beginning of optimization run.
+            Problem.BeginOptimizationRun();
+
             // Retrieve parameters specific to DE method.
             int numAgents = GetNumAgents(parameters);
             double CR = GetCR(parameters);
@@ -182,6 +184,8 @@ namespace SwarmOps.Optimizers.Parallel
             double[][] agentsY = Tools.NewMatrix(numAgents, n);
             double[] fitnessX = new double[numAgents];
             double[] fitnessY = new double[numAgents];
+            bool[] feasibleX = new bool[numAgents];
+            bool[] feasibleY = new bool[numAgents];
 
             // Allocate differential weight vector.
             double[] w = new double[n];
@@ -201,42 +205,42 @@ namespace SwarmOps.Optimizers.Parallel
             int i, j;
 
             // Fitness variables.
-            double gFitness = Problem.MaxFitness;
             double[] g = null;
+            double gFitness = Problem.MaxFitness;
+            bool gFeasible = false;
 
             // Initialize all agents. (Non-parallel)
             for (j = 0; j < numAgents; j++)
             {
                 // Initialize agent-position in search-space.
                 Tools.InitializeUniform(ref agentsX[j], lowerInit, upperInit);
+
+                // Enforce constraints and evaluate feasibility.
+                feasibleX[j] = Problem.EnforceConstraints(ref agentsX[j]);
             }
 
             // This counts as iterations below.
             // Compute fitness of initial position.
             System.Threading.Tasks.Parallel.For(0, numAgents, Globals.ParallelOptions, (jPar) =>
             {
-                fitnessX[jPar] = Problem.Fitness(agentsX[jPar]);
+                fitnessX[jPar] = Problem.Fitness(agentsX[jPar], feasibleX[jPar]);
             });
 
-            // Initialize the best-found position to the first in the population.
-            g = agentsX[0];
-            gFitness = fitnessX[0];
-            Trace(0, gFitness);
-
             // Update best found position. (Non-parallel)
-            for (j = 1; j < numAgents; j++)
+            for (j = 0; j < numAgents; j++)
             {
-                if (fitnessX[j] < gFitness)
+                if (Tools.BetterFeasibleFitness(gFeasible, feasibleX[j], gFitness, fitnessX[j]))
                 {
                     g = agentsX[j];
                     gFitness = fitnessX[j];
+                    gFeasible = feasibleX[j];
                 }
 
                 // Trace fitness of best found solution.
-                Trace(j, gFitness);
+                Trace(j, gFitness, gFeasible);
             }
 
-            for (i = numAgents; Problem.RunCondition.Continue(i, gFitness);)
+            for (i = numAgents; Problem.Continue(i, gFitness, gFeasible); )
             {
                 // Perform dithering of differential weight, depending on dither variant wanted.
                 if (_dither == DitherVariant.Generation)
@@ -264,55 +268,57 @@ namespace SwarmOps.Optimizers.Parallel
                     // Exclude the j'th agent (also referred to as x).
                     randomSet.ResetExclude(j);
 
-                    // Refer to the j'th agent as x.
-                    double[] x = agentsX[j];
-
-                    // Refer to the j'th agent's new position as y.
-                    double[] y = agentsY[j];
-
-                    // Copy agent's current position and use it as basis for new position..
-                    x.CopyTo(y, 0);
-
                     // Perform crossover.
-                    DECrossover.DoCrossover(_crossover, CR, n, w, ref y, g, agentsX, randomSet);
-
-                    // Enforce bounds before computing new fitness.
-                    Tools.Bound(ref y, lowerBound, upperBound);
+                    DECrossover.DoCrossover(_crossover, CR, n, w, agentsX[j], ref agentsY[j], g, agentsX, randomSet);
                 }
 
                 // Compute new fitness. (Parallel)
                 System.Threading.Tasks.Parallel.For(0, numAgents, Globals.ParallelOptions, (jPar) =>
                 {
-                    fitnessY[jPar] = Problem.Fitness(agentsY[jPar], fitnessX[jPar]);
+                    // Enforce constraints and evaluate feasibility.
+                    feasibleY[jPar] = Problem.EnforceConstraints(ref agentsY[jPar]);
+
+                    // Compute fitness if feasibility (constraint satisfaction) is same or better.
+                    if (Tools.BetterFeasible(feasibleX[jPar], feasibleY[jPar]))
+                    {
+                        fitnessY[jPar] = Problem.Fitness(agentsY[jPar], fitnessX[jPar], feasibleX[jPar], feasibleY[jPar]);
+                    }
                 });
 
-                    // Update agent positions. (Non-parallel)
+                // Update agent positions. (Non-parallel)
                 for (j = 0; j < numAgents; j++, i++)
                 {
-                    // Update agent in case of fitness improvement.
-                    if (fitnessY[j] < fitnessX[j])
+                    // Update agent in case feasibility is same or better and fitness is improvement.
+                    if (Tools.BetterFeasibleFitness(feasibleX[j], feasibleY[j], fitnessX[j], fitnessY[j]))
                     {
-                        // Copy agent's position.
+                        // Update agent's position.
                         agentsY[j].CopyTo(agentsX[j], 0);
 
-                        // Copy agent's fitness.
+                        // Update agent's fitness.
                         fitnessX[j] = fitnessY[j];
 
+                        // Update agent's feasibility. 
+                        feasibleX[j] = feasibleY[j];
+
                         // Update swarm's best known position.
-                        if (fitnessY[j] < gFitness)
+                        if (Tools.BetterFeasibleFitness(gFeasible, feasibleX[j], gFitness, fitnessX[j]))
                         {
                             g = agentsX[j];
-                            gFitness = fitnessY[j];
+                            gFitness = fitnessX[j];
+                            gFeasible = feasibleX[j];
                         }
                     }
 
                     // Trace fitness of best found solution.
-                    Trace(i, gFitness);
+                    Trace(i, gFitness, gFeasible);
                 }
             }
 
+            // Signal end of optimization run.
+            Problem.EndOptimizationRun();
+
             // Return best-found solution and fitness.
-            return new Result(g, gFitness, i);
+            return new Result(g, gFitness, gFeasible, i);
         }
         #endregion
     }

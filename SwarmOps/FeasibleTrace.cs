@@ -10,21 +10,20 @@ using System.IO;
 namespace SwarmOps
 {
     /// <summary>
-    /// Store fitness-values during optimization runs
+    /// Store feasibility-values during optimization runs
     /// and write them to a file afterwards. The number
     /// of iterations per optimization run must be known
     /// in advance.
     /// </summary>
-    public class FitnessTraceMean : FitnessTrace
+    public class FeasibleTrace : FitnessTrace
     {
         #region Constructors.
         /// <summary>
         /// Construct a new object.
         /// </summary>
-        /// <param name="numRuns">Number of optimization to be performed.</param>
         /// <param name="numIterations">Number of iterations per optimization run.</param>
         /// <param name="numIntervals">Approximate number of intervals to show mean.</param>
-        public FitnessTraceMean(int numIterations, int numIntervals)
+        public FeasibleTrace(int numIterations, int numIntervals)
             : this(numIterations, numIntervals, null)
         {
         }
@@ -35,7 +34,7 @@ namespace SwarmOps
         /// <param name="numIterations">Number of iterations per optimization run.</param>
         /// <param name="numIntervals">Approximate number of intervals to show mean.</param>
         /// <param name="chainedFitnessTrace">Chained FitnessTrace object.</param>
-        public FitnessTraceMean(int numIterations, int numIntervals, FitnessTrace chainedFitnessTrace)
+        public FeasibleTrace(int numIterations, int numIntervals, FitnessTrace chainedFitnessTrace)
             : base(chainedFitnessTrace, numIterations, numIntervals, 0)
         {
             // Allocate trace.
@@ -69,7 +68,7 @@ namespace SwarmOps
         /// <param name="feasible">Feasibility (constraint satisfaction) to log.</param>
         protected override void Log(int index, double fitness, bool feasible)
         {
-            Trace[index].Accumulate(fitness);
+            Trace[index].Accumulate((feasible) ? (1) : (0));
         }
 
         /// <summary>
@@ -77,7 +76,10 @@ namespace SwarmOps
         /// </summary>
         public override void Write(TextWriter writer)
         {
-            writer.WriteLine("# Iteration\tMean Fitness\tStdError\tMin\tMax");
+            writer.WriteLine("Mean feasibility 0 means all solutions were infeasible.");
+            writer.WriteLine("Mean feasibility 1 means all solutions were feasible.");
+            writer.WriteLine();
+            writer.WriteLine("# Iteration\tMean Feasibility");
             writer.WriteLine();
 
             for (int i = 0; i < Trace.Length; i++)
@@ -87,17 +89,11 @@ namespace SwarmOps
                 if (trace.Count > 0)
                 {
                     double mean = trace.Mean;
-                    double stdDev = trace.StandardDeviation;
-                    double min = trace.Min;
-                    double max = trace.Max;
 
                     writer.WriteLine(
-                        "{0} {1} {2} {3} {4}",
+                        "{0} {1}",
                         Iteration(i),
-                        Tools.FormatNumber(mean),
-                        Tools.FormatNumber(stdDev),
-                        Tools.FormatNumber(min),
-                        Tools.FormatNumber(max));
+                        Tools.FormatNumber(mean));
                 }
                 else
                 {
@@ -111,7 +107,7 @@ namespace SwarmOps
 
         #region Protected member variables.
         /// <summary>
-        /// Storage for the fitness trace.
+        /// Storage for the feasibility trace.
         /// </summary>
         protected StatisticsAccumulator[] Trace;
         #endregion

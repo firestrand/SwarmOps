@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -31,10 +30,14 @@ namespace SwarmOps.Optimizers
         /// <summary>
         /// Construct the object.
         /// </summary>
+        /// <param name="mask">Fix certain parameters or leave null.</param>
         /// <param name="problem">Problem to optimize.</param>
-        public MESH(Problem problem)
+        public MESH(double?[] mask, Problem problem)
             : base(problem)
         {
+            Debug.Assert(mask == null || mask.Length == problem.Dimensionality);
+
+            Mask = mask;
         }
         #endregion
 
@@ -116,6 +119,9 @@ namespace SwarmOps.Optimizers
         {
             Debug.Assert(parameters != null && parameters.Length == Dimensionality);
 
+            // Signal beginning of optimization run.
+            Problem.BeginOptimizationRun();
+
             // Retrieve parameter specific to this optimizer.
             int numIterationsPerDim = GetNumIterationsPerDim(parameters);
 
@@ -130,7 +136,8 @@ namespace SwarmOps.Optimizers
             double[] x = new double[n];					// Mesh position.
             double[] delta = new double[n];				// Mesh incremental values.
             double[] g = new double[n];					// Best found position for this run.
-            double gFitness = Problem.MaxFitness;			// Fitness for best found position.
+            double gFitness = Problem.MaxFitness;		// Fitness for best found position.
+            bool gFeasible = false;                     // Feasibility for best found position.
 
             // Initialize mesh position to the lower boundary.
             LowerBound.CopyTo(x, 0);
@@ -142,14 +149,22 @@ namespace SwarmOps.Optimizers
             }
 
             // Start recursive traversal of mesh.
-            Recursive(0, numIterationsPerDim, delta, ref x, ref g, ref gFitness);
+            Recursive(0, numIterationsPerDim, delta, ref x, ref g, ref gFitness, ref gFeasible);
+
+            // Signal end of optimization run.
+            Problem.EndOptimizationRun();
 
             // Return best-found solution and fitness.
-            return new Result(g, gFitness, (int)System.Math.Pow(numIterationsPerDim, n));
+            return new Result(g, gFitness, gFeasible, (int)System.Math.Pow(numIterationsPerDim, n));
         }
         #endregion
 
         #region Protected methods.
+        /// <summary>
+        /// Fix certain parameters or leave null.
+        /// </summary>
+        double?[] Mask;
+
         /// <summary>
         /// Helper function for recursive traversal of the mesh in a depth-first order.
         /// </summary>
@@ -159,13 +174,15 @@ namespace SwarmOps.Optimizers
         /// <param name="x">Current mesh point.</param>
         /// <param name="g">Best found point in mesh.</param>
         /// <param name="gFitness">Fitness of best found point.</param>
+        /// <param name="gFeasible">Feasibility of best found point.</param>
         void Recursive(
             int curDim,
             int numIterationsPerDim,
             double[] delta,
             ref double[] x,
             ref double[] g,
-            ref double gFitness)
+            ref double gFitness,
+            ref bool gFeasible)
         {
             // Get problem-context.
             double[] lowerBound = Problem.LowerBound;
@@ -174,36 +191,82 @@ namespace SwarmOps.Optimizers
 
             Debug.Assert(curDim >= 0 && curDim < n);
 
-            // Iterate over all mesh-entries for current dimension.
-            int i;
-            for (i = 0; i < numIterationsPerDim; i++)
+            // Should parameters be mesh-computed?
+            if (Mask == null || Mask[curDim] == null)
             {
-                // Update mesh position for current dimension.
-                x[curDim] = lowerBound[curDim] + delta[curDim] * i;
-
-                // Bound mesh position for current dimension.
-                x[curDim] = Tools.Bound(x[curDim], lowerBound[curDim], upperBound[curDim]);
-
-                // Either recurse or compute fitness for mesh position.
-                if (curDim < n - 1)
+                // Iterate over all mesh-entries for current dimension.
+                int i;
+                for (i = 0; i < numIterationsPerDim; i++)
                 {
-                    // Recurse for next dimension.
-                    Recursive(curDim + 1, numIterationsPerDim, delta, ref x, ref g, ref gFitness);
+                    // Update mesh position for current dimension.
+                    x[curDim] = lowerBound[curDim] + delta[curDim] * i;
+
+                    // Bound mesh position for current dimension.
+                    x[curDim] = Tools.Bound(x[curDim], lowerBound[curDim], upperBound[curDim]);
+
+                    // Do actual recursion or fitness evaluation.
+                    RecursiveInner(curDim, numIterationsPerDim, delta, ref x, ref g, ref gFitness, ref gFeasible);
                 }
-                else
+            }
+            else
+            {
+                // Use fixed parameter instead of mesh-computed.
+                x[curDim] = Mask[curDim].Value;
+
+                // Do actual recursion or fitness evaluation.
+                RecursiveInner(curDim, numIterationsPerDim, delta, ref x, ref g, ref gFitness, ref gFeasible);
+            }
+        }
+ 
+        /// <summary>
+        /// Helper function for recursive traversal of the mesh in a depth-first order.
+        /// </summary>
+        /// <param name="curDim">Current dimension being processed.</param>
+        /// <param name="numIterationsPerDim">Number of mesh iterations per dimension.</param>
+        /// <param name="delta">Distance between points in mesh.</param>
+        /// <param name="x">Current mesh point.</param>
+        /// <param name="g">Best found point in mesh.</param>
+        /// <param name="gFitness">Fitness of best found point.</param>
+        /// <param name="gFeasible">Feasibility of best found point.</param>
+        void RecursiveInner(
+            int curDim,
+            int numIterationsPerDim,
+            double[] delta,
+            ref double[] x,
+            ref double[] g,
+            ref double gFitness,
+            ref bool gFeasible)
+        {
+            int n = Problem.Dimensionality;
+
+            Debug.Assert(curDim >= 0 && curDim < n);
+
+            // Either recurse or compute fitness for mesh position.
+            if (curDim < n - 1)
+            {
+                // Recurse for next dimension.
+                Recursive(curDim + 1, numIterationsPerDim, delta, ref x, ref g, ref gFitness, ref gFeasible);
+            }
+            else
+            {
+                // Compute feasibility (constraint satisfaction).
+                bool feasible = Problem.Feasible(x);
+
+                // Compute fitness for current mesh position.
+                // This is done regardless of feasibility.
+                double fitness = Problem.Fitness(x, feasible);
+
+                // Update best position and fitness found in this run.
+                if (Tools.BetterFeasibleFitness(gFeasible, feasible, gFitness, fitness))
                 {
-                    // Compute fitness for current mesh position.
-                    double fitness = Problem.Fitness(x, Problem.MaxFitness);
+                    // Update this run's best known position.
+                    x.CopyTo(g, 0);
 
-                    // Update best position and fitness found in this run.
-                    if (fitness < gFitness)
-                    {
-                        // Update this run's best known position.
-                        x.CopyTo(g, 0);
+                    // Update this run's best know fitness.
+                    gFitness = fitness;
 
-                        // Update this run's best know fitness.
-                        gFitness = fitness;
-                    }
+                    // Update best known feasibility.
+                    gFeasible = feasible;
                 }
             }
         }

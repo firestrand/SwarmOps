@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("TestParallelBenchmarks")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hewlett-Packard")]
+[assembly: AssemblyCompany("Hvass Laboratories")]
 [assembly: AssemblyProduct("TestParallelBenchmarks")]
-[assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2010")]
+[assembly: AssemblyCopyright("Copyright © Magnus Erik Hvass Pedersen 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

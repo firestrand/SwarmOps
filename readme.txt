@@ -37,6 +37,33 @@ framework v4.
 
 Update History:
 
+Version 3.1:
+- Fixed PS and LUS initialization to use LowerInit
+  and UpperInit instead of LowerBound and UpperBound.
+- Various cleanup.
+
+Version 3:
+- Added constraint handling to optimizers and framework.
+- Added methods BeginOptimizationRun and EndOptimizationRun.
+- Added Mangler-class for mangling search-space of benchmark
+  problems instead of search-space displacement.
+- Added OptimizerWrapper-class.
+- Fixed preemptive fitness limit in MOL initialization.
+- Streamlined notation in several optimizers.
+- Removed GED optimizer.
+- Removed Multi-class.
+- Removed RunCondition-classes, integrated in Problem-class.
+- Fixed bug in FitnessTrace-classes when trace was short.
+
+Version 2.2:
+- Added FitnessComparer to Solution-class.
+- Fixed bug in LogSolutions.
+- Changed software license to a simpler one.
+
+Version 2.1:
+- Added Mask to MESH-optimizer so as to hold fixed some parameters.
+- Added several parameter sets to PSO, MOL and DE-Rand1Bin (DESuite).
+
 Version 2:
 - Added parallel version of the optimizers: DE, DESuite, MOL, PSO.
 - Added parallel version of MetaFitness.

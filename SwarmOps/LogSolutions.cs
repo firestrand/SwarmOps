@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -23,20 +22,15 @@ namespace SwarmOps
         /// </summary>
         /// <param name="problem">Problem-object to be wrapped.</param>
         /// <param name="capacity">Log capacity.</param>
-        public LogSolutions(Problem problem, int capacity)
+        /// <param name="onlyFeasible">Only log feasible solutions.</param>
+        public LogSolutions(Problem problem, int capacity, bool onlyFeasible)
             : base(problem)
         {
             Capacity = capacity;
+            OnlyFeasible = onlyFeasible;
 
-            _log = new SortedList<double, Solution>(capacity);
+            Log = new List<Solution>(capacity);
         }
-        #endregion
-
-        #region Private fields.
-        /// <summary>
-        /// Log of candidate solutions.
-        /// </summary>
-        SortedList<double, Solution> _log;
         #endregion
 
         #region Public fields.
@@ -50,11 +44,21 @@ namespace SwarmOps
         }
 
         /// <summary>
+        /// Only log feasible solutions.
+        /// </summary>
+        public bool OnlyFeasible
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Log of candidate solutions.
         /// </summary>
-        public IList<Solution> Log
+        public List<Solution> Log
         {
-            get { return _log.Values; }
+            get;
+            private set;
         }
         #endregion
 
@@ -64,7 +68,7 @@ namespace SwarmOps
         /// </summary>
         public void Clear()
         {
-            _log.Clear();
+            Log.Clear();
         }
         #endregion
 
@@ -85,22 +89,37 @@ namespace SwarmOps
         /// </summary>
         /// <param name="parameters">Candidate solution.</param>
         /// <param name="fitnessLimit">Preemptive Fitness Limit</param>
+        /// <param name="newFeasible">Feasibility of old candidate solution.</param>
+        /// <param name="oldFeasible">Feasibility of new candidate solution.</param>
         /// <returns>Fitness value.</returns>
-        public override double Fitness(double[] parameters, double fitnessLimit)
+        public override double Fitness(double[] parameters, double fitnessLimit, bool oldFeasible, bool newFeasible)
         {
-            double fitness = Problem.Fitness(parameters, fitnessLimit);
+            double fitness = Problem.Fitness(parameters, fitnessLimit, oldFeasible, newFeasible);
 
-            if (fitness < fitnessLimit)
+            // Log solutions. If feasibiilty is required then only log feasible solutions.
+            if (!OnlyFeasible || newFeasible)
             {
-                Solution candidateSolution = new Solution(parameters, fitness);
-
-                // Add new solution to the log.
-                _log.Add(fitness, candidateSolution);
-
-                if (Log.Count > Capacity)
+                // Log solutions with better fitness and feasibility.
+                if (Tools.BetterFeasibleFitness(oldFeasible, newFeasible, fitnessLimit, fitness))
                 {
-                    // Remove worst from the log.
-                    _log.RemoveAt(Log.Count - 1);
+                    // Ensure log does not exceed desired capacity.
+                    if (Log.Count >= Capacity)
+                    {
+                        // Assume log is sorted in ascending (worsening) order.
+                        // Remove worst from the log.
+                        Log.RemoveAt(Log.Count - 1);
+                    }
+
+                    Solution candidateSolution = new Solution(parameters, fitness, newFeasible);
+
+                    // Add new solution to the log.
+                    Log.Add(candidateSolution);
+
+                    // Sort log according to fitness.
+                    // This could be implemented more efficiently
+                    // but it is not crucial for runtime performance
+                    // so this simple implementation is sufficient.
+                    Log.Sort(new Solution.FitnessComparer());
                 }
             }
 

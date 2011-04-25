@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// RandomOps - (Pseudo) Random Number Generator For C#
 /// Copyright (C) 2003-2010 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
 /// Please see the file license.txt for license details.
 /// RandomOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -16,7 +15,7 @@ namespace RandomOps.ThreadSafe
     /// it has a very long period and hence decreases the risk of overlap and
     /// correlation of the individual threads.
     /// </summary>
-    public class CMWC4096 : ThreadSafeIndependent
+    public class CMWC4096 : Independent
     {
         #region Constructors.
         /// <summary>

@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -18,30 +17,46 @@ namespace SwarmOps
         /// <summary>
         /// Convert numeric value d to a string with convenient formatting.
         /// </summary>
-        public static string FormatNumber(double d)
+        public static string FormatNumber(double? d)
         {
             string s;
-            double dAbs = Math.Abs(d);
 
-            if (dAbs < 1e-2)
+            if (d.HasValue)
             {
-                s = String.Format(_cultureInfo, "{0:0.##e0}", d);
-            }
-            else if (dAbs > 1e+6)
-            {
-                s = String.Format(_cultureInfo, "{0:0.##e+0}", d);
-            }
-            else if (dAbs > 1e+3)
-            {
-                s = String.Format(_cultureInfo, "{0:0.}", d);
+                double dAbs = Math.Abs(d.Value);
+
+                if (dAbs < 1e-2)
+                {
+                    s = String.Format(_cultureInfo, "{0:0.##e0}", d.Value);
+                }
+                else if (dAbs > 1e+6)
+                {
+                    s = String.Format(_cultureInfo, "{0:0.##e+0}", d.Value);
+                }
+                else if (dAbs > 1e+3)
+                {
+                    s = String.Format(_cultureInfo, "{0:0.}", d.Value);
+                }
+                else
+                {
+                    s = String.Format(_cultureInfo, "{0:0.##}", d.Value);
+                }
             }
             else
             {
-                s = String.Format(_cultureInfo, "{0:0.##}", d);
+                s = "--";
             }
 
             return s;
         }
 
+        /// <summary>
+        /// Convert numeric value d to a percentage string, e.g. d==0.253212
+        /// returns string "25.32%"
+        /// </summary>
+        public static string FormatPercent(double? d)
+        {
+            return String.Format(_cultureInfo, "{0:0.##}%", d*100);
+        }
     }
 }

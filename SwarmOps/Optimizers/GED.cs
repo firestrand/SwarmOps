@@ -150,7 +150,7 @@ namespace SwarmOps.Optimizers
             x.CopyTo(g, 0);
 
             // Trace fitness of best found solution.
-            Trace(0, fitness);
+            Trace(0, fitness, true);
 
             int i;
             for (i = 1; Problem.RunCondition.Continue(i, fitness); i++)

@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -16,8 +15,7 @@ namespace SwarmOps
         #region Constructors.
         /// <summary>
         /// Construct the object. This does not set the Problem
-        /// or the RunCondition which has to be done before the
-        /// optimizer is being run.
+        /// which has to be done before the optimizer is being run.
         /// </summary>
         public Optimizer()
             : base()
@@ -30,19 +28,6 @@ namespace SwarmOps
         /// <param name="problem">Problem to optimize.</param>
         public Optimizer(Problem problem)
             : base()
-        {
-            Problem = problem;
-        }
-
-        /// <summary>
-        /// Construct the object.
-        /// </summary>
-        /// <param name="problem">Problem to optimize.</param>
-        /// <param name="runCondition">
-        /// Determines for how long to continue optimization.
-        /// </param>
-        public Optimizer(Problem problem, IRunCondition runCondition)
-            : base(runCondition)
         {
             Problem = problem;
         }
@@ -136,11 +121,11 @@ namespace SwarmOps
         /// </summary>
         /// <param name="iteration">Iteration number.</param>
         /// <param name="fitness">Best-found fitness for this optimization run.</param>
-        protected void Trace(int iteration, double fitness)
+        protected void Trace(int iteration, double fitness, bool feasible)
         {
             if (FitnessTrace != null)
             {
-                FitnessTrace.Add(iteration, fitness);
+                FitnessTrace.Add(iteration, fitness, feasible);
             }
         }
         #endregion

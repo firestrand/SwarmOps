@@ -69,7 +69,7 @@
     <Compile Include="Circle.cs" />
     <Compile Include="RandomAlgorithm.cs" />
     <Compile Include="ThreadSafe\CMWC4096.cs" />
-    <Compile Include="ThreadSafe\ThreadSafeIndependent.cs" />
+    <Compile Include="ThreadSafe\Independent.cs" />
     <Compile Include="ThreadSafe\MWC256.cs" />
     <Compile Include="Disk.cs" />
     <Compile Include="Sphere.cs" />
@@ -100,6 +100,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ToDo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RandomOps.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

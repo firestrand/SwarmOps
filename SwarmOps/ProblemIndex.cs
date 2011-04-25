@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -14,9 +13,9 @@ namespace SwarmOps
 {
     /// <summary>
     /// Used for sorting optimization problems so that those hardest
-    /// to optimize are tried first. This is used in the Multi and
-    /// MetaFitness classes where Pre-emptive Fitness Evaluation
-    /// seeks to abort the meta-fitness evaluation as early as possible.
+    /// to optimize are tried first. This is used in the MetaFitness
+    /// class where Pre-emptive Fitness Evaluation seeks to abort the
+    /// meta-fitness evaluation as early as possible.
     /// </summary>
     public class ProblemIndex
     {
@@ -28,6 +27,8 @@ namespace SwarmOps
         public ProblemIndex(Problem[] problems)
             : base()
         {
+            Debug.Assert(problems.Length > 0);
+
             int numProblems = problems.Count();
             double weight = 1.0 / numProblems;
 
@@ -46,7 +47,10 @@ namespace SwarmOps
         public ProblemIndex(WeightedProblem[] weightedProblems)
             : base()
         {
-            Index = new List<ProblemFitness>(weightedProblems.Count());
+            // Ensure array has elements.
+            Debug.Assert(weightedProblems.Length > 0);
+
+            Index = new List<ProblemFitness>(weightedProblems.Length);
 
             double weightSum = weightedProblems.Sum(o => o.Weight);
 
@@ -56,6 +60,7 @@ namespace SwarmOps
                 double weight = weightedProblem.Weight;
                 double weightNormalized = weight / weightSum;
 
+                // Ensure weight is positive.
                 Debug.Assert(weight > 0);
 
                 Index.Add(new ProblemFitness(problem, weightNormalized));

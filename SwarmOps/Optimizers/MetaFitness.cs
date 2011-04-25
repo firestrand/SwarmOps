@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -30,11 +29,12 @@ namespace SwarmOps.Optimizers
         /// <summary>
         /// Construct the object, un-weighted problems.
         /// </summary>
-        /// <param name="optimizer">Optimize to be used.</param>
+        /// <param name="optimizer">Optimizer to be used.</param>
         /// <param name="problems">Array of problems to be optimized.</param>
         /// <param name="numRuns">Number of optimization runs per problem.</param>
-        public MetaFitness(Optimizer optimizer, Problem[] problems, int numRuns)
-            : base()
+        /// <param name="maxIterations">Max number of optimization iterations.</param>
+        public MetaFitness(Optimizer optimizer, Problem[] problems, int numRuns, int maxIterations)
+            : base(maxIterations)
         {
             Optimizer = optimizer;
             NumRuns = numRuns;
@@ -47,8 +47,9 @@ namespace SwarmOps.Optimizers
         /// <param name="optimizer">Optimize to be used.</param>
         /// <param name="weightedProblems">Array of weighted problems to be optimized.</param>
         /// <param name="numRuns">Number of optimization runs per problem.</param>
-        public MetaFitness(Optimizer optimizer, WeightedProblem[] weightedProblems, int numRuns)
-            : base()
+        /// <param name="maxIterations">Max number of optimization iterations.</param>
+        public MetaFitness(Optimizer optimizer, WeightedProblem[] weightedProblems, int numRuns, int maxIterations)
+            : base(maxIterations)
         {
             Optimizer = optimizer;
             NumRuns = numRuns;
@@ -77,15 +78,6 @@ namespace SwarmOps.Optimizers
         #endregion
 
         #region Base-class overrides.
-        /// <summary>
-        /// Used for determining whether or not to continue optimization.
-        /// </summary>
-        public override IRunCondition RunCondition
-        {
-            get { return Optimizer.RunCondition; }
-            set { Optimizer.RunCondition = value; }
-        }
-
         /// <summary>
         /// Name of the optimization problem.
         /// </summary>
@@ -162,7 +154,7 @@ namespace SwarmOps.Optimizers
         /// <returns>Fitness value.</returns>
         public override double Fitness(double[] parameters, double fitnessLimit)
         {
-            // Initialize the fitnes-sum.
+            // Initialize the fitness-sum.
             double fitnessSum = 0;
 
             // Iterate over the problems.
@@ -211,10 +203,33 @@ namespace SwarmOps.Optimizers
             // this method is called again.
             ProblemIndex.Sort();
 
-            // Print progress to the Console.
-            FitnessPrint.DoPrint(parameters, fitnessSum, fitnessLimit, false);
-
             return fitnessSum;
+        }
+
+        /// <summary>
+        /// Enforce constraints and evaluate feasiblity.
+        /// </summary>
+        /// <param name="parameters">Parameters to use for the Optimizer.</param>
+        public override bool EnforceConstraints(ref double[] parameters)
+        {
+            return Optimizer.EnforceConstraints(ref parameters);
+        }
+
+        /// <summary>
+        /// Evaluate feasibility (constraint satisfaction).
+        /// </summary>
+        /// <param name="parameters">Parameters to use for the Optimizer.</param>
+        public override bool Feasible(double[] parameters)
+        {
+            return Optimizer.Feasible(parameters);
+        }
+
+        /// <summary>
+        /// At beginning of new meta-optimization run print a newline.
+        /// </summary>
+        public override void BeginOptimizationRun()
+        {
+            Tools.PrintNewline();
         }
         #endregion
 

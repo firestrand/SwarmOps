@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -81,7 +80,7 @@ namespace SwarmOps.Optimizers
         /// </summary>
         public override string[] ParameterName
         {
-            get { return _parameterName ; }
+            get { return _parameterName; }
         }
 
         static readonly double[] _defaultParameters = { 3.0 };
@@ -124,6 +123,9 @@ namespace SwarmOps.Optimizers
         {
             Debug.Assert(parameters != null && parameters.Length == Dimensionality);
 
+            // Signal beginning of optimization run.
+            Problem.BeginOptimizationRun();
+
             // Retrieve parameter specific to LUS method.
             double gamma = GetGamma(parameters);
 
@@ -143,24 +145,24 @@ namespace SwarmOps.Optimizers
             double r = 1;								            	// Search-range.
             double q = System.Math.Pow(2.0, -1.0 / (n * gamma));		// Decrease-factor (using gamma = 1.0/alpha).
 
-            // Fitness variables.
-            double fitness, newFitness;
-
             // Initialize agent-position in search-space.
-            Tools.InitializeUniform(ref x, lowerBound, upperBound);
+            Tools.InitializeUniform(ref x, lowerInit, upperInit);
 
             // Initialize search-range to full search-space.
             Tools.InitializeRange(ref d, lowerBound, upperBound);
 
+            // Enforce constraints and evaluate feasibility.
+            bool feasible = Problem.EnforceConstraints(ref x);
+
             // Compute fitness of initial position.
             // This counts as an iteration below.
-            fitness = Problem.Fitness(x);
+            double fitness = Problem.Fitness(x, feasible);
 
             // Trace fitness of best found solution.
-            Trace(0, fitness);
+            Trace(0, fitness, feasible);
 
             int i;
-            for (i = 1; Problem.RunCondition.Continue(i, fitness); i++)
+            for (i = 1; Problem.Continue(i, fitness, feasible); i++)
             {
                 // Compute potentially new position.
                 for (int j = 0; j < n; j++)
@@ -170,32 +172,50 @@ namespace SwarmOps.Optimizers
                     y[j] = Tools.SampleBounded(x[j], r * d[j], lowerBound[j], upperBound[j]);
                 }
 
-                // Compute new fitness.
-                newFitness = Problem.Fitness(y, fitness);
+                // Enforce constraints and evaluate feasibility.
+                bool newFeasible = Problem.EnforceConstraints(ref y);
 
-                // Update position and fitness in case of strict improvement.
-                if (newFitness < fitness)
+                // Compute fitness if feasibility (constraint satisfaction) is same or better.
+                if (Tools.BetterFeasible(feasible, newFeasible))
                 {
-                    // Update fitness.
-                    fitness = newFitness;
+                    // Compute fitness of new position.
+                    double newFitness = Problem.Fitness(y, fitness, feasible, newFeasible);
 
-                    // Update position by swapping array x and y.
-                    double[] temp = x;
-                    x = y;
-                    y = temp;
+                    // Update best known position, if improvement.
+                    if (Tools.BetterFeasibleFitness(feasible, newFeasible, fitness, newFitness))
+                    {
+                        // Update fitness.
+                        fitness = newFitness;
+
+                        // Update feasibility.
+                        feasible = newFeasible;
+
+                        // Update position by swapping array x and y.
+                        double[] temp = x;
+                        x = y;
+                        y = temp;
+                    }
+                    else // Worse fitness.
+                    {
+                        // Decrease the search-range.
+                        r *= q;
+                    }
                 }
-                else
+                else // Worse feasibility.
                 {
                     // Decrease the search-range.
                     r *= q;
                 }
 
                 // Trace fitness of best found solution.
-                Trace(i, fitness);
+                Trace(i, fitness, feasible);
             }
 
+            // Signal end of optimization run.
+            Problem.EndOptimizationRun();
+
             // Return best-found solution and fitness.
-            return new Result(x, fitness, i);
+            return new Result(x, fitness, feasible, i);
         }
         #endregion
     }

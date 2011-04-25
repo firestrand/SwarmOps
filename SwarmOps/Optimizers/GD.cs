@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -113,6 +112,9 @@ namespace SwarmOps.Optimizers
         {
             Debug.Assert(parameters != null && parameters.Length == Dimensionality);
 
+            // Signal beginning of optimization run.
+            Problem.BeginOptimizationRun();
+
             // Retrieve parameter specific to GD method.
             double stepsize = GetStepsize(parameters);
 
@@ -131,18 +133,21 @@ namespace SwarmOps.Optimizers
             // Initialize agent-position in search-space.
             Tools.InitializeUniform(ref x, lowerInit, upperInit);
 
+            // Enforce constraints and evaluate feasibility.
+            bool feasible = Problem.EnforceConstraints(ref x);
+
             // Compute fitness of initial position.
             // This counts as an iteration below.
-            double fitness = Problem.Fitness(x);
+            double fitness = Problem.Fitness(x, feasible);
 
             // This is the best-found position.
             x.CopyTo(g, 0);
 
             // Trace fitness of best found solution.
-            Trace(0, fitness);
+            Trace(0, fitness, feasible);
 
             int i;
-            for (i = 1; Problem.RunCondition.Continue(i, fitness); i++)
+            for (i = 1; Problem.Continue(i, fitness, feasible); i++)
             {
                 // Compute gradient.
                 int gradientIterations = Problem.Gradient(x, ref v);
@@ -159,32 +164,39 @@ namespace SwarmOps.Optimizers
                     x[j] -= normalizedStepsize * v[j];
                 }
 
-                // Enforce bounds before computing new fitness.
-                Tools.Bound(ref x, lowerBound, upperBound);
+                // Enforce constraints and evaluate feasibility.
+                bool newFeasible = Problem.EnforceConstraints(ref x);
 
-                // Compute new fitness.
-                double newFitness = Problem.Fitness(x, fitness);
-
-                // Update best position and fitness found in this run.
-                if (newFitness < fitness)
+                // Compute fitness if feasibility (constraint satisfaction) is same or better.
+                if (Tools.BetterFeasible(feasible, newFeasible))
                 {
-                    // Update this run's best known position.
-                    x.CopyTo(g, 0);
+                    // Compute new fitness.
+                    double newFitness = Problem.Fitness(x, fitness, feasible, newFeasible);
 
-                    // Update this run's best know fitness.
-                    fitness = newFitness;
+                    // Update best position and fitness found in this run.
+                    if (Tools.BetterFeasibleFitness(feasible, newFeasible, fitness, newFitness))
+                    {
+                        // Update this run's best known position.
+                        x.CopyTo(g, 0);
+
+                        // Update this run's best know fitness.
+                        fitness = newFitness;
+                    }
                 }
 
                 // Trace fitness of best found solution.
-                Trace(i, fitness);
+                Trace(i, fitness, feasible);
 
                 // Add iterations for gradient computation.
                 // This is incompatible with FitnessTrace.
                 //i += gradientIterations;
             }
 
+            // Signal end of optimization run.
+            Problem.EndOptimizationRun();
+
             // Return best-found solution and fitness.
-            return new Result(g, fitness, i);
+            return new Result(g, fitness, feasible, i);
         }
         #endregion
     }

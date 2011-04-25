@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -20,12 +19,9 @@ namespace SwarmOps.Problems
         /// Construct the object.
         /// </summary>
         /// <param name="dimensionality">Dimensionality of the problem (e.g. 20)</param>
-        /// <param name="displaceOptimum">Displace optimum?</param>
-        /// <param name="runCondition">
-        /// Determines for how long to continue optimization.
-        /// </param>
-        public Sphere(int dimensionality, bool displaceOptimum, IRunCondition runCondition)
-            : base(dimensionality, -100, 100, 50, 100, 25, displaceOptimum, runCondition)
+        /// <param name="maxIterations">Max optimization iterations to perform.</param>
+        public Sphere(int dimensionality, int maxIterations)
+            : base(dimensionality, -100, 100, 50, 100, maxIterations)
         {
         }
         #endregion
@@ -45,14 +41,6 @@ namespace SwarmOps.Problems
         public override double MinFitness
         {
             get { return 0; }
-        }
-
-        /// <summary>
-        /// Threshold for an acceptable fitness value.
-        /// </summary>
-        public override double AcceptableFitness
-        {
-            get { return 1.0; }
         }
 
         /// <summary>
@@ -94,7 +82,7 @@ namespace SwarmOps.Problems
 
             for (int i = 0; i < Dimensionality; i++)
             {
-                double elm = Displace(x[i]);
+                double elm = x[i];
                 v[i] = 2 * elm;
             }
 

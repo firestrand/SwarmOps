@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -34,7 +33,7 @@ namespace SwarmOps.Optimizers
     ///     In: Proceedings of the IEEE International Conference on
     ///     Evolutionary Computation, Indianapolis, USA, 1997.
     /// (4) M.E.H. Pedersen and A.J. Chipperfield. Simplifying particle
-    ///     swarm optimization. Applied Soft Computing. In press. 2009. 
+    ///     swarm optimization. Applied Soft Computing, 10, p. 618-628, 2010. 
     /// </remarks>
     public class MOL : Optimizer
     {
@@ -63,7 +62,84 @@ namespace SwarmOps.Optimizers
         /// </summary>
         public struct Parameters
         {
-            public static readonly double[] HandTuned = { 50.0, 0.72984378812835756567558911626891, 1.49 };
+            /// <summary>
+            /// Control parameters tuned for all benchmark problems in
+            /// 2 dimensions and 400 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] AllBenchmarks2Dim400IterA = { 23.0, -0.3328, 2.8446 };
+
+            /// <summary>
+            /// Control parameters tuned for all benchmark problems in
+            /// 2 dimensions and 400 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] AllBenchmarks2Dim400IterB = { 50.0, 0.284, 1.9466 };
+
+            /// <summary>
+            /// Control parameters tuned for all benchmark problems in
+            /// 2 dimensions and 4000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] AllBenchmarks2Dim4000IterA = { 183.0, -0.2797, 3.0539 };
+
+            /// <summary>
+            /// Control parameters tuned for all benchmark problems in
+            /// 2 dimensions and 4000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] AllBenchmarks2Dim4000IterB = { 139.0, 0.6372, 1.0949 };
+
+            /// <summary>
+            /// Control parameters tuned for all benchmark problems in
+            /// 5 dimensions and 1000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] AllBenchmarks5Dim1000Iter = { 50.0, -0.3085, 2.0273 };
+
+            /// <summary>
+            /// Control parameters tuned for all benchmark problems in
+            /// 5 dimensions and 10000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] AllBenchmarks5Dim10000Iter = { 96.0, -0.3675, 4.171 };
+
+            /// <summary>
+            /// Control parameters tuned for all benchmark problems in
+            /// 10 dimensions and 2000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] AllBenchmarks10Dim2000Iter = { 60.0, -0.27, 2.9708 };
+
+            /// <summary>
+            /// Control parameters tuned for all benchmark problems in
+            /// 10 dimensions and 20000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] AllBenchmarks10Dim20000Iter = { 116.0, -0.3518, 3.8304 };
+
+            /// <summary>
+            /// Control parameters tuned for all benchmark problems in
+            /// 20 dimensions and 40000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] AllBenchmarks20Dim40000Iter = { 228.0, -0.3747, 4.2373 };
+
+            /// <summary>
+            /// Control parameters tuned for Ackley, Rastrigin, Rosenbrock, and Schwefel1-2 in
+            /// 20 dimensions and 400000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] FourBenchmarks20Dim400000IterA = { 125.0, -0.2575, 4.6713 };
+
+            /// <summary>
+            /// Control parameters tuned for Ackley, Rastrigin, Rosenbrock, and Schwefel1-2 in
+            /// 20 dimensions and 400000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] FourBenchmarks20Dim400000IterB = { 67.0, -0.4882, 2.7923 };
+
+            /// <summary>
+            /// Control parameters tuned for all benchmark problems in
+            /// 50 dimensions and 100000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] AllBenchmarks50Dim100000Iter = { 290.0, -0.3067, 3.6223 };
+
+            /// <summary>
+            /// Control parameters tuned for Ackley, Rastrigin, Rosenbrock, and Schwefel1-2 in
+            /// 100 dimensions and 200000 fitness evaluations in one optimization run.
+            /// </summary>
+            public static readonly double[] FourBenchmarks100Dim200000Iter = { 219.0, -0.1685, 3.9162 };
+
             /// <summary>
             /// Control parameters tuned for all benchmark problems in
             /// 30 dimensions and 60000 fitness evaluations in one optimization run.
@@ -220,6 +296,9 @@ namespace SwarmOps.Optimizers
         {
             Debug.Assert(parameters != null && parameters.Length == Dimensionality);
 
+            // Signal beginning of optimization run.
+            Problem.BeginOptimizationRun();
+
             // Retrieve parameter specific to this optimizer.
             int numAgents = GetNumAgents(parameters);
             double omega = GetOmega(parameters);
@@ -240,9 +319,10 @@ namespace SwarmOps.Optimizers
             double[] velocityLowerBound = new double[n];
             double[] velocityUpperBound = new double[n];
 
-            // Best-found position and fitness.
+            // Best-found position, fitness and constraint feasibility.
             double[] g = new double[n];
             double gFitness = Problem.MaxFitness;
+            bool gFeasible = false;
 
             // Iteration variables.
             int i, j, k;
@@ -258,7 +338,7 @@ namespace SwarmOps.Optimizers
 
             // Initialize all agents.
             // This counts as iterations below.
-            for (j = 0; j < numAgents && Problem.RunCondition.Continue(j, gFitness); j++)
+            for (j = 0; j < numAgents && Problem.Continue(j, gFitness, gFeasible); j++)
             {
                 // Refer to the j'th agent as x and v.
                 double[] x = agents[j];
@@ -270,22 +350,30 @@ namespace SwarmOps.Optimizers
                 // Initialize velocity.
                 Tools.InitializeUniform(ref v, velocityLowerBound, velocityUpperBound);
 
-                // Compute fitness of initial position.
-                double newFitness = Problem.Fitness(x);
+                // Enforce constraints and evaluate feasibility.
+                bool newFeasible = Problem.EnforceConstraints(ref x);
 
-                // Update swarm's best known position.
-                if (newFitness < gFitness)
+                // Compute fitness if feasibility (constraint satisfaction) is same or better.
+                if (Tools.BetterFeasible(gFeasible, newFeasible))
                 {
-                    x.CopyTo(g, 0);
-                    gFitness = newFitness;
+                    // Compute fitness of initial position.
+                    double newFitness = Problem.Fitness(x, gFitness, gFeasible, newFeasible);
+
+                    // Update swarm's best known position, if improvement.
+                    if (Tools.BetterFeasibleFitness(gFeasible, newFeasible, gFitness, newFitness))
+                    {
+                        x.CopyTo(g, 0);
+                        gFitness = newFitness;
+                        gFeasible = newFeasible;
+                    }
                 }
 
                 // Trace fitness of best found solution.
-                Trace(j, gFitness);
+                Trace(j, gFitness, gFeasible);
             }
 
             // Perform actual optimization iterations.
-            for (i = numAgents; Problem.RunCondition.Continue(i, gFitness); i++)
+            for (i = numAgents; Problem.Continue(i, gFitness, gFeasible); i++)
             {
                 Debug.Assert(numAgents > 0);
 
@@ -317,26 +405,64 @@ namespace SwarmOps.Optimizers
                     x[k] = x[k] + v[k];
                 }
 
-                // Enforce bounds before computing new fitness.
-                Tools.Bound(ref x, lowerBound, upperBound);
+                // Enforce constraints and evaluate feasibility.
+                bool newFeasible = Problem.EnforceConstraints(ref x);
 
-                // Compute new fitness.
-                double newFitness = Problem.Fitness(x, gFitness);
-
-                // Update swarm's best known position.
-                if (newFitness < gFitness)
+                // Compute fitness if feasibility (constraint satisfaction) is same or better.
+                if (Tools.BetterFeasible(gFeasible, newFeasible))
                 {
-                    x.CopyTo(g, 0);
-                    gFitness = newFitness;
+                    // Compute new fitness.
+                    double newFitness = Problem.Fitness(x, gFitness, gFeasible, newFeasible);
+
+                    // Update swarm's best known position, if improvement.
+                    if (Tools.BetterFeasibleFitness(gFeasible, newFeasible, gFitness, newFitness))
+                    {
+                        x.CopyTo(g, 0);
+                        gFitness = newFitness;
+                        gFeasible = newFeasible;
+                    }
                 }
 
                 // Trace fitness of best found solution.
-                Trace(i, gFitness);
+                Trace(i, gFitness, gFeasible);
             }
 
+            // Signal end of optimization run.
+            Problem.EndOptimizationRun();
+
             // Return best-found solution and fitness.
-            return new Result(g, gFitness, i);
+            return new Result(g, gFitness, gFeasible, i);
         }
         #endregion
+
+        /// <summary>
+        /// Enforce constraints and evaluate feasiblity of the wrapped problem.
+        /// </summary>
+        /// <param name="parameters">Candidate solution.</param>
+        public override bool EnforceConstraints(ref double[] parameters)
+        {
+            Tools.Bound(ref parameters, LowerBound, UpperBound);
+
+            return Feasible(parameters);
+        }
+
+        /// <summary>
+        /// Evaluate feasibility (constraint satisfaction) of the wrapped problem.
+        /// </summary>
+        /// <param name="parameters">Candidate solution.</param>
+        public override bool Feasible(double[] parameters)
+        {
+#if false
+            int numAgents = GetNumAgents(parameters);
+            double omega = GetOmega(parameters);
+            double phi = GetPhi(parameters);
+
+            // Example of constraints on an optimizer's control optimizers.
+            // These particular constraints are only for demonstration purposes.
+            return (numAgents >= 1) && (omega > 0 || omega < -0.5) && (omega * phi < 0) && (omega + phi < 2);
+#else
+            return base.Feasible(parameters);
+#endif
+        }
     }
 }

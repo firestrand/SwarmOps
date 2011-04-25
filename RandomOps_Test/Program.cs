@@ -1,9 +1,19 @@
-﻿using System;
+﻿/// ------------------------------------------------------
+/// RandomOps - (Pseudo) Random Number Generator For C#
+/// Copyright (C) 2003-2010 Magnus Erik Hvass Pedersen.
+/// Please see the file license.txt for license details.
+/// RandomOps on the internet: http://www.Hvass-Labs.org/
+/// ------------------------------------------------------
+
+using System;
 using System.Diagnostics;
 using System.Threading;
 
 namespace Test
 {
+    /// <summary>
+    /// Test program for RandomOps.
+    /// </summary>
     class Program
     {
         static readonly bool TestByte = false;
@@ -450,10 +460,10 @@ namespace Test
         }
 
         static RandomOps.Ran2 ran2TS = new RandomOps.Ran2();
-        static RandomOps.ThreadSafe randTS = new RandomOps.ThreadSafe(ran2TS);
+        static RandomOps.ThreadSafe.Wrapper randTS = new RandomOps.ThreadSafe.Wrapper(ran2TS);
         static readonly int NumIterationsTS = 100;
 
-        static void Worker1()
+        static void Worker1A()
         {
             for (int i = 0; i < NumIterationsTS; i++)
             {
@@ -461,7 +471,7 @@ namespace Test
             }
         }
 
-        static void Worker2()
+        static void Worker2A()
         {
             for (int i = 0; i < NumIterationsTS; i++)
             {
@@ -469,7 +479,7 @@ namespace Test
             }
         }
 
-        static void Worker3()
+        static void Worker3A()
         {
             for (int i = 0; i < NumIterationsTS; i++)
             {
@@ -477,11 +487,52 @@ namespace Test
             }
         }
 
-        static void TestThreadSafe()
+        static void TestThreadSafeA()
         {
-            Thread t1 = new Thread(Worker1);
-            Thread t2 = new Thread(Worker2);
-            Thread t3 = new Thread(Worker3);
+            Thread t1 = new Thread(Worker1A);
+            Thread t2 = new Thread(Worker2A);
+            Thread t3 = new Thread(Worker3A);
+
+            t1.Start();
+            t2.Start();
+            t3.Start();
+
+            t1.Join();
+            t2.Join();
+            t3.Join();
+        }
+
+        static RandomOps.ThreadSafe.CMWC4096 randTSB = new RandomOps.ThreadSafe.CMWC4096();
+
+        static void Worker1B()
+        {
+            for (int i = 0; i < NumIterationsTS; i++)
+            {
+                Console.WriteLine("Thread 1: {0}", randTSB.Uniform());
+            }
+        }
+
+        static void Worker2B()
+        {
+            for (int i = 0; i < NumIterationsTS; i++)
+            {
+                Console.WriteLine("Thread 2: {0}", randTSB.Gauss());
+            }
+        }
+
+        static void Worker3B()
+        {
+            for (int i = 0; i < NumIterationsTS; i++)
+            {
+                Console.WriteLine("Thread 3: {0}", randTSB.Byte());
+            }
+        }
+
+        static void TestThreadSafeB()
+        {
+            Thread t1 = new Thread(Worker1B);
+            Thread t2 = new Thread(Worker2B);
+            Thread t3 = new Thread(Worker3B);
 
             t1.Start();
             t2.Start();
@@ -508,7 +559,8 @@ namespace Test
             //TestInternet();
             //TestInternetAsync();
 
-            //TestThreadSafe();
+            //TestThreadSafeA();
+            //TestThreadSafeB();
         }
     }
 }

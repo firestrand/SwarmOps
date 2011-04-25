@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -20,12 +19,9 @@ namespace SwarmOps.Problems
         /// Construct the object.
         /// </summary>
         /// <param name="dimensionality">Dimensionality of the problem (e.g. 20)</param>
-        /// <param name="displaceOptimum">Displace optimum?</param>
-        /// <param name="runCondition">
-        /// Determines for how long to continue optimization.
-        /// </param>
-        public Ackley(int dimensionality, bool displaceOptimum, IRunCondition runCondition)
-            : base(dimensionality, -30, 30, 15, 30, -7.5, displaceOptimum, runCondition)
+        /// <param name="maxIterations">Max optimization iterations to perform.</param>
+        public Ackley(int dimensionality, int maxIterations)
+            : base(dimensionality, -30, 30, 15, 30, maxIterations)
         {
         }
         #endregion
@@ -98,7 +94,7 @@ namespace SwarmOps.Problems
 
             for (int i = 0; i < Dimensionality; i++)
             {
-                double elm = Displace(x[i]);
+                double elm = x[i];
 
                 v[i] = 4 * DimRec * System.Math.Exp(-0.2 * sqrtSum) * elm / sqrtSum
                        + cosSum * System.Math.Sin(System.Math.PI * 2 * elm) * System.Math.PI * 2 * DimRec;
@@ -119,7 +115,7 @@ namespace SwarmOps.Problems
 
             for (int i = 0; i < n; i++)
             {
-                double elm = Displace(x[i]);
+                double elm = x[i];
 
                 sum += elm * elm;
             }
@@ -137,7 +133,7 @@ namespace SwarmOps.Problems
 
             for (int i = 0; i < n; i++)
             {
-                double elm = Displace(x[i]);
+                double elm = x[i];
                 sum += System.Math.Cos(System.Math.PI * 2 * elm);
             }
 

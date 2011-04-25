@@ -1,17 +1,22 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
 
+using System;
 using System.Diagnostics;
 
 namespace TestCustomProblem
 {
     /// <summary>
-    /// Custom optimization problem, example.
+    /// Constrained optimization problem, example.
+    /// This is the 2-dimensional Rosenbrock problem
+    /// with some example constraints.
+    /// The optimal feasible solution seems to be:
+    /// a ~ 1.5937
+    /// b ~ 2.5416
     /// </summary>
     class CustomProblem : SwarmOps.Problem
     {
@@ -43,15 +48,6 @@ namespace TestCustomProblem
         {
             return parameters[1];
         }
-
-        /// <summary>
-        /// Get parameter, C.
-        /// </summary>
-        /// <param name="parameters">Optimizer parameters.</param>
-        public double GetC(double[] parameters)
-        {
-            return parameters[2];
-        }
         #endregion
 
         #region Base-class overrides.
@@ -68,10 +64,10 @@ namespace TestCustomProblem
         /// </summary>
         public override int Dimensionality
         {
-            get { return 3; }
+            get { return 2; }
         }
 
-        double[] _lowerBound = { -10, -20, -30 };
+        double[] _lowerBound = { -100, -100 };
 
         /// <summary>
         /// Lower search-space boundary.
@@ -81,7 +77,7 @@ namespace TestCustomProblem
             get { return _lowerBound; }
         }
 
-        double[] _upperBound = { 30, 40, 70 };
+        double[] _upperBound = { 100, 100 };
 
         /// <summary>
         /// Upper search-space boundary.
@@ -120,11 +116,11 @@ namespace TestCustomProblem
         /// </summary>
         public override double AcceptableFitness
         {
-            get { return 0.01; }
+            get { return 0.4; }
         }
 
-        string[] _parameterName = { "a", "b", "c" };
- 
+        string[] _parameterName = { "a", "b" };
+
         /// <summary>
         /// Names of parameters for problem.
         /// </summary>
@@ -143,16 +139,40 @@ namespace TestCustomProblem
 
             double a = GetA(x);
             double b = GetB(x);
-            double c = GetC(x);
+            double t1 = 1 - a;
+            double t2 = b - a * a;
 
-            double value
-                = 2 * a * a
-                + 3 * a * b 
-                + 4 * b * b 
-                + 5 * b * c 
-                + 6 * c * c;
+            return t1 * t1 + 100 * t2 * t2;
+        }
 
-            return value;
+        /// <summary>
+        /// Enforce and evaluate constraints.
+        /// </summary>
+        /// <param name="x">Candidate solution.</param>
+        public override bool EnforceConstraints(ref double[] x)
+        {
+            // Enforce boundaries.
+            SwarmOps.Tools.Bound(ref x, LowerBound, UpperBound);
+
+            // Return feasibility.
+            return Feasible(x);
+        }
+
+        /// <summary>
+        /// Evaluate constraints.
+        /// </summary>
+        /// <param name="x">Candidate solution.</param>
+        public override bool Feasible(double[] x)
+        {
+            Debug.Assert(x != null && x.Length == Dimensionality);
+
+            double a = GetA(x);
+            double b = GetB(x);
+
+            // Radius.
+            double r = Math.Sqrt(a * a + b * b);
+
+            return ((r < 0.7) || ((r > 3) && (r < 5))) && (a < b * b);
         }
         #endregion
     }

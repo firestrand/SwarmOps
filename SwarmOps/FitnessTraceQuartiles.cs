@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -31,7 +30,7 @@ namespace SwarmOps
         /// </summary>
         /// <param name="numRuns">Number of optimization to be performed.</param>
         /// <param name="numIterations">Number of iterations per optimization run.</param>
-        /// <param name="numIntervals">Approximate number of intervals to show mean.</param>
+        /// <param name="numIntervals">Approximate number of intervals to show quartiles.</param>
         public FitnessTraceQuartiles(int numRuns, int numIterations, int numIntervals)
             : this(numRuns, numIterations, numIntervals, null)
         {
@@ -42,7 +41,7 @@ namespace SwarmOps
         /// </summary>
         /// <param name="numRuns">Number of optimization to be performed.</param>
         /// <param name="numIterations">Number of iterations per optimization run.</param>
-        /// <param name="numIntervals">Approximate number of intervals to show mean.</param>
+        /// <param name="numIntervals">Approximate number of intervals to show quartiles.</param>
         /// <param name="chainedFitnessTrace">Chained FitnessTrace object.</param>
         public FitnessTraceQuartiles(int numRuns, int numIterations, int numIntervals, FitnessTrace chainedFitnessTrace)
             : base(chainedFitnessTrace, numIterations, numIntervals, 0.5)
@@ -98,7 +97,8 @@ namespace SwarmOps
         /// </summary>
         /// <param name="index">Index into fitness-trace, mapped from optimization iteration.</param>
         /// <param name="fitness">Fitness value to log.</param>
-        protected override void Log(int index, double fitness)
+        /// <param name="feasible">Feasibility (constraint satisfaction) to log.</param>
+        protected override void Log(int index, double fitness, bool feasible)
         {
             Trace[index].Add(fitness);
         }
@@ -117,16 +117,23 @@ namespace SwarmOps
 
                 double[] traceArray = Trace[i].ToArray();
 
-                quartiles.ComputeUnsortedInplace(traceArray);
+                if (traceArray.Length > 0)
+                {
+                    quartiles.ComputeUnsortedInplace(traceArray);
 
-                writer.WriteLine(
-                    "{0} {1} {2} {3} {4} {5}",
-                    Iteration(i),
-                    Tools.FormatNumber(quartiles.Min),
-                    Tools.FormatNumber(quartiles.Q1),
-                    Tools.FormatNumber(quartiles.Median),
-                    Tools.FormatNumber(quartiles.Q3),
-                    Tools.FormatNumber(quartiles.Max));
+                    writer.WriteLine(
+                        "{0} {1} {2} {3} {4} {5}",
+                        Iteration(i),
+                        Tools.FormatNumber(quartiles.Min),
+                        Tools.FormatNumber(quartiles.Q1),
+                        Tools.FormatNumber(quartiles.Median),
+                        Tools.FormatNumber(quartiles.Q3),
+                        Tools.FormatNumber(quartiles.Max));
+                }
+                else
+                {
+                    break;
+                }
             }
 
             writer.Close();

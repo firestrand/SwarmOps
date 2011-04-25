@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2010 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -23,8 +22,9 @@ namespace SwarmOps.Optimizers.Parallel
         /// <param name="optimizer">Optimize to be used.</param>
         /// <param name="problems">Array of problems to be optimized.</param>
         /// <param name="numRuns">Number of optimization runs per problem.</param>
-        public MetaFitness(Optimizer optimizer, Problem[] problems, int numRuns)
-            : base(optimizer, problems, numRuns)
+        /// <param name="maxIterations">Max number of optimization iterations.</param>
+        public MetaFitness(Optimizer optimizer, Problem[] problems, int numRuns, int maxIterations)
+            : base(optimizer, problems, numRuns, maxIterations)
         {
         }
 
@@ -34,8 +34,9 @@ namespace SwarmOps.Optimizers.Parallel
         /// <param name="optimizer">Optimize to be used.</param>
         /// <param name="weightedProblems">Array of weighted problems to be optimized.</param>
         /// <param name="numRuns">Number of optimization runs per problem.</param>
-        public MetaFitness(Optimizer optimizer, WeightedProblem[] weightedProblems, int numRuns)
-            : base(optimizer, weightedProblems, numRuns)
+        /// <param name="maxIterations">Max number of optimization iterations.</param>
+        public MetaFitness(Optimizer optimizer, WeightedProblem[] weightedProblems, int numRuns, int maxIterations)
+            : base(optimizer, weightedProblems, numRuns, maxIterations)
         {
         }
         #endregion
@@ -134,9 +135,6 @@ namespace SwarmOps.Optimizers.Parallel
             // performing will be attempted optimized first, when
             // this method is called again.
             ProblemIndex.Sort();
-
-            // Print progress to the Console.
-            FitnessPrint.DoPrint(parameters, fitnessSum, fitnessLimit, false);
 
             return fitnessSum;
         }
