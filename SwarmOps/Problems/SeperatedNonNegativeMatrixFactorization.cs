@@ -63,6 +63,7 @@ namespace SwarmOps.Problems
             Array.Copy(x, 0, packedW, 0, packedW.Length);
             var packedH = new double[RowCountH * ColumnCountH];
             Array.Copy(x, packedW.Length, packedH, 0, packedH.Length);
+
             var v = new GeneralMatrix(ColumnPackedV, RowCountV);
             var wh = new GeneralMatrix[RowCountH];
             var whTemp = new GeneralMatrix(RowCountV, ColumnCountV, 0.0);

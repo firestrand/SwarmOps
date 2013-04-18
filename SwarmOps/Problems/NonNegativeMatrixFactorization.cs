@@ -9,9 +9,10 @@ namespace SwarmOps.Problems
 {
     public class NonNegativeMatrixFactorization : Problem
     {
-        private int _dimensionality;
+        private readonly int _dimensionality;
+        private readonly bool _quantization;
 
-        public NonNegativeMatrixFactorization(int rowCountV, int rowCountH, double[] columnPackedV)
+        public NonNegativeMatrixFactorization(int rowCountV, int rowCountH, double[] columnPackedV, bool quantization = false)
         {
             if(rowCountV <=0 || rowCountH <= 0 || columnPackedV == null || columnPackedV.Length <= 0)
                 throw new ArgumentException("Arguments invalid.");
@@ -32,10 +33,12 @@ namespace SwarmOps.Problems
             Quantizations = Enumerable.Repeat(1.0d, _dimensionality).ToArray();
             _lowerBound = Enumerable.Repeat(1.0d, _dimensionality).ToArray();
             _upperBound = Enumerable.Repeat(10.0d, _dimensionality).ToArray();
+
+            _quantization = quantization;
         }
         public override string Name
         {
-            get { return "Non Linear Matrix Factorization"; }
+            get { return "Non Negative Matrix Factorization"; }
         }
 
 
@@ -51,15 +54,20 @@ namespace SwarmOps.Problems
         public override double Fitness(double[] x)
         {
             Debug.Assert(x != null && x.Length == Dimensionality);
-            //This problem uses integer values only. Round and enforce
-            Quantize(x, Quantizations);
-            double[] packedW = new double[RowCountW * ColumnCountW];
+            if (_quantization)
+            {
+                //This problem uses integer values only. Round and enforce
+                Quantize(x, Quantizations);
+            }
+            var packedW = new double[RowCountW * ColumnCountW];
             Array.Copy(x, 0, packedW, 0, packedW.Length);
-            double[] packedH = new double[RowCountH * ColumnCountH];
+            var packedH = new double[RowCountH * ColumnCountH];
             Array.Copy(x, packedW.Length, packedH, 0, packedH.Length);
-            GeneralMatrix v = new GeneralMatrix(ColumnPackedV, RowCountV);
-            GeneralMatrix h = new GeneralMatrix(packedH, RowCountH);
-            GeneralMatrix w = new GeneralMatrix(packedW, RowCountW);
+
+            var v = new GeneralMatrix(ColumnPackedV, RowCountV);
+            var h = new GeneralMatrix(packedH, RowCountH);
+            var w = new GeneralMatrix(packedW, RowCountW);
+
             var result = v - (w * h);
             return result.NormF();
 

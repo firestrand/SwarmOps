@@ -125,7 +125,7 @@ namespace SwarmOps_Test
             Assert.IsTrue(result.Fitness <= problem.AcceptableFitness);
         }
         [TestMethod]
-        public void TestNonNegativeMatrixFactorizationOptimum()
+        public void TestSepNonNegativeMatrixFactorizationOptimum()
         {
             var packedKnownW = new[] { 1.0, 3.0, 2.0, 5.0, 1.0, 7.0 };
             var packedKnownH = new[] { 3.0, 8.0, 1.0, 3.0, 4.0, 7.0 };
@@ -160,6 +160,23 @@ namespace SwarmOps_Test
             solution[6] = 1.0;
             var oneFromOpt = problem.Fitness(solution);
             Assert.IsTrue(oneFromOpt < twoFromOpt);
+        }
+        [TestMethod]
+        public void TestNonNegativeMatrixFactorizationOptimum()
+        {
+            var packedKnownW = new[] { 1.0, 3.0, 2.0, 5.0, 1.0, 7.0 };
+            var packedKnownH = new[] { 3.0, 8.0, 1.0, 3.0, 4.0, 7.0 };
+            var w = new GeneralMatrix(packedKnownW, 3);
+            var h = new GeneralMatrix(packedKnownH, 2);
+            var v = w * h;
+
+            var packedWRows = 3;
+            var packedHRows = 2;
+            NonNegativeMatrixFactorization problem = new NonNegativeMatrixFactorization(packedWRows, packedHRows, v.ColumnPackedCopy);
+
+            var solution = new[] {1.0,3,2,5,1,7,3,8,1,3,4,7};
+            var oneFromOpt = problem.Fitness(solution);
+            Assert.IsTrue(oneFromOpt == 0.0);
         }
     }
 }
