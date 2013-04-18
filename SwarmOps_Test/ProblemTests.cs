@@ -102,7 +102,7 @@ namespace SwarmOps_Test
             Assert.IsTrue(expected >= result);
         }
         [TestMethod]
-        public void TestNonLinearMatrixFactorization()
+        public void TestNonNegativeMatrixFactorization()
         {
             SPSO optimizer = new SPSO();
             double[] parameters = optimizer.DefaultParameters;
@@ -125,7 +125,7 @@ namespace SwarmOps_Test
             Assert.IsTrue(result.Fitness <= problem.AcceptableFitness);
         }
         [TestMethod]
-        public void TestNonLinearMatrixFactorizationOptimum()
+        public void TestNonNegativeMatrixFactorizationOptimum()
         {
             var packedKnownW = new[] { 1.0, 3.0, 2.0, 5.0, 1.0, 7.0 };
             var packedKnownH = new[] { 3.0, 8.0, 1.0, 3.0, 4.0, 7.0 };

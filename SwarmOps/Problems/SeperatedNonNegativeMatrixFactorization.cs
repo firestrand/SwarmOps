@@ -9,7 +9,7 @@ namespace SwarmOps.Problems
 {
     public class SeperatedNonNegativeMatrixFactorization : Problem
     {
-        private int _dimensionality;
+        private readonly int _dimensionality;
 
         public SeperatedNonNegativeMatrixFactorization(int rowCountV, int rowCountH, double[] columnPackedV)
         {
@@ -35,7 +35,7 @@ namespace SwarmOps.Problems
         }
         public override string Name
         {
-            get { return "Non Linear Matrix Factorization"; }
+            get { return "Non-Negative Matrix Factorization"; }
         }
 
 
@@ -56,11 +56,11 @@ namespace SwarmOps.Problems
             Quantize(x, Quantizations);
             double[] packedW = new double[RowCountW * ColumnCountW];
             Array.Copy(x, 0, packedW, 0, packedW.Length);
-            double[] packedH = new double[RowCountH * ColumnCountH];
+            var packedH = new double[RowCountH * ColumnCountH];
             Array.Copy(x, packedW.Length, packedH, 0, packedH.Length);
-            GeneralMatrix v = new GeneralMatrix(ColumnPackedV, RowCountV);
-            GeneralMatrix[] wh = new GeneralMatrix[RowCountH];
-            GeneralMatrix whTemp = new GeneralMatrix(RowCountV, ColumnCountV, 0.0);
+            var v = new GeneralMatrix(ColumnPackedV, RowCountV);
+            var wh = new GeneralMatrix[RowCountH];
+            var whTemp = new GeneralMatrix(RowCountV, ColumnCountV, 0.0);
             for (int i = 0; i < RowCountH; i++)
             {
                 wh[i] = new GeneralMatrix(x, RowCountV, ColumnCountV, i * RowCountV * ColumnCountV);
