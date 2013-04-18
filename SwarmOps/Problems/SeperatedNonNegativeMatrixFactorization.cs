@@ -10,8 +10,9 @@ namespace SwarmOps.Problems
     public class SeperatedNonNegativeMatrixFactorization : Problem
     {
         private readonly int _dimensionality;
+        private readonly bool _quantize;
 
-        public SeperatedNonNegativeMatrixFactorization(int rowCountV, int rowCountH, double[] columnPackedV)
+        public SeperatedNonNegativeMatrixFactorization(int rowCountV, int rowCountH, double[] columnPackedV, bool quantize = true)
         {
             if(rowCountV <=0 || rowCountH <= 0 || columnPackedV == null || columnPackedV.Length <= 0)
                 throw new ArgumentException("Arguments invalid.");
@@ -32,6 +33,7 @@ namespace SwarmOps.Problems
             Quantizations = Enumerable.Repeat(1.0d, _dimensionality).ToArray();
             _lowerBound = Enumerable.Repeat(1.0d, _dimensionality).ToArray();
             _upperBound = Enumerable.Repeat(100.0d, _dimensionality).ToArray();
+            _quantize = quantize;
         }
         public override string Name
         {
@@ -52,8 +54,11 @@ namespace SwarmOps.Problems
         {
 
             Debug.Assert(x != null && x.Length == Dimensionality);
-            //This problem uses integer values only. Round and enforce
-            Quantize(x, Quantizations);
+            if (_quantize)
+            {
+                //This problem uses integer values only. Round and enforce
+                Quantize(x, Quantizations);
+            }
             double[] packedW = new double[RowCountW * ColumnCountW];
             Array.Copy(x, 0, packedW, 0, packedW.Length);
             var packedH = new double[RowCountH * ColumnCountH];
