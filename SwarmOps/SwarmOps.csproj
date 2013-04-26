@@ -71,6 +71,7 @@
     <Compile Include="Optimizers\PSOM.cs" />
     <Compile Include="Optimizers\VPSO.cs" />
     <Compile Include="Problems\NonNegativeMatrixFactorization.cs" />
+    <Compile Include="Problems\MatrixFactorization.cs" />
     <Compile Include="Problems\SeperatedNonNegativeMatrixFactorization.cs" />
     <Compile Include="RepeatCount.cs" />
     <Compile Include="Optimizers\SPSO.cs" />

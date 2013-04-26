@@ -7,12 +7,15 @@ using DotNetMatrix;
 
 namespace SwarmOps.Problems
 {
-    public class NonNegativeMatrixFactorization : Problem
+    /// <summary>
+    /// Factorize a matrix into two matrixes without the positive constraint of NMF, similar to principle component analysis
+    /// </summary>
+    public class MatrixFactorization : Problem
     {
         private readonly int _dimensionality;
         private readonly bool _quantization;
 
-        public NonNegativeMatrixFactorization(int rowCountV, int rowCountH, double[] columnPackedV, bool quantization = false)
+        public MatrixFactorization(int rowCountV, int rowCountH, double[] columnPackedV, double lowerBound = -10.0d, double upperBound = 10.0d, bool quantization = false)
         {
             if(rowCountV <=0 || rowCountH <= 0 || columnPackedV == null || columnPackedV.Length <= 0)
                 throw new ArgumentException("Arguments invalid.");
@@ -31,14 +34,15 @@ namespace SwarmOps.Problems
 
             _dimensionality = RowCountH * ColumnCountH + RowCountW * ColumnCountW;
             Quantizations = Enumerable.Repeat(1.0d, _dimensionality).ToArray();
-            _lowerBound = Enumerable.Repeat(1.0d, _dimensionality).ToArray();
-            _upperBound = Enumerable.Repeat(10.0d, _dimensionality).ToArray();
+            //TODO: May want to pass in arrays for upper and lower for multidimensional problems
+            _lowerBound = Enumerable.Repeat(lowerBound, _dimensionality).ToArray();
+            _upperBound = Enumerable.Repeat(upperBound, _dimensionality).ToArray();
 
             _quantization = quantization;
         }
         public override string Name
         {
-            get { return "Non Negative Matrix Factorization"; }
+            get { return "Matrix Factorization"; }
         }
 
 

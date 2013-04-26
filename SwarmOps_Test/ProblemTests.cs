@@ -140,12 +140,19 @@ namespace SwarmOps_Test
             var solution = new[] {3.0,9.0,6.0,1.0,3.0,2.0,4.0,12.0,8.0,40.0,8.0,56.0,15.0,3.0,21.0,35.0,7.0,49.0};
             var best = problem.Fitness(solution);
             Assert.IsTrue(best == 0.0);
+
+            packedKnownW = new[] { 3.0, 9.0, 6.0, 1.0, 3.0, 2.0 };
+            packedKnownH = new[] { 4.0, 12.0, 8.0, 40.0, 8.0, 56.0 };
+            w = new GeneralMatrix(packedKnownW, 3);
+           h = new GeneralMatrix(packedKnownH, 2);
+            var result = v - (w*h);
+            Assert.IsTrue(result.NormF() == 0);
         }
         [TestMethod]
         public void TestNonLinearMatrixFactorizationDistanceFromOptimum()
         {
             var packedKnownW = new[] { 1.0, 3.0, 2.0, 5.0, 1.0, 7.0 };
-            var packedKnownH = new[] { 3.0, 8.0, 1.0, 3.0, 4.0, 7.0 };
+            var packedKnownH = new[] { 4.0,12.0,8.0,40.0,8.0,56.0 };
             var w = new GeneralMatrix(packedKnownW, 3);
             var h = new GeneralMatrix(packedKnownH, 2);
             var v = w * h;
@@ -177,6 +184,30 @@ namespace SwarmOps_Test
             var solution = new[] {1.0,3,2,5,1,7,3,8,1,3,4,7};
             var oneFromOpt = problem.Fitness(solution);
             Assert.IsTrue(oneFromOpt == 0.0);
+        }
+        [TestMethod]
+        public void TestMatrixFactorization()
+        {
+            SPSO optimizer = new SPSO();
+            double[] parameters = optimizer.DefaultParameters;
+
+            var packedKnownW = new[] { 1.0, 3.0, 2.0, 5.0, 1.0, 7.0 };
+            var packedKnownH = new[] { 4.0, 12.0, 8.0, 40.0, 8.0, 56.0 };
+            var w = new GeneralMatrix(packedKnownW, 3);
+            var h = new GeneralMatrix(packedKnownH, 2);
+            var v = w * h;
+
+            var packedWRows = 3;
+            var packedHRows = 2;
+            MatrixFactorization problem = new MatrixFactorization(packedWRows, packedHRows, v.ColumnPackedCopy,-10,50);
+
+            int numIterations = 1000000;
+            IRunCondition runCondition = new RunConditionFitness(numIterations, problem.AcceptableFitness);
+            problem.RunCondition = runCondition;
+            optimizer.Problem = problem;
+            Result result = optimizer.Optimize(parameters);
+            var best = result.Parameters;
+            Assert.IsTrue(result.Fitness <= problem.AcceptableFitness);
         }
     }
 }
