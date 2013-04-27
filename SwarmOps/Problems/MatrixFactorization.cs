@@ -14,7 +14,16 @@ namespace SwarmOps.Problems
     {
         private readonly int _dimensionality;
         private readonly bool _quantization;
-
+        private readonly GeneralMatrix _v;
+        /// <summary>
+        /// General Matrix Factorization Problem
+        /// </summary>
+        /// <param name="rowCountV">The number of rows in V typically refers to the number of parameters being compressed</param>
+        /// <param name="rowCountH">The desired number of classes in W where WH == V</param>
+        /// <param name="columnPackedV">The column packed 1-dimensional array</param>
+        /// <param name="lowerBound"></param>
+        /// <param name="upperBound"></param>
+        /// <param name="quantization"></param>
         public MatrixFactorization(int rowCountV, int rowCountH, double[] columnPackedV, double lowerBound = -10.0d, double upperBound = 10.0d, bool quantization = false)
         {
             if(rowCountV <=0 || rowCountH <= 0 || columnPackedV == null || columnPackedV.Length <= 0)
@@ -39,6 +48,8 @@ namespace SwarmOps.Problems
             _upperBound = Enumerable.Repeat(upperBound, _dimensionality).ToArray();
 
             _quantization = quantization;
+
+            _v = new GeneralMatrix(ColumnPackedV, RowCountV);
         }
         public override string Name
         {
@@ -68,11 +79,11 @@ namespace SwarmOps.Problems
             var packedH = new double[RowCountH * ColumnCountH];
             Array.Copy(x, packedW.Length, packedH, 0, packedH.Length);
 
-            var v = new GeneralMatrix(ColumnPackedV, RowCountV);
+            
             var h = new GeneralMatrix(packedH, RowCountH);
             var w = new GeneralMatrix(packedW, RowCountW);
 
-            var result = v - (w * h);
+            var result = _v - (w.ParallelMultiply(h));
             return result.NormF();
 
 

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace DotNetMatrix
 {
@@ -1082,7 +1084,91 @@ namespace DotNetMatrix
             }
             return x;
         }
+        /// <summary>
+        /// Modified from http://codepyre.com/2010/03/parallel-matrix-multiplication-with-the-task-parallel-library-tpl/
+        /// </summary>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public virtual GeneralMatrix ParallelMultiply(GeneralMatrix b)
+        {
+            if (b._m != _n)
+            {
+                throw new ArgumentException("GeneralMatrix inner dimensions must agree.");
+            }
+            var x = new GeneralMatrix(_m, b._n);
+            double[][] c = x.Array;
 
+            IEnumerable<Tuple<int, double[][]>> data = PartitionData(_m, _a);
+            Parallel.ForEach(data, item => Multiply(item, b._a, c));
+
+
+            //for (int i = 0; i < _m; i++)
+            //{
+            //    for (int k = 0; k < _n; k++)
+            //    {
+            //        for (int j = 0; j < b._n; j++)
+            //        {
+            //            c[i][j] = (_a[i][k] * b._a[k][j]) + c[i][j];
+            //        }
+            //    }
+            //}
+            return x;
+        }
+        private static IEnumerable<Tuple<int, double[][]>> PartitionData(int N, double[][] A)
+        {
+            var chunkFactor = 6;
+
+            int remaining = N;
+            int currentRow = 0;
+
+            while (remaining > 0)
+            {
+                if (remaining < chunkFactor)
+                {
+                    chunkFactor = remaining;
+                }
+
+                remaining = remaining - chunkFactor;
+                var ai = new double[chunkFactor][];
+                for (int i = 0; i < chunkFactor; i++)
+                {
+                    ai[i] = A[currentRow + i];
+                }
+
+                int oldRow = currentRow;
+                currentRow += chunkFactor;
+                yield return new Tuple<int, double[][]>(oldRow, ai);
+            }
+        }
+
+        private static void Multiply(Tuple<int, double[][]> A, double[][] B, double[][] C)
+        {
+            int size = A.Item2.GetLength(0);
+            int b_m = B.GetLength(0);
+            int b_n = B[0].Length;
+
+            double[][] ai = A.Item2;
+
+            int i = 0;
+            int offset = A.Item1;
+            do
+            {
+                int k = 0;
+                do
+                {
+                    int j = 0;
+                    do
+                    {
+                        double[] ci = C[offset];
+                        ci[j] = (ai[i][k] * B[k][j]) + ci[j];
+                        j++;
+                    } while (j < b_n);
+                    k++;
+                } while (k < b_m);
+                i++;
+                offset++;
+            } while (i < size);
+        }
         /// <summary>
         ///   LU Decomposition
         /// </summary>

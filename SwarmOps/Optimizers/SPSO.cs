@@ -133,7 +133,7 @@ namespace SwarmOps.Optimizers
         #endregion
 
         #region Base-class overrides, Optimizer.
-        public Result Optimize()
+        public new Result Optimize()
         {
             var parameters = this.CalculateParameters(Problem.Dimensionality, 3);
             return Optimize(parameters);

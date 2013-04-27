@@ -200,6 +200,39 @@ namespace DotNetMatrix_Test
             var actual = matrix.GetElement(matrix.RowDimension-1, matrix.ColumnDimension-1);
             Assert.AreEqual(expected,actual);
         }
+        [TestMethod]
+        public void MatrixParallelMultiplyEqualsNonParallelMultiply()
+        {
+            double[][] array = { new[] { 1.0, 4.0, 7.0 }, new[] { 2.0, 5.0, 8.0 }, new[] { 3.0, 6.0, 9.0 } };
+            var matrix = new GeneralMatrix(array);
+            double[][] array2 = { new[] { 2.0, 1.0, 5.0 }, new[] { 3.0, 5.0, 7.0}, new[] { 2.0, 4.0, 6.0 } };
+            var matrix2 = new GeneralMatrix(array2);
+            var mResult = matrix.Multiply(matrix2);
+            var pmResult = matrix.ParallelMultiply(matrix2);
+            Assert.AreEqual(mResult,pmResult);
+        }
+        [TestMethod]
+        public void MatrixParallelMultiplyEqualsNonParallelMultiplyDifferentSizes()
+        {
+            double[][] array = {new[] {1.0, 4.0, 7.0}, new[] {2.0, 5.0, 8.0}, new[] {3.0, 6.0, 9.0}};
+            var matrix = new GeneralMatrix(array);
+            double[][] array2 = {new[] {2.0, 1.0}, new[] {3.0, 5.0}, new[] {2.0, 4.0}};
+            var matrix2 = new GeneralMatrix(array2);
+            var mResult = matrix.Multiply(matrix2);
+            var pmResult = matrix.ParallelMultiply(matrix2);
+            Assert.AreEqual(mResult, pmResult);
+        }
 
+        [TestMethod]
+        public void MatrixParallelMultiplyEqualsNonParallelMultiply_3x2_2x2()
+        {
+            var array = new[]{ new[] { 1.0, 4.0 }, new[] { 2.0, 5.0 }, new[] { 3.0, 6.0} };
+            var matrix = new GeneralMatrix(array);
+            var array2 = new[]{ new[] { 2.0, 1.0 }, new[] { 3.0, 5.0 } };
+            var matrix2 = new GeneralMatrix(array2);
+            var mResult = matrix.Multiply(matrix2);
+            var pmResult = matrix.ParallelMultiply(matrix2);
+            Assert.AreEqual(mResult, pmResult);
+        }
     }
 }
