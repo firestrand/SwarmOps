@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -104,6 +103,9 @@ namespace SwarmOps.Optimizers
         /// <param name="parameters">Control parameters for the optimizer.</param>
         public override Result Optimize(double[] parameters)
         {
+            // Signal beginning of optimization run.
+            Problem.BeginOptimizationRun();
+
             // Get problem-context.
             double[] lowerBound = Problem.LowerBound;
             double[] upperBound = Problem.UpperBound;
@@ -113,63 +115,85 @@ namespace SwarmOps.Optimizers
 
             // Allocate agent position and search-range vectors.
             double[] x = new double[n];      // Current position.
+            double[] y = new double[n];      // Potentially new position.
             double[] d = new double[n];      // Search-range.
 
-            // Fitness variables.
-            double fitness, newFitness;
-
             // Initialize agent-position in search-space.
-            Tools.InitializeUniform(ref x, lowerBound, upperBound);
+            Tools.InitializeUniform(ref x, lowerInit, upperInit);
 
             // Initialize search-range to full search-space.
             Tools.InitializeRange(ref d, lowerBound, upperBound);
 
+            // Enforce constraints and evaluate feasibility.
+            bool feasible = Problem.EnforceConstraints(ref x);
+
             // Compute fitness of initial position.
             // This counts as an iteration below.
-            fitness = Problem.Fitness(x);
+            double fitness = Problem.Fitness(x, feasible);
 
             // Trace fitness of best found solution.
-            Trace(0, fitness);
+            Trace(0, fitness, feasible);
 
             int i;
-            for (i = 1; Problem.RunCondition.Continue(i, fitness); i++)
+            for (i = 1; Problem.Continue(i, fitness, feasible); i++)
             {
                 // Pick random dimension.
                 int R = Globals.Random.Index(n);
 
-                // Store old value for that dimension.
-                double t = x[R];
+                // Copy current position to new position
+                x.CopyTo(y, 0);
 
-                // Compute new value for that dimension.
-                x[R] += d[R];
+                // Compute new value for randomly chosen dimension.
+                y[R] += d[R];
 
-                // Enforce bounds before computing new fitness.
-                x[R] = Tools.Bound(x[R], lowerBound[R], upperBound[R]);
+                // Enforce constraints and evaluate feasibility.
+                bool newFeasible = Problem.EnforceConstraints(ref y);
 
-                // Compute new fitness.
-                newFitness = Problem.Fitness(x, fitness);
-
-                // If improvement to fitness, keep new position.
-                if (newFitness < fitness)
+                // Compute fitness if feasibility (constraint satisfaction) is same or better.
+                if (Tools.BetterFeasible(feasible, newFeasible))
                 {
-                    // Store fitness.
+                    // Compute fitness of new position.
+                    double newFitness = Problem.Fitness(y, fitness, feasible, newFeasible);
+
+                    // Update best known position, if improvement.
+                    if (Tools.BetterFeasibleFitness(feasible, newFeasible, fitness, newFitness))
+                {
+                        // Update fitness.
                     fitness = newFitness;
-                }
-                else
-                {
-                    // Restore position.
-                    x[R] = t;
 
+                        // Update feasibility.
+                        feasible = newFeasible;
+
+                        // Update position by swapping array x and y.
+                        // This is necessary because the constraint-handler
+                        // may alter the position y to something different
+                        // from what PS computed it to be. Otherwise we
+                        // could just have updated the R'th dimension of x.
+                        double[] temp = x;
+                        x = y;
+                        y = temp;
+                }
+                    else // Worse fitness.
+                    {
+                        // Reduce and invert search-range.
+                        d[R] *= -0.5;
+                    }
+                }
+                else // Worse feasibility.
+                {
                     // Reduce and invert search-range.
                     d[R] *= -0.5;
                 }
 
                 // Trace fitness of best found solution.
-                Trace(i, fitness);
+                Trace(i, fitness, feasible);
             }
 
+            // Signal end of optimization run.
+            Problem.EndOptimizationRun();
+
             // Return best-found solution and fitness.
-            return new Result(x, fitness, i);
+            return new Result(x, fitness, feasible, i);
         }
         #endregion
     }

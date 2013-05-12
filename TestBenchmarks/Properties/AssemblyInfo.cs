@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Hvass Laboratories")]
 [assembly: AssemblyProduct("TestBenchmarks")]
-[assembly: AssemblyCopyright("Copyright © Magnus Erik Hvass Pedersen 2009")]
+[assembly: AssemblyCopyright("Copyright © Magnus Erik Hvass Pedersen 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

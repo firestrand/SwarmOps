@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -22,34 +21,47 @@ namespace TestMetaBenchmarks
     class Program
     {
         // Settings for the optimization layer.
-        static readonly int NumRuns = 64;
-        static readonly int Dim = 30;
+        static readonly int NumRuns = 50;
+        static readonly int Dim = 5;
         static readonly int DimFactor = 2000;
         static readonly int NumIterations = DimFactor * Dim;
-        static readonly bool DisplaceOptimum = true;
 
-        // The optimizer whose control paramters are to be tuned.
-        static Optimizer Optimizer = new DE();
+        // Mangle search-space.
+        static readonly bool UseMangler = false;
+        static readonly double Spillover = 0.05;       // E.g. 0.05
+        static readonly double Displacement = 0.1;     // E.g. 0.1
+        static readonly double Diffusion = 0.01;       // E.g. 0.01
+        static readonly double FitnessNoise = 0.01;    // E.g. 0.01
+
+        // Wrap problem-object in search-space mangler.
+        static Problem Mangle(Problem problem)
+        {
+            return (UseMangler) ? (new Mangler(problem, Diffusion, Displacement, Spillover, FitnessNoise)) : (problem);
+        }
+
+        // The optimizer whose control parameters are to be tuned.
+        static Optimizer Optimizer = new MOL();
+        //static Optimizer Optimizer = new DESuite(DECrossover.Variant.Rand1Bin, DESuite.DitherVariant.None);
 
         // Problems to optimize. That is, the optimizer is having its control
         // parameters tuned to work well on these problems. The numbers are weights
-        // that significy mutual importance of the problems in tuning. Higher weight
+        // that signify mutual importance of the problems in tuning. Higher weight
         // means more importance.
         static WeightedProblem[] WeightedProblems =
             new WeightedProblem[]
             {
-                new WeightedProblem(1.0, new Ackley(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new Griewank(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new Penalized1(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new Penalized2(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                //new WeightedProblem(1.0, new QuarticNoise(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new Rastrigin(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new Rosenbrock(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new Schwefel12(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new Schwefel221(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new Schwefel222(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new Sphere(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
-                new WeightedProblem(1.0, new Step(Dim, DisplaceOptimum, new RunConditionIterations(NumIterations))),
+                new WeightedProblem(1.0, Mangle(new Ackley(Dim, NumIterations))),
+                new WeightedProblem(1.0, Mangle(new Griewank(Dim, NumIterations))),
+                //new WeightedProblem(1.0, Mangle(new Penalized1(Dim, NumIterations))),
+                //new WeightedProblem(1.0, Mangle(new Penalized2(Dim, NumIterations))),
+                //new WeightedProblem(1.0, Mangle(new QuarticNoise(Dim, NumIterations))),
+                //new WeightedProblem(1.0, Mangle(new Rastrigin(Dim, NumIterations))),
+                new WeightedProblem(1.0, Mangle(new Rosenbrock(Dim, NumIterations))),
+                new WeightedProblem(1.0, Mangle(new Schwefel12(Dim, NumIterations))),
+                //new WeightedProblem(1.0, Mangle(new Schwefel221(Dim, NumIterations))),
+                //new WeightedProblem(1.0, Mangle(new Schwefel222(Dim, NumIterations))),
+                //new WeightedProblem(1.0, Mangle(new Sphere(Dim, NumIterations))),
+                new WeightedProblem(1.0, Mangle(new Step(Dim, NumIterations))),
             };
 
         // Settings for the meta-optimization layer.
@@ -58,18 +70,19 @@ namespace TestMetaBenchmarks
         static readonly int MetaDimFactor = 20;
         static readonly int MetaNumIterations = MetaDimFactor * MetaDim;
 
-        // Continue meta-optimization for a certain number of iterations.
-        static IRunCondition RunCondition = new RunConditionIterations(MetaNumIterations);
-
         // The meta-fitness consists of computing optimization performance
         // for the problems listed above over several optimization runs and
         // sum the results, so we wrap the Optimizer-object in a
         // MetaFitness-object which takes of this.
-        static MetaFitness MetaFitness = new MetaFitness(Optimizer, WeightedProblems, NumRuns);
+        static MetaFitness MetaFitness = new MetaFitness(Optimizer, WeightedProblems, NumRuns, MetaNumIterations);
+
+        // Print meta-optimization progress.
+        static FitnessPrint MetaFitnessPrint = new FitnessPrint(MetaFitness);
 
         // Log all candidate solutions.
         static int LogCapacity = 20;
-        static LogSolutions LogSolutions = new LogSolutions(MetaFitness, LogCapacity);
+        static bool LogOnlyFeasible = false;
+        static LogSolutions LogSolutions = new LogSolutions(MetaFitnessPrint, LogCapacity, LogOnlyFeasible);
 
         // The meta-optimizer.
         static Optimizer MetaOptimizer = new LUS(LogSolutions);
@@ -81,25 +94,24 @@ namespace TestMetaBenchmarks
         //static double[] MetaParameters = DE.Parameters.ForMetaOptimization;
 
         // Wrap the meta-optimizer in a Statistics object for logging results.
-        static Statistics Statistics = new Statistics(MetaOptimizer);
+        static readonly bool StatisticsOnlyFeasible = true;
+        static Statistics Statistics = new Statistics(MetaOptimizer, StatisticsOnlyFeasible);
 
         // Repeat a number of meta-optimization runs.
-        static Repeat MetaRepeat = new RepeatCount(Statistics, MetaNumRuns);
+        static Repeat MetaRepeat = new RepeatMin(Statistics, MetaNumRuns);
 
         static void Main(string[] args)
         {
             // Initialize the PRNG.
             Globals.Random = new RandomOps.MersenneTwister();
 
-            // Create a fitness trace for tracing the progress of optimization.
+            // Create a fitness trace for tracing the progress of meta-optimization.
             int MaxMeanIntervals = 3000;
             FitnessTrace fitnessTrace = new FitnessTraceMean(MetaNumIterations, MaxMeanIntervals);
-
-            // Assign the RunCondition to the optimizer.
-            Optimizer.RunCondition = RunCondition;
+            FeasibleTrace feasibleTrace = new FeasibleTrace(MetaNumIterations, MaxMeanIntervals, fitnessTrace);
 
             // Assign the fitness trace to the meta-optimizer.
-            MetaOptimizer.FitnessTrace = fitnessTrace;
+            MetaOptimizer.FitnessTrace = feasibleTrace;
 
             // Output settings.
             Console.WriteLine("Meta-Optimization of benchmark problems.");
@@ -124,11 +136,22 @@ namespace TestMetaBenchmarks
             Console.WriteLine("Dimensionality for each benchmark problem: {0}", Dim);
             Console.WriteLine("Number of runs per benchmark problem: {0}", NumRuns);
             Console.WriteLine("Number of iterations per run: {0}", NumIterations);
-            Console.WriteLine("Displace global optimum: {0}", (DisplaceOptimum) ? ("Yes") : ("No"));
+            if (UseMangler)
+            {
+                Console.WriteLine("Mangle search-space:");
+                Console.WriteLine("\tSpillover:     {0}", Spillover);
+                Console.WriteLine("\tDisplacement:  {0}", Displacement);
+                Console.WriteLine("\tDiffusion:     {0}", Diffusion);
+                Console.WriteLine("\tFitnessNoise:  {0}", FitnessNoise);
+            }
+            else
+            {
+                Console.WriteLine("Mangle search-space: No");
+            }
             Console.WriteLine();
 
-            Console.WriteLine("*** Indicates a meta-fitness evaluation is an improvement.");
-            Console.WriteLine();
+            Console.WriteLine("0/1 Boolean whether optimizer's control parameters are feasible.");
+            Console.WriteLine("*** Indicates meta-fitness/feasibility is an improvement.");
 
             // Start-time.
             DateTime t1 = DateTime.Now;
@@ -161,9 +184,10 @@ namespace TestMetaBenchmarks
             Console.WriteLine("Best {0} found parameters:", LogSolutions.Capacity);
             foreach (Solution candidateSolution in LogSolutions.Log)
             {
-                Console.WriteLine("\t{0}\t{1}",
+                Console.WriteLine("\t{0}\t{1}\t{2}",
                     Tools.ArrayToStringRaw(candidateSolution.Parameters, 4),
-                    Tools.FormatNumber(candidateSolution.Fitness));
+                    Tools.FormatNumber(candidateSolution.Fitness),
+                    (candidateSolution.Feasible) ? (1) : (0));
             }
 
             // Output time-usage.
@@ -172,11 +196,13 @@ namespace TestMetaBenchmarks
 
             // Output fitness trace.
             string traceFilename
-                = "MetaFitnessTrace-" + MetaOptimizer.Name + "-" + Optimizer.Name
+                = MetaOptimizer.Name + "-" + Optimizer.Name
                 + "-" + WeightedProblems.Length + "Bnch" + "-" + DimFactor + "xDim.txt";
-            fitnessTrace.WriteToFile(traceFilename);
-            Console.WriteLine("Press Enter to Exit");
-            Console.ReadLine();
+            fitnessTrace.WriteToFile("MetaFitnessTrace-" + traceFilename);
+            feasibleTrace.WriteToFile("MetaFeasibleTrace-" + traceFilename);
+
+            //Console.WriteLine("Press any key to exit ...");
+            //Console.ReadKey();
         }
     }
 }

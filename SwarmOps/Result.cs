@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -19,12 +18,14 @@ namespace SwarmOps
         /// </summary>
         /// <param name="parameters">Best found solution parameters.</param>
         /// <param name="fitness">Fitness for best found solution.</param>
+        /// <param name="feasible">Feasibility (constraint satisfaction) of best found solution.</param>
         /// <param name="iterations">Number of iterations used.</param>
-        public Result(double[] parameters, double fitness, int iterations)
+        public Result(double[] parameters, double fitness, bool feasible, int iterations)
         {
             Parameters = parameters.Clone() as double[];
             Fitness = fitness;
             Iterations = iterations;
+            Feasible = feasible;
         }
         #endregion
 
@@ -42,6 +43,16 @@ namespace SwarmOps
         /// Fitness associated with best found solution.
         /// </summary>
         public double Fitness
+        {
+            get;
+            protected set;
+        }
+
+        /// <summary>
+        /// Feasibility (constraint satisfaction) associated with best found solution.
+        /// Defaults to true if problem is not constrained.
+        /// </summary>
+        public bool Feasible
         {
             get;
             protected set;

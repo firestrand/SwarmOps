@@ -1084,6 +1084,27 @@ namespace DotNetMatrix
             }
             return x;
         }
+        public virtual GeneralMatrix ParallelMultiplyNaive(GeneralMatrix b)
+        {
+            if (b._m != _n)
+            {
+                throw new ArgumentException("GeneralMatrix inner dimensions must agree.");
+            }
+            var x = new GeneralMatrix(_m, b._n);
+            double[][] c = x.Array;
+
+            Parallel.For(0, _m, i =>
+                                    {
+                                        for (int k = 0; k < _n; k++)
+                                        {
+                                            for (int j = 0; j < b._n; j++)
+                                            {
+                                                c[i][j] = (_a[i][k]*b._a[k][j]) + c[i][j];
+                                            }
+                                        }
+                                    });
+            return x;
+        }
         /// <summary>
         /// Modified from http://codepyre.com/2010/03/parallel-matrix-multiplication-with-the-task-parallel-library-tpl/
         /// </summary>

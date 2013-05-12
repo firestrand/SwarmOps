@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="ProblemTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RunConditionFitnessStagnationTests.cs" />
     <Compile Include="ToolTests.cs" />
   </ItemGroup>
   <ItemGroup>

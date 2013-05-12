@@ -67,6 +67,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OptimizerWrapper.cs" />
+    <Compile Include="FeasibleTrace.cs" />
+    <Compile Include="RunConditionFitnessStagnation.cs" />
     <Compile Include="Optimizers\FPSO.cs" />
     <Compile Include="Optimizers\PSOM.cs" />
     <Compile Include="Optimizers\VPSO.cs" />
@@ -84,10 +87,12 @@
     <Compile Include="Optimizers\LPSO.cs" />
     <Compile Include="Optimizers\Parallel\MOL.cs" />
     <Compile Include="Optimizers\Parallel\PSO.cs" />
+    <Compile Include="Problems\Mangler.cs" />
     <Compile Include="Problems\GearTrain.cs" />
     <Compile Include="Problems\RosenbrockF6.cs" />
     <Compile Include="Problems\Tripod.cs" />
     <Compile Include="Problems\SphereSleep.cs" />
+    <Compile Include="Tools\Feasible.cs" />
     <Compile Include="WeightedProblem.cs" />
     <Compile Include="FitnessTraceMean.cs" />
     <Compile Include="FitnessTraceQuartiles.cs" />
@@ -97,6 +102,7 @@
     <Compile Include="FitnessTrace.cs" />
     <Compile Include="FitnessPrint.cs" />
     <Compile Include="Extensions\Enumerable.cs" />
+    <Compile Include="Optimizers\MetaFitness.cs" />
     <Compile Include="Optimizers\DECrossover.cs" />
     <Compile Include="Optimizers\JDE.cs" />
     <Compile Include="Optimizers\DESuite.cs" />
@@ -149,7 +155,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="Tools\Matrix.cs" />
-    <Compile Include="Tools\PrintParameters.cs" />
+    <Compile Include="Tools\Print.cs" />
     <Compile Include="Tools\Sample.cs" />
     <Compile Include="Statistics.cs" />
     <Compile Include="Statistics\StatisticsAccumulator.cs">

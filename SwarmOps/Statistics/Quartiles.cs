@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -21,6 +20,7 @@ namespace SwarmOps
         /// </summary>
         public Quartiles()
         {
+            Clear();
         }
         #endregion
 
@@ -28,7 +28,7 @@ namespace SwarmOps
         /// <summary>
         /// Minimum element.
         /// </summary>
-        public double Min
+        public double? Min
         {
             get;
             private set;
@@ -37,7 +37,7 @@ namespace SwarmOps
         /// <summary>
         /// Maximum element.
         /// </summary>
-        public double Max
+        public double? Max
         {
             get;
             private set;
@@ -48,7 +48,7 @@ namespace SwarmOps
         /// is the median, otherwise if array is even-length the
         /// median is the mean of the two middle elements.
         /// </summary>
-        public double Median
+        public double? Median
         {
             get;
             private set;
@@ -58,7 +58,7 @@ namespace SwarmOps
         /// First quartile, if between two elements the one
         /// closest to the median is taken.
         /// </summary>
-        public double Q1
+        public double? Q1
         {
             get;
             private set;
@@ -67,7 +67,7 @@ namespace SwarmOps
         /// <summary>
         /// Same as Median.
         /// </summary>
-        public double Q2
+        public double? Q2
         {
             get { return Median; }
         }
@@ -76,7 +76,7 @@ namespace SwarmOps
         /// Third quartile, if between two elements the one
         /// closest to the median is taken.
         /// </summary>
-        public double Q3
+        public double? Q3
         {
             get;
             private set;
@@ -85,7 +85,7 @@ namespace SwarmOps
         /// <summary>
         /// Inter-quartile range, Q3-Q1.
         /// </summary>
-        public double IQR
+        public double? IQR
         {
             get;
             private set;
@@ -94,12 +94,25 @@ namespace SwarmOps
 
         #region Public methods.
         /// <summary>
+        /// Clear all quartiles.
+        /// </summary>
+        public void Clear()
+        {
+            Min = null;
+            Max = null;
+            Median = null;
+            Q1 = null;
+            Q3 = null;
+            IQR = null;
+        }
+        /// <summary>
         /// Compute quartiles for a sorted array of values.
         /// </summary>
         /// <param name="x">Sorted array of values.</param>
         public void Compute(double[] x)
         {
-            Debug.Assert(x.Length > 0);
+            if (x.Length > 0)
+            {
 
             ComputeMedian(x);
             ComputeQ1(x);
@@ -109,6 +122,11 @@ namespace SwarmOps
 
             Min = x[0];
             Max = x[x.Length - 1];
+        }
+            else
+            {
+                Clear();
+            }
         }
 
         /// <summary>
@@ -134,8 +152,6 @@ namespace SwarmOps
         /// <param name="x">Un-sorted array of values.</param>
         public void ComputeUnsortedInplace(double[] x)
         {
-            if (x.Length == 0)
-                return;
             System.Array.Sort(x);
 
             Compute(x);

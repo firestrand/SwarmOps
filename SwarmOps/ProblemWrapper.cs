@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -9,7 +8,7 @@
 namespace SwarmOps
 {
     /// <summary>
-    /// Transparently wrap a problem-object.
+    /// Transparently wrap a Problem-object.
     /// </summary>
     public abstract class ProblemWrapper : Problem
     {
@@ -38,12 +37,11 @@ namespace SwarmOps
 
         #region Problem base-class overrides.
         /// <summary>
-        /// Used for determining whether or not to continue optimization.
+        /// Return Name of the wrapped problem.
         /// </summary>
-        public override IRunCondition RunCondition
+        public override string Name
         {
-            get { return Problem.RunCondition; }
-            set { Problem.RunCondition = value; }
+            get { return Problem.Name; }
         }
 
         /// <summary>
@@ -139,6 +137,51 @@ namespace SwarmOps
         public override int Gradient(double[] x, ref double[] v)
         {
             return Problem.Gradient(x, ref v);
+        }
+
+        /// <summary>
+        /// Enforce constraints and evaluate feasiblity of the wrapped problem.
+        /// </summary>
+        /// <param name="parameters">Candidate solution.</param>
+        public override bool EnforceConstraints(ref double[] parameters)
+        {
+            return Problem.EnforceConstraints(ref parameters);
+        }
+
+        /// <summary>
+        /// Evaluate feasibility (constraint satisfaction) of the wrapped problem.
+        /// </summary>
+        /// <param name="parameters">Candidate solution.</param>
+        public override bool Feasible(double[] parameters)
+        {
+            return Problem.Feasible(parameters);
+        }
+
+        /// <summary>
+        /// Propagate signal to wrapped problem.
+        /// </summary>
+        public override void BeginOptimizationRun()
+        {
+            Problem.BeginOptimizationRun();
+        }
+
+        /// <summary>
+        /// Propagate signal to wrapped problem.
+        /// </summary>
+        public override void EndOptimizationRun()
+        {
+            Problem.EndOptimizationRun();
+        }
+
+        /// <summary>
+        /// Return whether optimization of wrapped problem is allowed to continue.
+        /// </summary>
+        /// <param name="iterations">Number of iterations performed in optimization run.</param>
+        /// <param name="fitness">Best fitness found in optimization run.</param>
+        /// <param name="feasible">Feasibility of best found candidate solution.</param>
+        public override bool Continue(int iterations, double fitness, bool feasible)
+        {
+            return Problem.Continue(iterations, fitness, feasible);
         }
         #endregion
     }

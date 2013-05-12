@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -20,12 +19,9 @@ namespace SwarmOps.Problems
         /// Construct the object.
         /// </summary>
         /// <param name="dimensionality">Dimensionality of the problem (e.g. 20)</param>
-        /// <param name="displaceOptimum">Displace optimum?</param>
-        /// <param name="runCondition">
-        /// Determines for how long to continue optimization.
-        /// </param>
-        public Schwefel12(int dimensionality, bool displaceOptimum, IRunCondition runCondition)
-            : base(dimensionality, -100, 100, 50, 100, -25, displaceOptimum, runCondition)
+        /// <param name="maxIterations">Max optimization iterations to perform.</param>
+        public Schwefel12(int dimensionality, int maxIterations)
+            : base(dimensionality, -100, 100, 50, 100, maxIterations)
         {
         }
         #endregion
@@ -63,7 +59,7 @@ namespace SwarmOps.Problems
 
                 for (int j = 0; j <= i; j++)
                 {
-                    double elm = Displace(x[j]);
+                    double elm = x[j];
 
                     sum += elm;
                 }

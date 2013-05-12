@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -20,9 +19,9 @@ namespace SwarmOps.Problems
         /// Construct the object.
         /// </summary>
         /// <param name="dimensionality">Dimensionality of the problem (e.g. 20)</param>
-        /// <param name="displaceOptimum">Displace optimum?</param>
-        public Griewank(int dimensionality, bool displaceOptimum, IRunCondition runCondition)
-            : base(dimensionality, -600, 600, 300, 600, -150, displaceOptimum, runCondition)
+        /// <param name="maxIterations">Max optimization iterations to perform.</param>
+        public Griewank(int dimensionality, int maxIterations)
+            : base(dimensionality, -600, 600, 300, 600, maxIterations)
         {
         }
         #endregion
@@ -45,14 +44,6 @@ namespace SwarmOps.Problems
         }
 
         /// <summary>
-        /// Threshold for an acceptable fitness value.
-        /// </summary>
-        public override double AcceptableFitness
-        {
-            get { return 1.0; }
-        }
-
-        /// <summary>
         /// Compute and return fitness for the given parameters.
         /// </summary>
         /// <param name="x">Candidate solution.</param>
@@ -64,7 +55,7 @@ namespace SwarmOps.Problems
 
             for (int i = 0; i < Dimensionality; i++)
             {
-                double elm = Displace(x[i]);
+                double elm = x[i];
 
                 sum += elm * elm;
                 prod *= System.Math.Cos(elm / System.Math.Sqrt((double)(i + 1)));
@@ -93,7 +84,7 @@ namespace SwarmOps.Problems
 
             for (int i = 0; i < Dimensionality; i++)
             {
-                double elm = Displace(x[i]);
+                double elm = x[i];
 
                 double rec = 1.0 / System.Math.Sqrt((double)(i + 1));
                 double val2 = System.Math.Sin(elm * rec) * rec;

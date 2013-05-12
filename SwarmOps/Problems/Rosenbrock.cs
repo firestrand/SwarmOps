@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -20,17 +19,11 @@ namespace SwarmOps.Problems
         /// Construct the object.
         /// </summary>
         /// <param name="dimensionality">Dimensionality of the problem (e.g. 20)</param>
-        /// <param name="displaceOptimum">Displace optimum?</param>
-        /// <param name="runCondition">
-        /// Determines for how long to continue optimization.
-        /// </param>
-        public Rosenbrock(int dimensionality, bool displaceOptimum, IRunCondition runCondition)
-            :this(dimensionality,25.0,displaceOptimum,runCondition)
+        /// <param name="maxIterations">Max optimization iterations to perform.</param>
+        public Rosenbrock(int dimensionality, int maxIterations)
+            : base(dimensionality, -100, 100, 15, 30, maxIterations)
         {
         }
-        public Rosenbrock(int dimensionality,double displacement,bool displaceOptimum,IRunCondition runCondition)
-            : base(dimensionality, -100, 100, 15, 30, displacement, displaceOptimum, runCondition)
-        {}
         #endregion
 
         #region Base-class overrides.
@@ -62,8 +55,8 @@ namespace SwarmOps.Problems
 
             for (int i = 0; i < Dimensionality - 1; i++)
             {
-                double elm = Displace(x[i]);
-                double nextElm = Displace(x[i + 1]);
+                double elm = x[i];
+                double nextElm = x[i + 1];
 
                 double minusOne = elm - 1;
                 double nextMinusSqr = nextElm - elm * elm;
@@ -94,16 +87,16 @@ namespace SwarmOps.Problems
 
             for (int i = 0; i < Dimensionality - 1; i++)
             {
-                double elm = Displace(x[i]);
-                double nextElm = Displace(x[i + 1]);
+                double elm = x[i];
+                double nextElm = x[i + 1];
 
                 v[i] = -400 * (nextElm - elm * elm) * elm + 2 * (elm - 1);
             }
 
             // Gradient for the last dimension.
             {
-                double elm = Displace(x[Dimensionality - 1]);
-                double prevElm = Displace(x[Dimensionality - 2]); ;
+                double elm = x[Dimensionality - 1];
+                double prevElm = x[Dimensionality - 2];
 
                 v[Dimensionality - 1] = 200 * (elm - prevElm * prevElm);
             }

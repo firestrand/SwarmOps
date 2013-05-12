@@ -1,12 +1,10 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
 
-using System;
 using System.Diagnostics;
 
 namespace SwarmOps
@@ -56,6 +54,26 @@ namespace SwarmOps
             {
                 x[i] = Bound(x[i], lower[i], upper[i]);
             }
+        }
+
+        /// <summary>
+        /// Return whether array of values is between lower and upper boundaries.
+        /// </summary>
+        /// <param name="x">Array of values to be bounded.</param>
+        /// <param name="lower">Lower boundaries.</param>
+        /// <param name="upper">Upper boundaries.</param>
+        public static bool BetweenBounds(double[] x, double[] lower, double[] upper)
+        {
+            Debug.Assert(x.Length == lower.Length && x.Length == upper.Length);
+
+            bool retVal = true;
+
+            for (int i = 0; retVal && i < x.Length; i++)
+            {
+                retVal = retVal && x[i] >= lower[i] && x[i] <= upper[i]; 
+            }
+
+            return retVal;
         }
     }
 }

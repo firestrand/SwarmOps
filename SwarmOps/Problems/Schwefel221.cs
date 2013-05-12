@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -20,12 +19,9 @@ namespace SwarmOps.Problems
         /// Construct the object.
         /// </summary>
         /// <param name="dimensionality">Dimensionality of the problem (e.g. 20)</param>
-        /// <param name="displaceOptimum">Displace optimum?</param>
-        /// <param name="runCondition">
-        /// Determines for how long to continue optimization.
-        /// </param>
-        public Schwefel221(int dimensionality, bool displaceOptimum, IRunCondition runCondition)
-            : base(dimensionality, -100, 100, 50, 100, -25, displaceOptimum, runCondition)
+        /// <param name="maxIterations">Max optimization iterations to perform.</param>
+        public Schwefel221(int dimensionality, int maxIterations)
+            : base(dimensionality, -100, 100, 50, 100, maxIterations)
         {
         }
         #endregion
@@ -55,11 +51,11 @@ namespace SwarmOps.Problems
         {
             Debug.Assert(x != null && x.Length == Dimensionality);
 
-            double maxValue = maxValue = GetElm(x[0]);
+            double maxValue = System.Math.Abs(x[0]);
 
             for (int i = 1; i < Dimensionality; i++)
             {
-                double elm = GetElm(x[i]);
+                double elm = System.Math.Abs(x[i]);
 
                 if (elm > maxValue)
                 {
@@ -68,19 +64,6 @@ namespace SwarmOps.Problems
             }
 
             return maxValue;
-        }
-        #endregion
-
-        #region Protected methods.
-        /// <summary>
-        /// Return the absolute of the parameter.
-        /// </summary>
-        protected double GetElm(double x)
-        {
-            double elm = Displace(x);
-            double absElm = System.Math.Abs(elm);
-
-            return absElm;
         }
         #endregion
     }
