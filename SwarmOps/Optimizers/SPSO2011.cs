@@ -32,13 +32,13 @@ namespace SwarmOps.Optimizers
     ///     Networks, volume IV, pages 1942-1948, Perth, Australia, 1995
     /// (3) Clerc, M. C Source Code downloaded from http://clerc.maurice.free.fr/pso/
     /// </remarks>
-    public class SPSO : Optimizer
+    public class SPSO2011 : Optimizer
     {
         #region Constructors.
         /// <summary>
         /// Construct the object.
         /// </summary>
-        public SPSO()
+        public SPSO2011()
             : base()
         {
             RandomChoice = RandomAlgorithm.MersenneTwister;
@@ -48,7 +48,7 @@ namespace SwarmOps.Optimizers
         /// Construct the object.
         /// </summary>
         /// <param name="problem">Problem to optimize.</param>
-        public SPSO(Problem problem)
+        public SPSO2011(Problem problem)
             : base(problem)
         {
             RandomChoice = RandomAlgorithm.MersenneTwister; //Default Random Choice
@@ -326,7 +326,7 @@ namespace SwarmOps.Optimizers
             return new Result(bestAgentPosition[best], bestAgentFitness[best], nEval);
         }
         #endregion
-        public double[] CalculateParameters(int dimensions, int numInformed)
+        public double[] CalculateParameters(int dimensions, int numInformed, int swarmSize = 40)
         {
             /*
              * S := swarm size
@@ -335,7 +335,7 @@ namespace SwarmOps.Optimizers
              * w := first cognitive/confidence coefficient
              * c := second cognitive/confidence coefficient
              */
-            int S = (int)(10 + 2 * Math.Sqrt(dimensions));	// Swarm size
+            int S = swarmSize;	// Swarm size
             int K = numInformed; //number of informed particles
             double p = 1 - Math.Pow(1 - (double)1 / (S), K); //Probability threshold of random topology
             // (to simulate the global best PSO, set p=1)

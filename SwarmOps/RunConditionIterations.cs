@@ -21,7 +21,7 @@ namespace SwarmOps
         /// <param name="maxIterations">
         /// Stop optimization once this number of iterations is used.
         /// </param>
-        public RunConditionIterations(int maxIterations)
+        public RunConditionIterations(long maxIterations)
         {
             MaxIterations = maxIterations;
         }
@@ -31,7 +31,7 @@ namespace SwarmOps
         /// <summary>
         /// Maximum number of optimization iterations to perform.
         /// </summary>
-        public int MaxIterations
+        public long MaxIterations
         {
             get;
             protected set;

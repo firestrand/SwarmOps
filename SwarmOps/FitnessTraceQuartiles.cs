@@ -32,7 +32,7 @@ namespace SwarmOps
         /// <param name="numRuns">Number of optimization to be performed.</param>
         /// <param name="numIterations">Number of iterations per optimization run.</param>
         /// <param name="numIntervals">Approximate number of intervals to show mean.</param>
-        public FitnessTraceQuartiles(int numRuns, int numIterations, int numIntervals)
+        public FitnessTraceQuartiles(int numRuns, long numIterations, int numIntervals)
             : this(numRuns, numIterations, numIntervals, null)
         {
         }
@@ -44,7 +44,7 @@ namespace SwarmOps
         /// <param name="numIterations">Number of iterations per optimization run.</param>
         /// <param name="numIntervals">Approximate number of intervals to show mean.</param>
         /// <param name="chainedFitnessTrace">Chained FitnessTrace object.</param>
-        public FitnessTraceQuartiles(int numRuns, int numIterations, int numIntervals, FitnessTrace chainedFitnessTrace)
+        public FitnessTraceQuartiles(int numRuns, long numIterations, int numIntervals, FitnessTrace chainedFitnessTrace)
             : base(chainedFitnessTrace, numIterations, numIntervals, 0.5)
         {
             NumRuns = numRuns;
@@ -72,7 +72,7 @@ namespace SwarmOps
         /// <summary>
         /// Number of iterations per optimization run being fitness-traced.
         /// </summary>
-        public int NumIterations
+        public long NumIterations
         {
             get;
             private set;
@@ -98,7 +98,7 @@ namespace SwarmOps
         /// </summary>
         /// <param name="index">Index into fitness-trace, mapped from optimization iteration.</param>
         /// <param name="fitness">Fitness value to log.</param>
-        protected override void Log(int index, double fitness)
+        protected override void Log(long index, double fitness)
         {
             Trace[index].Add(fitness);
         }

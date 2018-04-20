@@ -16,8 +16,10 @@ namespace MiniBenchmark
     class Program
     {
         // Create optimizer object.
-        //static SPSO Optimizer = new SPSO();
-        static PSOM Optimizer = new PSOM();
+        static SPSO2007 Optimizer = new SPSO2007();
+        //static MOL Optimizer = new MOL();
+        //static PS Optimizer = new PS();
+
         //static Optimizer Optimizer = new VPSO();
         // Control parameters for optimizer.
         private static readonly double[] Parameters = Optimizer.DefaultParameters;
@@ -42,8 +44,8 @@ namespace MiniBenchmark
             Repeat Repeat = new RepeatCount(Optimizer, NumRuns);
 
             // Perform the optimization runs.
-            //double successPercent = Repeat.Fitness(Parameters);
-            double successPercent = Repeat.Fitness(Optimizer.CalculateParameters(Optimizer.Problem.Dimensionality, 3));
+            double successPercent = Repeat.Fitness(Parameters);
+            //double successPercent = Repeat.Fitness(Optimizer.CalculateParameters(Optimizer.Problem.Dimensionality, 3));
 
             // Output result-statistics.
             Console.WriteLine("{0} & {1} \\\\",

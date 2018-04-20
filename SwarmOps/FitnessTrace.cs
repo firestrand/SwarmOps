@@ -20,20 +20,20 @@ namespace SwarmOps
         /// <summary>
         /// Construct a new object.
         /// </summary>
-        public FitnessTrace(FitnessTrace chainedFitnessTrace, int numIterations, int numIntervals, double offset)
+        public FitnessTrace(FitnessTrace chainedFitnessTrace, long numIterations, int numIntervals, double offset)
         {
             ChainedFitnessTrace = chainedFitnessTrace;
 
             // The number of intervals at which to log/show fitness cannot
             // be greater than the number of optimization iterations.
-            int intervals = System.Math.Min(numIntervals, numIterations);
+            long intervals = System.Math.Min(numIntervals, numIterations);
 
             // The stride is the number of optimization iterations that each
             // interval is made up of.
             Stride = numIterations / intervals;
 
             // Offset for the first fitness log.
-            Offset = (int)(offset * Stride);
+            Offset = (long)(offset * Stride);
 
             // The maximum number of intervals at which to log the fitness.
             // Consider numIterations==10, Offset==0, Stride==3, this requires
@@ -58,7 +58,7 @@ namespace SwarmOps
         /// <summary>
         /// Offset for showing the first trace-element.
         /// </summary>
-        public int Offset
+        public long Offset
         {
             get;
             private set;
@@ -67,7 +67,7 @@ namespace SwarmOps
         /// <summary>
         /// Stride between the intervals for showing trace-elements.
         /// </summary>
-        public int Stride
+        public long Stride
         {
             get;
             private set;
@@ -89,12 +89,12 @@ namespace SwarmOps
         /// </summary>
         /// <param name="iteration">Iteration number of fitness.</param>
         /// <param name="fitness">Fitness value to be traced.</param>
-        public void Add(int iteration, double fitness)
+        public void Add(long iteration, double fitness)
         {
             // If the optimization-iteration falls on an interval then log the fitness.
             if ((iteration - Offset) % Stride == 0)
             {
-                int index = (iteration - Offset) / Stride;
+                long index = (iteration - Offset) / Stride;
 
                 if (index < MaxIntervals)
                 {
@@ -132,12 +132,12 @@ namespace SwarmOps
         /// </summary>
         /// <param name="index">Index into fitness-trace, mapped from optimization iteration.</param>
         /// <param name="fitness">Fitness value to log.</param>
-        protected abstract void Log(int index, double fitness);
+        protected abstract void Log(long index, double fitness);
 
         /// <summary>
         /// Map fitness-trace index to optimization iteration.
         /// </summary>
-        protected int Iteration(int index)
+        protected long Iteration(long index)
         {
             return index * Stride + Offset + 1;
         }

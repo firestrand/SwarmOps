@@ -22,17 +22,17 @@ namespace TestBenchmarks
     class Program
     {
         // Create optimizer object.
-        static Optimizer Optimizer = new SPSO();
-
+        static Optimizer _optimizer = new PSO();
         // Control parameters for optimizer.
-        private static readonly double[] Parameters = Optimizer.DefaultParameters;
+        private static readonly double[] Parameters = _optimizer.DefaultParameters;
+        
         //static readonly double[] Parameters = MOL.Parameters.HandTuned;
 
         // Optimization settings.
-        static readonly int NumRuns = 100;
-        static readonly int Dim = 30;
-        static readonly int DimFactor = 2000;
-        static readonly int NumIterations = DimFactor* Dim; //Really the number of function evaluations
+        static readonly int NumRuns = 10;
+        static readonly int Dim = 1000;
+        static readonly long DimFactor = 2000;
+        private static readonly long NumIterations = 50000; //DimFactor* Dim; //Really the number of function evaluations
         static readonly bool DisplaceOptimum = true;
         static IRunCondition RunCondition = new RunConditionIterations(NumIterations);
         static StringBuilder _resultSb = new StringBuilder();
@@ -42,6 +42,7 @@ namespace TestBenchmarks
         /// </summary>
         static void Optimize(Problem problem)
         {
+            Parameters[0] = 200;
             // Create a fitness trace for tracing the progress of optimization, mean.
             int NumMeanIntervals = 3000;
             FitnessTrace fitnessTraceMean = new FitnessTraceMean(NumIterations, NumMeanIntervals);
@@ -53,12 +54,12 @@ namespace TestBenchmarks
             FitnessTrace fitnessTraceQuartiles = new FitnessTraceQuartiles(NumRuns, NumIterations, NumQuartileIntervals, fitnessTraceMean);
 
             // Assign the problem etc. to the optimizer.
-            Optimizer.Problem = problem;
-            Optimizer.RunCondition = RunCondition;
-            Optimizer.FitnessTrace = fitnessTraceQuartiles;
+            _optimizer.Problem = problem;
+            _optimizer.RunCondition = RunCondition;
+            _optimizer.FitnessTrace = fitnessTraceQuartiles;
 
             // Wrap the optimizer in a logger of result-statistics.
-            Statistics Statistics = new Statistics(Optimizer);
+            Statistics Statistics = new Statistics(_optimizer);
 
             // Wrap it again in a repeater.
             Repeat Repeat = new RepeatSum(Statistics, NumRuns);
@@ -81,15 +82,15 @@ namespace TestBenchmarks
                 Tools.FormatNumber(Statistics.FitnessQuartiles.Max));
 
             // Output fitness trace, mean.
-            string traceFilenameMean = Optimizer.Name + "-FitnessTraceMean-" + problem.Name + ".txt";
-            fitnessTraceMean.WriteToFile(traceFilenameMean);
+            //string traceFilenameMean = _optimizer.Name + "-FitnessTraceMean-" + problem.Name + ".txt";
+            //fitnessTraceMean.WriteToFile(traceFilenameMean);
 
             // Output fitness trace, quartiles.
-            string traceFilenameQuartiles = Optimizer.Name + "-FitnessTraceQuartiles-" + problem.Name + ".txt";
-            fitnessTraceQuartiles.WriteToFile(traceFilenameQuartiles);
+            //string traceFilenameQuartiles = _optimizer.Name + "-FitnessTraceQuartiles-" + problem.Name + ".txt";
+            //fitnessTraceQuartiles.WriteToFile(traceFilenameQuartiles);
 
             //Add to result summary
-            _resultSb.AppendLine(String.Format("{0} & {1} & {2} & {3} & {4} & {5} & {6} & {7} \\\\",
+            _resultSb.AppendLine(String.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}",
                                                problem.Name,
                                                Tools.FormatNumber(Statistics.FitnessMean),
                                                Tools.FormatNumber(Statistics.FitnessStdDev),
@@ -106,16 +107,16 @@ namespace TestBenchmarks
 
             // Output optimization settings.
             Console.WriteLine("Benchmark-tests.");
-            Console.WriteLine("Optimizer: {0}", Optimizer.Name);
+            Console.WriteLine("_optimizer: {0}", _optimizer.Name);
             Console.WriteLine("Using following parameters:");
-            Tools.PrintParameters(Optimizer, Parameters);
+            Tools.PrintParameters(_optimizer, Parameters);
             Console.WriteLine("Number of runs per problem: {0}", NumRuns);
             Console.WriteLine("Dimensionality: {0}", Dim);
             Console.WriteLine("Dim-factor: {0}", DimFactor);
             Console.WriteLine("Displace global optimum: {0}", (DisplaceOptimum) ? ("Yes") : ("No"));
             Console.WriteLine();
             Console.WriteLine("Problem & Mean & Std.Dev. & Min & Q1 & Median & Q3 & Max \\\\");
-            _resultSb.AppendLine("Problem & Mean & Std.Dev. & Min & Q1 & Median & Q3 & Max \\\\");
+            _resultSb.AppendLine("Problem\tMean\tStd.Dev.\tMin\tQ1\tMedian\tQ3\tMax");
             Console.WriteLine("\\hline");
 
             // Starting-time.
@@ -144,7 +145,7 @@ namespace TestBenchmarks
             swTimer.Stop();
             _resultSb.AppendLine(String.Format("Total Benchmark Run Time: {0}", swTimer.Elapsed));
             //Write out summary
-            File.WriteAllText(Optimizer.Name + "ResultSummary.txt",_resultSb.ToString());
+            File.WriteAllText(_optimizer.Name + "ResultSummary_" + Dim +".txt",_resultSb.ToString());
 
             // Output time-usage.
             Console.WriteLine();

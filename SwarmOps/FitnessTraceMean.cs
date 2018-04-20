@@ -30,7 +30,7 @@ namespace SwarmOps
         /// <param name="numRuns">Number of optimization to be performed.</param>
         /// <param name="numIterations">Number of iterations per optimization run.</param>
         /// <param name="numIntervals">Approximate number of intervals to show mean.</param>
-        public FitnessTraceMean(int numIterations, int numIntervals)
+        public FitnessTraceMean(long numIterations, int numIntervals)
             : this(numIterations, numIntervals, null)
         {
         }
@@ -41,7 +41,7 @@ namespace SwarmOps
         /// <param name="numIterations">Number of iterations per optimization run.</param>
         /// <param name="numIntervals">Approximate number of intervals to show mean.</param>
         /// <param name="chainedFitnessTrace">Chained FitnessTrace object.</param>
-        public FitnessTraceMean(int numIterations, int numIntervals, FitnessTrace chainedFitnessTrace)
+        public FitnessTraceMean(long numIterations, int numIntervals, FitnessTrace chainedFitnessTrace)
             : base(chainedFitnessTrace, numIterations, numIntervals, 0)
         {
             // Allocate trace.
@@ -72,7 +72,7 @@ namespace SwarmOps
         /// </summary>
         /// <param name="index">Index into fitness-trace, mapped from optimization iteration.</param>
         /// <param name="fitness">Fitness value to log.</param>
-        protected override void Log(int index, double fitness)
+        protected override void Log(long index, double fitness)
         {
             Trace[index].Accumulate(fitness);
         }

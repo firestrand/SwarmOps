@@ -104,7 +104,7 @@ namespace SwarmOps_Test
         [TestMethod]
         public void TestNonNegativeMatrixFactorization()
         {
-            SPSO optimizer = new SPSO();
+            SPSO2007 optimizer = new SPSO2007();
             double[] parameters = optimizer.DefaultParameters;
             var packedKnownW = new[] {1.0, 3.0, 2.0, 5.0, 1.0, 7.0};
             var packedKnownH = new[] {3.0, 8.0, 1.0, 3.0, 4.0, 7.0};
@@ -188,7 +188,7 @@ namespace SwarmOps_Test
         [TestMethod]
         public void TestMatrixFactorization()
         {
-            SPSO optimizer = new SPSO();
+            SPSO2007 optimizer = new SPSO2007();
             double[] parameters = optimizer.DefaultParameters;
 
             var packedKnownW = new[] { 1.0, 3.0, 2.0, 5.0, 1.0, 7.0 };
