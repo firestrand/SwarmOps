@@ -6,6 +6,7 @@
 /// ------------------------------------------------------
 
 using System.Diagnostics;
+using SwarmOps.Initializers;
 
 namespace SwarmOps.Optimizers
 {
@@ -371,6 +372,9 @@ namespace SwarmOps.Optimizers
                 velocityUpperBound[k] = range;
             }
 
+            //Use a quasi random initializer
+            var initializer = new QuasiRandomInitializer(Problem.Dimensionality);
+
             // Initialize all agents.
             // This counts as iterations below.
             for (j = 0; j < numAgents && Problem.Continue(j, gFitness, gFeasible); j++)
@@ -383,7 +387,8 @@ namespace SwarmOps.Optimizers
                 Tools.InitializeUniform(ref v, velocityLowerBound, velocityUpperBound);
 
                 // Initialize agent-position in search-space.
-                Tools.InitializeUniform(ref x, lowerInit, upperInit);
+                initializer.Initialize(ref x, j, lowerInit, upperInit);
+                //Tools.InitializeUniform(ref x, lowerInit, upperInit);
 
                 // Enforce constraints and evaluate feasibility.
                 bestAgentFeasible[j] = Problem.EnforceConstraints(ref x);
