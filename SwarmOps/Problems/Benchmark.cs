@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -22,25 +21,17 @@ namespace SwarmOps.Problems
         /// <param name="upperBound">Upper boundary for entire search-space.</param>
         /// <param name="lowerInit">Lower boundary for initialization.</param>
         /// <param name="upperInit">Upper boundary for initialization.</param>
-        /// <param name="displaceValue">Displace optimum by this amount.</param>
-        /// <param name="displaceOptimum">Use optimum displacement?</param>
-        /// <param name="runCondition">
-        /// Determines for how long to continue optimization.
-        /// </param>
+        /// <param name="maxIterations">Max optimization iterations to perform.</param>
         public Benchmark(
             int dimensionality,
             double lowerBound,
             double upperBound,
             double lowerInit,
             double upperInit,
-            double displaceValue,
-            bool displaceOptimum,
-            IRunCondition runCondition)
-            : base(runCondition)
+            int maxIterations)
+            : base(maxIterations)
         {
             _dimensionality = dimensionality;
-            DisplaceOptimum = displaceOptimum;
-            DisplaceValue = displaceValue;
 
             _lowerBound = new double[Dimensionality];
             _upperBound = new double[Dimensionality];
@@ -110,29 +101,5 @@ namespace SwarmOps.Problems
             get { return _upperInit; }
         }
         #endregion.
-
-        #region Private variables.
-        /// <summary>
-        /// Displace the optimum?
-        /// </summary>
-        bool DisplaceOptimum = false;
-
-        /// <summary>
-        /// Displace optimum by this amount.
-        /// </summary>
-        double DisplaceValue = 0;
-        #endregion
-
-        #region Protected methods.
-        /// <summary>
-        /// Displace the optimum by subtracting for each x the DisplaceValue.
-        /// </summary>
-        /// <param name="x">Parameter in the search-space.</param>
-        /// <returns>Displaced parameter, if displacement is being used.</returns>
-        protected double Displace(double x)
-        {
-            return (DisplaceOptimum) ? (x - DisplaceValue) : (x);
-        }
-        #endregion
     }
 }

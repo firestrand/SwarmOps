@@ -27,7 +27,6 @@ namespace RandomOps
         /// Constructs the RNG-object from different RNG's.
         /// </summary>
         public SumUInt32(RanUInt32[] rands)
-            : base()
         {
             Rands = rands;
         }
@@ -37,10 +36,9 @@ namespace RandomOps
         /// <summary>
         /// The array of RNGs to sum.
         /// </summary>
-        protected Random[] Rands
+        protected RanUInt32[] Rands
         {
             get;
-            private set;
         }
         #endregion
 
@@ -48,7 +46,7 @@ namespace RandomOps
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override sealed string Name
+        public sealed override string Name
         {
             get
             {
@@ -68,9 +66,9 @@ namespace RandomOps
         /// <summary>
         /// Draw a random number in inclusive range {0, .., RandMax}
         /// </summary>
-        public override sealed UInt32 Rand()
+        public sealed override uint Rand()
         {
-            UInt32 sum = 0;
+            uint sum = 0;
 
             // Sum and modulo.
             foreach (RanUInt32 rand in Rands)
@@ -84,13 +82,8 @@ namespace RandomOps
         /// <summary>
         /// The maximum possible value returned by Rand().
         /// </summary>
-        public override sealed UInt32 RandMax
-        {
-            get
-            {
-                return UInt32.MaxValue;
-            }
-        }
+        public sealed override uint RandMax => uint.MaxValue;
+
         #endregion
     }
 }

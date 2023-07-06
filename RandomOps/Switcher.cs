@@ -26,7 +26,7 @@ namespace RandomOps
         public Switcher(Random randSwitch, Random[] rands)
             : base(rands)
         {
-            RandSwitch = randSwitch;
+            _randSwitch = randSwitch;
         }
         #endregion
 
@@ -34,17 +34,14 @@ namespace RandomOps
         /// <summary>
         /// The RNG used to determine when to switch.
         /// </summary>
-        Random RandSwitch;
+        readonly Random _randSwitch;
         #endregion
 
         #region Base-class overrides.
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "Switcher-" + base.Name; }
-        }
+        public override string Name => "Switcher-" + base.Name;
 
         /// <summary>
         /// Determine which RNG in RandMulti to use.
@@ -52,7 +49,7 @@ namespace RandomOps
         /// <returns>Index for the RNG.</returns>
         protected override int SelectRand()
         {
-            return RandSwitch.Index(base.Rands.Length);
+            return _randSwitch.Index(Rands.Length);
         }
         #endregion
     }

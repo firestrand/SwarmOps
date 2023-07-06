@@ -28,14 +28,14 @@ namespace RandomOps
         {
             Rand = rand;
 
-            ProbabilitySum = new double[probabilities.Length + 1];
-            ProbabilitySum[0] = 0;
+            _probabilitySum = new double[probabilities.Length + 1];
+            _probabilitySum[0] = 0;
 
             double sum = 0;
             for (int i = 0; i < probabilities.Length; i++)
             {
                 sum += probabilities[i];
-                ProbabilitySum[i + 1] = sum;
+                _probabilitySum[i + 1] = sum;
             }
         }
         #endregion
@@ -56,7 +56,7 @@ namespace RandomOps
 
             int i;
 
-            for (i = 0; ProbabilitySum[i] < r && i < ProbabilitySum.Length-1; i++)
+            for (i = 0; _probabilitySum[i] < r && i < _probabilitySum.Length-1; i++)
             {
             }
 
@@ -75,13 +75,13 @@ namespace RandomOps
         {
             double r = Rand.Uniform();
             int minIdx=0;
-            int maxIdx = ProbabilitySum.Length - 1;
+            int maxIdx = _probabilitySum.Length - 1;
 
             while (minIdx < maxIdx - 1)
             {
                 int middle = (maxIdx - minIdx) / 2 + minIdx;
 
-                if (r < ProbabilitySum[middle])
+                if (r < _probabilitySum[middle])
                 {
                     maxIdx = middle;
                 }
@@ -110,7 +110,7 @@ namespace RandomOps
         /// <summary>
         /// Intermediate summation of the probability-distribution.
         /// </summary>
-        private double[] ProbabilitySum;
+        private readonly double[] _probabilitySum;
         #endregion
     }
 }

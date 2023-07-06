@@ -26,7 +26,6 @@ namespace RandomOps
         /// </summary>
         /// <param name="rands">The RNGs that will be switched between.</param>
         public Multi(Random[] rands)
-            : base()
         {
             Rands = rands;
         }
@@ -47,13 +46,12 @@ namespace RandomOps
         protected Random[] Rands
         {
             get;
-            private set;
         }
 
         /// <summary>
         /// The currently selected RNG.
         /// </summary>
-        Random Rand;
+        Random _rand;
         #endregion
 
         #region RNG Implementation.
@@ -65,7 +63,7 @@ namespace RandomOps
         {
             int selected = SelectRand();
 
-            Rand = Rands[selected];
+            _rand = Rands[selected];
         }
         #endregion
 
@@ -97,7 +95,7 @@ namespace RandomOps
         {
             Switch();
 
-            return Rand.Uniform();
+            return _rand.Uniform();
         }
 
         /// <summary>
@@ -107,7 +105,7 @@ namespace RandomOps
         {
             Switch();
 
-            return Rand.Bool();
+            return _rand.Bool();
         }
 
         /// <summary>
@@ -117,7 +115,7 @@ namespace RandomOps
         {
             Switch();
 
-            return Rand.Byte();
+            return _rand.Byte();
         }
 
         /// <summary>
@@ -128,7 +126,7 @@ namespace RandomOps
         {
             Switch();
 
-            return Rand.Bytes(length);
+            return _rand.Bytes(length);
         }
         #endregion
     }

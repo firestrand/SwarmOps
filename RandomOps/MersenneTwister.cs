@@ -64,7 +64,6 @@ namespace RandomOps
         /// This is what you will mostly want to use.
         /// </summary>
         public MersenneTwister()
-            : base()
         {
             Seed();
         }
@@ -74,8 +73,7 @@ namespace RandomOps
         /// This is useful if you want to repeat experiments with the
         /// same sequence of pseudo-random numbers.
         /// </summary>
-        public MersenneTwister(UInt32 seed)
-            : base()
+        public MersenneTwister(uint seed)
         {
             Seed(seed);
         }
@@ -84,41 +82,40 @@ namespace RandomOps
         /// Constructs the PRNG-object using the designated array
         /// of seeds. Use this if you need to seed with more than 32 bits.
         /// </summary>
-        public MersenneTwister(UInt32[] seeds)
-            : base()
+        public MersenneTwister(uint[] seeds)
         {
             Seed(seeds);
         }
         #endregion
 
         #region Internal definitions and variables
-        static readonly UInt32 N = 624;                     // Array-length.
-        static readonly UInt32 M = 397;
-        static readonly UInt32 MATRIX_A = 0x9908b0df;       // Constant vector a.
-        static readonly UInt32 UPPER_MASK = 0x80000000;     // Most significant w-r bits.
-        static readonly UInt32 LOWER_MASK = 0x7fffffff;     // Least significant r bits.
-        static readonly UInt32[] mag01 = { 0x0, MATRIX_A };
+        static readonly uint N = 624;                     // Array-length.
+        static readonly uint M = 397;
+        static readonly uint MatrixA = 0x9908b0df;       // Constant vector a.
+        static readonly uint UpperMask = 0x80000000;     // Most significant w-r bits.
+        static readonly uint LowerMask = 0x7fffffff;     // Least significant r bits.
+        static readonly uint[] Mag01 = { 0x0, MatrixA };
 
-        UInt32[] mt = new UInt32[N];                        // The array for the state vector.
-        UInt32 mti;                                         // Index into mt-array.
+        readonly uint[] _mt = new uint[N];                        // The array for the state vector.
+        uint _mti;                                         // Index into mt-array.
 
         /// <summary>
         /// Is PRNG ready for use?
         /// </summary>
-        bool IsReady = false;
+        bool _isReady;
         #endregion
 
         #region PRNG Implementation.
         /// <summary>
         /// Draw a random number in inclusive range {0, .., RandMax}
         /// </summary>
-        public sealed override UInt32 Rand()
+        public sealed override uint Rand()
         {
-            Debug.Assert(IsReady);
+            Debug.Assert(_isReady);
 
-            UInt32 y;
+            uint y;
 
-            if (mti >= N)
+            if (_mti >= N)
             {
                 // Generate N words.
 
@@ -126,23 +123,23 @@ namespace RandomOps
 
                 for (kk = 0; kk < N - M; kk++)
                 {
-                    y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
-                    mt[kk] = mt[kk + M] ^ (y >> 1) ^ mag01[y & 0x1];
+                    y = (_mt[kk] & UpperMask) | (_mt[kk + 1] & LowerMask);
+                    _mt[kk] = _mt[kk + M] ^ (y >> 1) ^ Mag01[y & 0x1];
                 }
 
                 for (; kk < N - 1; kk++)
                 {
-                    y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
-                    mt[kk] = mt[kk + M - N] ^ (y >> 1) ^ mag01[y & 0x1];
+                    y = (_mt[kk] & UpperMask) | (_mt[kk + 1] & LowerMask);
+                    _mt[kk] = _mt[kk + M - N] ^ (y >> 1) ^ Mag01[y & 0x1];
                 }
 
-                y = (mt[N - 1] & UPPER_MASK) | (mt[0] & LOWER_MASK);
-                mt[N - 1] = mt[M - 1] ^ (y >> 1) ^ mag01[y & 0x1];
+                y = (_mt[N - 1] & UpperMask) | (_mt[0] & LowerMask);
+                _mt[N - 1] = _mt[M - 1] ^ (y >> 1) ^ Mag01[y & 0x1];
 
-                mti = 0;
+                _mti = 0;
             }
 
-            y = mt[mti++];
+            y = _mt[_mti++];
 
             /* Tempering */
             y ^= (y >> 11);
@@ -150,7 +147,7 @@ namespace RandomOps
             y ^= (y << 15) & 0xefc60000;
             y ^= (y >> 18);
 
-            Debug.Assert(y >= 0 && y <= RandMax);
+            Debug.Assert(y <= RandMax);
 
             return y;
         }
@@ -158,49 +155,46 @@ namespace RandomOps
         /// <summary>
         /// The maximum possible value returned by Rand().
         /// </summary>
-        public sealed override UInt32 RandMax
-        {
-            get { return UInt32.MaxValue; }
-        }
+        public sealed override uint RandMax => uint.MaxValue;
 
         /// <summary>
         /// Seed with an integer.
         /// </summary>
-        protected sealed override void Seed(UInt32 seed)
+        protected sealed override void Seed(uint seed)
         {
-            mt[0] = seed;
+            _mt[0] = seed;
 
-            for (mti = 1; mti < N; mti++)
+            for (_mti = 1; _mti < N; _mti++)
             {
-                UInt32 lcg = 1812433253;
-                mt[mti] = (lcg * (mt[mti - 1] ^ (mt[mti - 1] >> 30)) + mti);
+                uint lcg = 1812433253;
+                _mt[_mti] = (lcg * (_mt[_mti - 1] ^ (_mt[_mti - 1] >> 30)) + _mti);
             }
 
-            IsReady = true;
+            _isReady = true;
         }
 
         /// <summary>
         /// Seed with an array of integers.
         /// </summary>
-        protected void Seed(UInt32[] seeds)
+        protected void Seed(uint[] seeds)
         {
             Seed(19650218);
 
-            UInt32 i = 1;
-            UInt32 j = 0;
-            UInt32 k = (N > seeds.Length) ? (N) : ((UInt32)seeds.Length);
+            uint i = 1;
+            uint j = 0;
+            uint k = (N > seeds.Length) ? (N) : ((uint)seeds.Length);
 
             for (; k > 0; k--)
             {
                 // Non-linear.
-                mt[i] = (mt[i] ^ ((mt[i - 1] ^ (mt[i - 1] >> 30)) * 1664525)) + seeds[j] + j;
+                _mt[i] = (_mt[i] ^ ((_mt[i - 1] ^ (_mt[i - 1] >> 30)) * 1664525)) + seeds[j] + j;
 
                 i++;
                 j++;
 
                 if (i >= N)
                 {
-                    mt[0] = mt[N - 1];
+                    _mt[0] = _mt[N - 1];
                     i = 1;
                 }
 
@@ -213,19 +207,19 @@ namespace RandomOps
             for (k = N - 1; k > 0; k--)
             {
                 // Non-linear.
-                mt[i] = (mt[i] ^ ((mt[i - 1] ^ (mt[i - 1] >> 30)) * 1566083941)) - i;
+                _mt[i] = (_mt[i] ^ ((_mt[i - 1] ^ (_mt[i - 1] >> 30)) * 1566083941)) - i;
 
                 i++;
 
                 if (i >= N)
                 {
-                    mt[0] = mt[N - 1];
+                    _mt[0] = _mt[N - 1];
                     i = 1;
                 }
             }
 
             // MSB is 1; assuring non-zero initial array.
-            mt[0] = 0x80000000;
+            _mt[0] = 0x80000000;
         }
         #endregion
 
@@ -233,10 +227,8 @@ namespace RandomOps
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "MersenneTwister19937"; }
-        }
+        public override string Name => "MersenneTwister19937";
+
         #endregion
     }
 }

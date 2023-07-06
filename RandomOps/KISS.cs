@@ -22,15 +22,14 @@ namespace RandomOps
     /// paper cited above with Marsaglia's authorization, also under
     /// the GNU LPGL license.
     /// </remarks>
-    public class KISS : RanUInt32Array
+    public class Kiss : RanUInt32Array
     {
         #region Constructors.
         /// <summary>
         /// Constructs the PRNG-object without a seed. Remember
         /// to seed it before drawing random numbers.
         /// </summary>
-        public KISS()
-            : base()
+        public Kiss()
         {
         }
 
@@ -39,7 +38,7 @@ namespace RandomOps
         /// This is useful if you want to repeat experiments with the
         /// same sequence of pseudo-random numbers.
         /// </summary>
-        public KISS(UInt32[] seed)
+        public Kiss(uint[] seed)
             : base(seed)
         {
         }
@@ -47,7 +46,7 @@ namespace RandomOps
         /// <summary>
         /// Constructs the PRNG-object and uses another RNG for seeding.
         /// </summary>
-        public KISS(Random rand)
+        public Kiss(Random rand)
             : base(rand)
         {
         }
@@ -57,42 +56,42 @@ namespace RandomOps
         /// <summary>
         /// Default seed.
         /// </summary>
-        public static readonly UInt32[] SeedDefault = { 123456789, 362436000, 521288629, 7654321 };
+        public static readonly uint[] SeedDefault = { 123456789, 362436000, 521288629, 7654321 };
         #endregion
 
         #region Internal definitions and variables
         /// <summary>
         /// Iterator variables.
         /// </summary>
-        UInt32 X, Y, Z, C;
+        uint _x, _y, _z, _c;
 
         /// <summary>
         /// Is PRNG ready for use?
         /// </summary>
-        bool IsReady = false;
+        bool _isReady;
         #endregion
 
         #region PRNG Implementation.
         /// <summary>
         /// Draw a random number in inclusive range {0, .., RandMax}
         /// </summary>
-        public sealed override UInt32 Rand()
+        public sealed override uint Rand()
         {
-            Debug.Assert(IsReady);
+            Debug.Assert(_isReady);
 
-            X = 69069 * X + 12345;
+            _x = 69069 * _x + 12345;
 
-            Y ^= Y << 13;
-            Y ^= Y >> 17;
-            Y ^= Y << 5;
+            _y ^= _y << 13;
+            _y ^= _y >> 17;
+            _y ^= _y << 5;
 
-            UInt64 t = 698769069 * Z + C;
+            ulong t = 698769069 * _z + _c;
 
-            C = (UInt32)(t >> 32);
+            _c = (uint)(t >> 32);
 
-            Z = (UInt32)t;
+            _z = (uint)t;
 
-            UInt32 retVal = X + Y + Z;
+            uint retVal = _x + _y + _z;
 
             return retVal;
         }
@@ -100,32 +99,26 @@ namespace RandomOps
         /// <summary>
         /// The maximum possible value returned by Rand().
         /// </summary>
-        public sealed override UInt32 RandMax
-        {
-            get { return UInt32.MaxValue; }
-        }
+        public sealed override uint RandMax => uint.MaxValue;
 
         /// <summary>
         /// Length of seed-array.
         /// </summary>
-        public sealed override int SeedLength
-        {
-            get { return 4; }
-        }
+        public sealed override int SeedLength => 4;
 
         /// <summary>
         /// Seed with an array.
         /// </summary>
-        public sealed override void Seed(UInt32[] seed)
+        public sealed override void Seed(uint[] seed)
         {
             Debug.Assert(seed.Length == SeedLength);
 
-            X = seed[0];
-            Y = seed[1];
-            Z = seed[2];
-            C = seed[3];
+            _x = seed[0];
+            _y = seed[1];
+            _z = seed[2];
+            _c = seed[3];
 
-            IsReady = true;
+            _isReady = true;
         }
         #endregion
 
@@ -133,10 +126,8 @@ namespace RandomOps
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "KISS"; }
-        }
+        public override string Name => "KISS";
+
         #endregion
     }
 }

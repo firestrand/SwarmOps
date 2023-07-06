@@ -6,7 +6,6 @@
 /// RandomOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
 
-using System;
 using System.Threading;
 
 namespace RandomOps
@@ -69,17 +68,14 @@ namespace RandomOps
         /// <summary>
         /// The non-thread-safe RNG used for generating the numbers.
         /// </summary>
-        Random _rand;
+        readonly Random _rand;
         #endregion
 
         #region Base-class Overrides.
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "ThreadSafe(" + _rand.Name + ")"; }
-        }
+        public override string Name => "ThreadSafe(" + _rand.Name + ")";
 
         /// <summary>
         /// Thread-safe wrapper for Uniform(). Note that derived methods

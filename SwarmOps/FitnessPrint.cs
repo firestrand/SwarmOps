@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -14,6 +13,7 @@ namespace SwarmOps
     /// Prints parameters and fitness to Console. Useful in
     /// viewing the progress of meta-optimization. Works as
     /// a 'transparent' wrapper for the problem to be optimized.
+    /// Note that feasibility is computed here.
     /// </summary>
     public class FitnessPrint : ProblemWrapper
     {
@@ -23,7 +23,7 @@ namespace SwarmOps
         /// </summary>
         /// <param name="problem">The problem being wrapped.</param>
         public FitnessPrint(Problem problem)
-            : base(problem)
+            : this(problem, false)
         {
         }
 
@@ -62,34 +62,21 @@ namespace SwarmOps
         /// <summary>
         /// Compute fitness of wrapped problem and print the result.
         /// </summary>
-        public override double Fitness(double[] parameters, double fitnessLimit)
+        public override double Fitness(double[] parameters, double fitnessLimit, bool oldFeasible, bool newFeasible)
         {
             double fitness = Problem.Fitness(parameters, fitnessLimit);
 
-            DoPrint(parameters, fitness, fitnessLimit, FormatAsArray);
+            Tools.PrintSolution(parameters, fitness, fitnessLimit, oldFeasible, newFeasible, FormatAsArray);
 
             return fitness;
         }
-        #endregion
 
-        #region Printing methods.
         /// <summary>
-        /// Print parameters and fitness to Console, and print a marking if
-        /// fitness was an improvement to fitnessLimit.
+        /// At beginning of new optimization run print a newline.
         /// </summary>
-        public static void DoPrint(double[] parameters, double fitness, double fitnessLimit, bool formatAsArray)
+        public override void BeginOptimizationRun()
         {
-            // Convert parameters to a string.
-            string parametersStr = (formatAsArray) ? (Tools.ArrayToString(parameters)) : (Tools.ArrayToStringRaw(parameters));
-
-            Console.WriteLine("{0} \t{1} \t{2}",
-                parametersStr,
-                Tools.FormatNumber(fitness),
-                (fitness < fitnessLimit) ? ("***") : (""));
-
-            // Flush stdout, this is useful if piping the output and you wish
-            // to study the the output before the entire optimization run is complete.
-            Console.Out.Flush();
+            Tools.PrintNewline();
         }
         #endregion
     }

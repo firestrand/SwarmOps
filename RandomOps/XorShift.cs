@@ -30,7 +30,6 @@ namespace RandomOps
         /// to seed it before drawing random numbers.
         /// </summary>
         public XorShift()
-            : base()
         {
         }
 
@@ -39,7 +38,7 @@ namespace RandomOps
         /// This is useful if you want to repeat experiments with the
         /// same sequence of pseudo-random numbers.
         /// </summary>
-        public XorShift(UInt32[] seed)
+        public XorShift(uint[] seed)
             : base(seed)
         {
         }
@@ -57,39 +56,39 @@ namespace RandomOps
         /// <summary>
         /// Default seed.
         /// </summary>
-        public static readonly UInt32[] SeedDefault = { 123456789, 362436069, 521288629, 88675123, 886756453 };
+        public static readonly uint[] SeedDefault = { 123456789, 362436069, 521288629, 88675123, 886756453 };
         #endregion
 
         #region Internal definitions and variables
         /// <summary>
         /// Iterator variables.
         /// </summary>
-        UInt32 X, Y, Z, W, V;
+        uint _x, _y, _z, _w, _v;
 
         /// <summary>
         /// Is PRNG ready for use?
         /// </summary>
-        bool IsReady = false;
+        bool _isReady;
         #endregion
 
         #region PRNG Implementation.
         /// <summary>
         /// Draw a random number in inclusive range {0, .., RandMax}
         /// </summary>
-        public sealed override UInt32 Rand()
+        public sealed override uint Rand()
         {
-            Debug.Assert(IsReady);
+            Debug.Assert(_isReady);
 
-            UInt32 t = (X ^ (X >> 7));
+            uint t = (_x ^ (_x >> 7));
 
-            X=Y;
-            Y=Z;
-            Z=W;
-            W=V;
+            _x=_y;
+            _y=_z;
+            _z=_w;
+            _w=_v;
             
-            V = (V ^ (V << 6)) ^ (t ^ (t << 13));
+            _v = (_v ^ (_v << 6)) ^ (t ^ (t << 13));
             
-            UInt32 retVal = (Y+Y+1)*V;
+            uint retVal = (_y+_y+1)*_v;
 
             return retVal;
         }
@@ -97,33 +96,27 @@ namespace RandomOps
         /// <summary>
         /// The maximum possible value returned by Rand().
         /// </summary>
-        public sealed override UInt32 RandMax
-        {
-            get { return UInt32.MaxValue; }
-        }
+        public sealed override uint RandMax => uint.MaxValue;
 
         /// <summary>
         /// Length of seed-array.
         /// </summary>
-        public sealed override int SeedLength
-        {
-            get { return 5; }
-        }
+        public sealed override int SeedLength => 5;
 
         /// <summary>
         /// Seed with an array.
         /// </summary>
-        public sealed override void Seed(UInt32[] seed)
+        public sealed override void Seed(uint[] seed)
         {
             Debug.Assert(seed.Length == SeedLength);
 
-            X = seed[0];
-            Y = seed[1];
-            Z = seed[2];
-            W = seed[3];
-            V = seed[4];
+            _x = seed[0];
+            _y = seed[1];
+            _z = seed[2];
+            _w = seed[3];
+            _v = seed[4];
 
-            IsReady = true;
+            _isReady = true;
         }
         #endregion
 
@@ -131,10 +124,8 @@ namespace RandomOps
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "XorShift"; }
-        }
+        public override string Name => "XorShift";
+
         #endregion
     }
 }

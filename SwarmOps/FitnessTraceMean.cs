@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -12,15 +11,10 @@ namespace SwarmOps
 {
     /// <summary>
     /// Store fitness-values during optimization runs
-    /// and write them to a file afterwards. This only
-    /// supports a fixed number of optimization runs and
-    /// iterations per run which must therefore be known
+    /// and write them to a file afterwards. The number
+    /// of iterations per optimization run must be known
     /// in advance.
     /// </summary>
-    /// <remarks>
-    /// An array of fitness values is being accumulated
-    /// and averaged upon writing to a stream or a file.
-    /// </remarks>
     public class FitnessTraceMean : FitnessTrace
     {
         #region Constructors.
@@ -72,7 +66,8 @@ namespace SwarmOps
         /// </summary>
         /// <param name="index">Index into fitness-trace, mapped from optimization iteration.</param>
         /// <param name="fitness">Fitness value to log.</param>
-        protected override void Log(int index, double fitness)
+        /// <param name="feasible">Feasibility (constraint satisfaction) to log.</param>
+        protected override void Log(int index, double fitness, bool feasible)
         {
             Trace[index].Accumulate(fitness);
         }
@@ -89,18 +84,25 @@ namespace SwarmOps
             {
                 StatisticsAccumulator trace = Trace[i];
 
-                double fitnessMean = trace.Mean;
-                double stdDev = trace.StandardDeviation;
-                double min = trace.Min;
-                double max = trace.Max;
+                if (trace.Count > 0)
+                {
+                    double mean = trace.Mean;
+                    double stdDev = trace.StandardDeviation;
+                    double min = trace.Min;
+                    double max = trace.Max;
 
-                writer.WriteLine(
-                    "{0} {1} {2} {3} {4}",
-                    Iteration(i),
-                    Tools.FormatNumber(fitnessMean),
-                    Tools.FormatNumber(stdDev),
-                    Tools.FormatNumber(min),
-                    Tools.FormatNumber(max));
+                    writer.WriteLine(
+                        "{0} {1} {2} {3} {4}",
+                        Iteration(i),
+                        Tools.FormatNumber(mean),
+                        Tools.FormatNumber(stdDev),
+                        Tools.FormatNumber(min),
+                        Tools.FormatNumber(max));
+                }
+                else
+                {
+                    break;
+                }
             }
 
             writer.Close();

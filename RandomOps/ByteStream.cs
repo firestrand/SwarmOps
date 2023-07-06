@@ -29,7 +29,7 @@ namespace RandomOps
         {
             RandFallback = randFallback;
             NumFallback = numFallback;
-            BufferSize = Math.Max(bufferSize, sizeof(UInt32));
+            BufferSize = Math.Max(bufferSize, sizeof(uint));
             Queue = new Queue<byte>(BufferSize);
 
             // Fill the buffer so it is ready to use.
@@ -41,10 +41,7 @@ namespace RandomOps
         /// <summary>
         /// The number of bytes to fill the buffer with.
         /// </summary>
-        protected int FillCount
-        {
-            get { return BufferSize - Queue.Count; }
-        }
+        protected int FillCount => BufferSize - Queue.Count;
 
         /// <summary>
         /// The maximum number of bytes that can be retrieved in a single
@@ -52,10 +49,8 @@ namespace RandomOps
         /// but some sources allow a maximum number of bytes that can be
         /// retrieved each time or they will generate an error.
         /// </summary>
-        protected virtual int MaxRetrieveLength
-        {
-            get { return BufferSize; }
-        }
+        protected virtual int MaxRetrieveLength => BufferSize;
+
         #endregion
 
         #region Internal variables.
@@ -72,7 +67,7 @@ namespace RandomOps
         /// <summary>
         /// 1.0/((double)UInt32.MaxValue + 2), for convenience and speed.
         /// </summary>
-        double _randMaxPlusTwoInv = 1.0 / ((double)UInt32.MaxValue + 2);
+        readonly double _randMaxPlusTwoInv = 1.0 / ((double)uint.MaxValue + 2);
         #endregion
 
         #region Fallback RNG.
@@ -88,14 +83,13 @@ namespace RandomOps
         protected int NumFallback
         {
             get;
-            private set;
         }
 
         /// <summary>
         /// How many bytes yet to be retrieved from Fallback RNG
         /// before buffer will be attempted filled again.
         /// </summary>
-        protected int FallbackCount = 0;
+        protected int FallbackCount;
         #endregion
 
         #region Fill buffer.
@@ -123,7 +117,7 @@ namespace RandomOps
             {
                 while (fillCount > 0)
                 {
-                    DoFillBuffer(System.Math.Min(fillCount, MaxRetrieveLength));
+                    DoFillBuffer(Math.Min(fillCount, MaxRetrieveLength));
 
                     fillCount -= MaxRetrieveLength;
                 }
@@ -187,7 +181,7 @@ namespace RandomOps
         /// </summary>
         public bool IsAvailableUniform()
         {
-            return IsAvailable(sizeof(UInt32));
+            return IsAvailable(sizeof(uint));
         }
 
         /// <summary>
@@ -201,7 +195,7 @@ namespace RandomOps
             if (FallbackCount > 0)
             {
                 // Decrease the fallback-counter.
-                FallbackCount = System.Math.Max(0, FallbackCount - numBytes);
+                FallbackCount = Math.Max(0, FallbackCount - numBytes);
             }
             else if (Queue.Count < numBytes)
             {
@@ -271,9 +265,9 @@ namespace RandomOps
 
             if (IsAvailableUniform())
             {
-                byte[] b = Bytes(sizeof(UInt32));
+                byte[] b = Bytes(sizeof(uint));
 
-                UInt32 rand = BitConverter.ToUInt32(b, 0);
+                uint rand = BitConverter.ToUInt32(b, 0);
                 double randPlusOne = (double)rand + 1;
 
                 value = randPlusOne * _randMaxPlusTwoInv;

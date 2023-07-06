@@ -20,15 +20,14 @@ namespace RandomOps
     /// in the newsgroup comp.lang.c by George Marsaglia, published
     /// here with Marsaglia's authorization under the GNU LGPL license.
     /// </remarks>
-    public class MWC256 : RanUInt32Array
+    public class Mwc256 : RanUInt32Array
     {
         #region Constructors.
         /// <summary>
         /// Constructs the PRNG-object without a seed. Remember
         /// to seed it before drawing random numbers.
         /// </summary>
-        public MWC256()
-            : base()
+        public Mwc256()
         {
         }
 
@@ -37,7 +36,7 @@ namespace RandomOps
         /// This is useful if you want to repeat experiments with the
         /// same sequence of pseudo-random numbers.
         /// </summary>
-        public MWC256(UInt32[] seed)
+        public Mwc256(uint[] seed)
             : base(seed)
         {
         }
@@ -45,7 +44,7 @@ namespace RandomOps
         /// <summary>
         /// Constructs the PRNG-object and uses another RNG for seeding.
         /// </summary>
-        public MWC256(Random rand)
+        public Mwc256(Random rand)
             : base(rand)
         {
         }
@@ -55,38 +54,38 @@ namespace RandomOps
         /// <summary>
         /// Iterator array.
         /// </summary>
-        UInt32[] Q = new UInt32[256];
+        readonly uint[] _q = new uint[256];
 
         /// <summary>
         /// Carry variable.
         /// </summary>
-        UInt32 C;
+        uint _c;
 
         /// <summary>
         /// Iteration counter.
         /// </summary>
-        Byte Counter = 255;
+        byte _counter = 255;
 
         /// <summary>
         /// Is PRNG ready for use?
         /// </summary>
-        bool IsReady = false;
+        bool _isReady;
         #endregion
 
         #region PRNG Implementation.
         /// <summary>
         /// Draw a random number in inclusive range {0, .., RandMax}
         /// </summary>
-        public sealed override UInt32 Rand()
+        public sealed override uint Rand()
         {
-            Debug.Assert(IsReady);
+            Debug.Assert(_isReady);
 
-            UInt64 t = (UInt64)809430660 * Q[++Counter] + C;
+            ulong t = (ulong)809430660 * _q[++_counter] + _c;
 
-            C = (UInt32)(t >> 32);
+            _c = (uint)(t >> 32);
 
-            UInt32 retVal = (UInt32)t;
-            Q[Counter] = retVal;
+            uint retVal = (uint)t;
+            _q[_counter] = retVal;
 
             return retVal;
         }
@@ -94,36 +93,30 @@ namespace RandomOps
         /// <summary>
         /// The maximum possible value returned by Rand().
         /// </summary>
-        public sealed override UInt32 RandMax
-        {
-            get { return UInt32.MaxValue; }
-        }
+        public sealed override uint RandMax => uint.MaxValue;
 
         /// <summary>
         /// Length of seed-array.
         /// </summary>
-        public sealed override int SeedLength
-        {
-            get { return 257; }
-        }
+        public sealed override int SeedLength => 257;
 
         /// <summary>
         /// Seed with an array.
         /// </summary>
-        public sealed override void Seed(UInt32[] seed)
+        public sealed override void Seed(uint[] seed)
         {
             Debug.Assert(seed.Length == SeedLength);
 
             // First seed is used for C.
-            C = seed[0] % 809430660;
+            _c = seed[0] % 809430660;
 
             // Remaining seeds are used for Q.
             for (int i = 1; i < SeedLength; i++)
             {
-                Q[i-1] = seed[i];
+                _q[i-1] = seed[i];
             }
 
-            IsReady = true;
+            _isReady = true;
         }
         #endregion
 
@@ -131,10 +124,8 @@ namespace RandomOps
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "MWC256"; }
-        }
+        public override string Name => "MWC256";
+
         #endregion
     }
 }

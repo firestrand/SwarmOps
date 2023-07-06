@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -299,6 +298,9 @@ namespace SwarmOps.Optimizers
         {
             Debug.Assert(parameters != null && parameters.Length == Dimensionality);
 
+            // Signal beginning of optimization run.
+            Problem.BeginOptimizationRun();
+
             // Retrieve parameters specific to JDE method.
             int numAgents = GetNumAgents(parameters);
 
@@ -319,16 +321,15 @@ namespace SwarmOps.Optimizers
             }
 
             // Get problem-context.
-            double[] lowerBound = Problem.LowerBound;
-            double[] upperBound = Problem.UpperBound;
             double[] lowerInit = Problem.LowerInit;
             double[] upperInit = Problem.UpperInit;
             int n = Problem.Dimensionality;
 
             // Allocate agent positions and associated fitnesses.
             double[][] agents = Tools.NewMatrix(numAgents, n);
-            double[] agentFitness = new double[numAgents];
-            double[] t = new double[n];
+            double[] fitness = new double[numAgents];
+            bool[] feasible = new bool[numAgents];
+            double[] y = new double[n];
             double[] w = new double[n];
             double[] F = new double[numAgents];
             double[] CR = new double[numAgents];
@@ -344,12 +345,13 @@ namespace SwarmOps.Optimizers
             int i, j;
 
             // Fitness variables.
-            double gFitness = Problem.MaxFitness;
             double[] g = null;
+            double gFitness = Problem.MaxFitness;
+            bool gFeasible = false;
 
             // Initialize all agents.
             // This counts as iterations below.
-            for (j = 0; j < numAgents && Problem.RunCondition.Continue(j, gFitness); j++)
+            for (j = 0; j < numAgents && Problem.Continue(j, gFitness, gFeasible); j++)
             {
                 // Refer to the j'th agent as x.
                 double[] x = agents[j];
@@ -357,25 +359,30 @@ namespace SwarmOps.Optimizers
                 // Initialize agent-position in search-space.
                 Tools.InitializeUniform(ref x, lowerInit, upperInit);
 
-                // Compute fitness of initial position.
-                agentFitness[j] = Problem.Fitness(x);
+                // Enforce constraints and evaluate feasibility.
+                feasible[j] = Problem.EnforceConstraints(ref x);
 
-                // Update swarm's best known position.
-                if (g == null || agentFitness[j] < gFitness)
+                // Compute fitness of initial position.
+                fitness[j] = Problem.Fitness(x, feasible[j]);
+
+                // Update population's best known position if it either does not exist or,
+                // if feasibility is same or better and fitness is an improvement.
+                if (Tools.BetterFeasibleFitness(gFeasible, feasible[j], gFitness, fitness[j]))
                 {
-                    g = x;
-                    gFitness = agentFitness[j];
+                    g = agents[j];
+                    gFitness = fitness[j];
+                    gFeasible = feasible[j];
                 }
 
                 // Trace fitness of best found solution.
-                Trace(j, gFitness);
+                Trace(j, gFitness, gFeasible);
             }
 
-            for (i = numAgents; Problem.RunCondition.Continue(i, gFitness);)
+            for (i = numAgents; Problem.Continue(i, gFitness, gFeasible); )
             {
                 Debug.Assert(numAgents > 0);
 
-                for (j = 0; j < numAgents && Problem.RunCondition.Continue(i, gFitness); j++, i++)
+                for (j = 0; j < numAgents && Problem.Continue(i, gFitness, gFeasible); j++, i++)
                 {
                     // Reset the random-set used for picking distinct agents.
                     // Exclude the j'th agent (also referred to as x).
@@ -383,9 +390,6 @@ namespace SwarmOps.Optimizers
 
                     // Refer to the j'th agent as x.
                     double[] x = agents[j];
-
-                    // Store old position of agent x.
-                    x.CopyTo(t, 0);
 
                     // JDE 'Self-adaptive' parameters.
                     double newF = (Globals.Random.Bool(tauF)) ? (Globals.Random.Uniform(Fl, Fl + Fu)) : (F[j]);
@@ -395,45 +399,55 @@ namespace SwarmOps.Optimizers
                     Tools.Initialize(ref w, newF);
 
                     // Perform crossover.
-                    DECrossover.DoCrossover(_crossover, newCR, n, w, ref x, g, agents, randomSet);
+                    DECrossover.DoCrossover(_crossover, newCR, n, w, x, ref y, g, agents, randomSet);
 
-                    // Enforce bounds before computing new fitness.
-                    Tools.Bound(ref x, lowerBound, upperBound);
+                    // Enforce constraints and evaluate feasibility.
+                    bool newFeasible = Problem.EnforceConstraints(ref y);
 
-                    // Compute new fitness.
-                    double newFitness = Problem.Fitness(x, agentFitness[j]);
-
-                    // Update agent in case of fitness improvement.
-                    if (newFitness < agentFitness[j])
+                    // Compute fitness if feasibility (constraint satisfaction) is same or better.
+                    if (Tools.BetterFeasible(feasible[j], newFeasible))
                     {
-                        // Update agent's fitness. Position is already updated.
-                        agentFitness[j] = newFitness;
+                        // Compute new fitness.
+                        double newFitness = Problem.Fitness(y, fitness[j], feasible[j], newFeasible);
 
-                        // Update swarm's best known position.
-                        if (newFitness < gFitness)
+                        // Update agent in case of fitness improvement.
+                        if (Tools.BetterFeasibleFitness(feasible[j], newFeasible, fitness[j], newFitness))
                         {
-                            g = x;
-                            gFitness = newFitness;
-                        }
+                            // Update agent's position.
+                            y.CopyTo(agents[j], 0);
 
-                        // JDE 'Self-adaptive' parameters.
-                        // Keep the new parameters because they led to fitness improvement.
-                        F[j] = newF;
-                        CR[j] = newCR;
-                    }
-                    else // Fitness was not an improvement.
-                    {
-                        // Restore old position.
-                        t.CopyTo(x, 0);
+                            // Update agent's fitness.
+                            fitness[j] = newFitness;
+
+                            // Update agent's feasibility.
+                            feasible[j] = newFeasible;
+
+                            // Update population's best known position,
+                            // if feasibility is same or better and fitness is an improvement.
+                            if (Tools.BetterFeasibleFitness(gFeasible, newFeasible, gFitness, newFitness))
+                            {
+                                g = agents[j];
+                                gFitness = newFitness;
+                                gFeasible = newFeasible;
+                            }
+
+                            // JDE 'Self-adaptive' parameters.
+                            // Keep the new parameters because they led to fitness improvement.
+                            F[j] = newF;
+                            CR[j] = newCR;
+                        }
                     }
 
                     // Trace fitness of best found solution.
-                    Trace(i, gFitness);
+                    Trace(i, gFitness, gFeasible);
                 }
             }
 
+            // Signal end of optimization run.
+            Problem.EndOptimizationRun();
+
             // Return best-found solution and fitness.
-            return new Result(g, gFitness, i);
+            return new Result(g, gFitness, gFeasible, i);
         }
         #endregion
     }

@@ -21,7 +21,6 @@ namespace RandomOps
         /// Constructs the PRNG-object.
         /// </summary>
         public RanUInt32Array()
-            : base()
         {
         }
 
@@ -30,8 +29,7 @@ namespace RandomOps
         /// This is useful if you want to repeat experiments with the
         /// same sequence of pseudo-random numbers.
         /// </summary>
-        public RanUInt32Array(UInt32[] seed)
-            : base()
+        public RanUInt32Array(uint[] seed)
         {
             Seed(seed);
         }
@@ -41,7 +39,6 @@ namespace RandomOps
         /// for seeding.
         /// </summary>
         public RanUInt32Array(Random rand)
-            : base()
         {
             Seed(rand);
         }
@@ -59,14 +56,14 @@ namespace RandomOps
         /// <summary>
         /// Seed with an array.
         /// </summary>
-        public abstract void Seed(UInt32[] seed);
+        public abstract void Seed(uint[] seed);
 
         /// <summary>
         /// Seed with random bytes from another RNG.
         /// </summary>
         public void Seed(Random rand)
         {
-            UInt32[] seed = new UInt32[SeedLength];
+            uint[] seed = new uint[SeedLength];
 
             for (int i = 0; i < seed.Length; i++)
             {
@@ -90,7 +87,7 @@ namespace RandomOps
         /// <summary>
         /// Seed with an integer.
         /// </summary>
-        protected sealed override void Seed(UInt32 seed)
+        protected sealed override void Seed(uint seed)
         {
             throw new NotImplementedException();
         }

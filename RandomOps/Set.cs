@@ -34,7 +34,6 @@ namespace RandomOps
         public int Capacity
         {
             get;
-            private set;
         }
         #endregion
 
@@ -46,9 +45,9 @@ namespace RandomOps
         /// <param name="capacity">Number of elements in the set.</param>
         public Set(Random rand, int capacity)
         {
-            Rand = rand;
+            _rand = rand;
 
-            Elms = new int[capacity];
+            _elms = new int[capacity];
             Capacity = capacity;
             Size = 0;
         }
@@ -58,12 +57,12 @@ namespace RandomOps
         /// <summary>
         /// The RNG used for drawing elements from the set.
         /// </summary>
-        Random Rand;
+        readonly Random _rand;
 
         /// <summary>
         /// Array used for holding the elements of the set.
         /// </summary>
-        int[] Elms;
+        readonly int[] _elms;
         #endregion
 
         #region Internal methods.
@@ -75,9 +74,9 @@ namespace RandomOps
             Debug.Assert(i >= 0 && i < Capacity);
             Debug.Assert(j >= 0 && j < Capacity);
 
-            int temp = Elms[i];
-            Elms[i] = Elms[j];
-            Elms[j] = temp;
+            int temp = _elms[i];
+            _elms[i] = _elms[j];
+            _elms[j] = temp;
         }
 
         /// <summary>
@@ -113,10 +112,10 @@ namespace RandomOps
             Debug.Assert(Size > 0);
 
             // Get random index from remainder of set.
-            index = Rand.Index(Size);
+            index = _rand.Index(Size);
 
             // Retrieve the element at that position.
-            retVal = Elms[index];
+            retVal = _elms[index];
 
             // Remove that element from the set.
             Remove(index);
@@ -136,7 +135,7 @@ namespace RandomOps
             // Initialize array.
             for (int i = 0; i < Size; i++)
             {
-                Elms[i] = i;
+                _elms[i] = i;
             }
         }
 

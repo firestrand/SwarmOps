@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -63,12 +62,12 @@ namespace SwarmOps.Optimizers
             /// No dither.
             /// </summary>
             None,
-            
+
             /// <summary>
             /// Use same dithering for entire generation.
             /// </summary>
             Generation,
-            
+
             /// <summary>
             /// Use same dithering for entire vector. (Aka. Dither.)
             /// </summary>
@@ -106,13 +105,13 @@ namespace SwarmOps.Optimizers
             }
         }
 
-        DitherVariant _dither;
-        DECrossover.Variant _crossover;
+        protected DitherVariant _dither;
+        protected DECrossover.Variant _crossover;
 
         /// <summary>
         /// Name of crossover operator.
         /// </summary>
-        string CrossoverName
+        protected string CrossoverName
         {
             get
             {
@@ -123,7 +122,7 @@ namespace SwarmOps.Optimizers
         /// <summary>
         /// Name of dither variant.
         /// </summary>
-        string DitherName
+        protected string DitherName
         {
             get
             {
@@ -177,6 +176,97 @@ namespace SwarmOps.Optimizers
                     /// Hand-tuned control parameters for use with Rand1Bin crossover, No Dither.
                     /// </summary>
                     public static readonly double[] HandTuned = { 300.0, 0.9, 0.5 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 2 dimensions and 400 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks2Dim400IterA = { 13.0, 0.745, 0.9096 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 2 dimensions and 400 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks2Dim400IterB = { 10.0, 0.4862, 1.1922 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 2 dimensions and 4000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks2Dim4000IterA = { 24, 0.2515, 0.8905 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 2 dimensions and 4000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks2Dim4000IterB = { 20.0, 0.7455, 0.9362 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 5 dimensions and 1000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks5Dim1000Iter = { 17.0, 0.7122, 0.6301 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 5 dimensions and 10000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks5Dim10000Iter = { 20.0, 0.6938, 0.9314 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 10 dimensions and 2000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks10Dim2000IterA = { 28.0, 0.9426, 0.6607 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 10 dimensions and 2000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks10Dim2000IterB = { 12.0, 0.2368, 0.6702 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 10 dimensions and 20000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks10Dim20000Iter = { 18.0, 0.5026, 0.6714 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 20 dimensions and 40000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks20Dim40000Iter = { 37.0, 0.9455, 0.6497 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for Ackley, Rastrigin, Rosenbrock, and Schwefel1-2 in
+                    /// 20 dimensions and 400000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] FourBenchmarks20Dim400000Iter = { 35.0, 0.4147, 0.5983 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for all benchmark problems in
+                    /// 50 dimensions and 100000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] AllBenchmarks50Dim100000Iter = { 48.0, 0.9784, 0.6876 };
+
+                    /// <summary>
+                    /// Control parameters for use with Rand1Bin crossover, No Dither,
+                    /// tuned for Ackley, Rastrigin, Rosenbrock, and Schwefel1-2 in
+                    /// 100 dimensions and 200000 fitness evaluations in one optimization run.
+                    /// </summary>
+                    public static readonly double[] FourBenchmarks100Dim200000Iter = { 46.0, 0.9565, 0.5824 };
 
                     /// <summary>
                     /// Mesh-tuned parameters, from mesh search when fixing CR=0.9 with various
@@ -386,6 +476,9 @@ namespace SwarmOps.Optimizers
         {
             Debug.Assert(parameters != null && parameters.Length == Dimensionality);
 
+            // Signal beginning of optimization run.
+            Problem.BeginOptimizationRun();
+
             // Retrieve parameters specific to DE method.
             int numAgents = GetNumAgents(parameters);
             double CR = GetCR(parameters);
@@ -394,16 +487,15 @@ namespace SwarmOps.Optimizers
             double FRange = GetFRange(parameters);
 
             // Get problem-context.
-            double[] lowerBound = Problem.LowerBound;
-            double[] upperBound = Problem.UpperBound;
             double[] lowerInit = Problem.LowerInit;
             double[] upperInit = Problem.UpperInit;
             int n = Problem.Dimensionality;
 
-            // Allocate agent positions and associated fitnesses.
+            // Allocate agent positions and associated fitnesses and feasibility.
             double[][] agents = Tools.NewMatrix(numAgents, n);
-            double[] agentFitness = new double[numAgents];
-            double[] t = new double[n];
+            double[] fitness = new double[numAgents];
+            bool[] feasible = new bool[numAgents];
+            double[] y = new double[n];
 
             // Allocate differential weight vector.
             double[] w = new double[n];
@@ -423,12 +515,13 @@ namespace SwarmOps.Optimizers
             int i, j;
 
             // Fitness variables.
-            double gFitness = Problem.MaxFitness;
             double[] g = null;
+            double gFitness = Problem.MaxFitness;
+            bool gFeasible = false;
 
             // Initialize all agents.
             // This counts as iterations below.
-            for (j = 0; j < numAgents && Problem.RunCondition.Continue(j, gFitness); j++)
+            for (j = 0; j < numAgents && Problem.Continue(j, gFitness, gFeasible); j++)
             {
                 // Refer to the j'th agent as x.
                 double[] x = agents[j];
@@ -436,21 +529,26 @@ namespace SwarmOps.Optimizers
                 // Initialize agent-position in search-space.
                 Tools.InitializeUniform(ref x, lowerInit, upperInit);
 
-                // Compute fitness of initial position.
-                agentFitness[j] = Problem.Fitness(x);
+                // Enforce constraints and evaluate feasibility.
+                feasible[j] = Problem.EnforceConstraints(ref x);
 
-                // Update swarm's best known position.
-                if (g == null || agentFitness[j] < gFitness)
+                // Compute fitness of initial position.
+                fitness[j] = Problem.Fitness(x, feasible[j]);
+
+                // Update population's best known position if it either does not exist or,
+                // if feasibility is same or better and fitness is an improvement.
+                if (Tools.BetterFeasibleFitness(gFeasible, feasible[j], gFitness, fitness[j]))
                 {
-                    g = x;
-                    gFitness = agentFitness[j];
+                    g = agents[j];
+                    gFitness = fitness[j];
+                    gFeasible = feasible[j];
                 }
 
                 // Trace fitness of best found solution.
-                Trace(j, gFitness);
+                Trace(j, gFitness, gFeasible);
             }
 
-            for (i = numAgents; Problem.RunCondition.Continue(i, gFitness);)
+            for (i = numAgents; Problem.Continue(i, gFitness, gFeasible); )
             {
                 Debug.Assert(numAgents > 0);
 
@@ -461,7 +559,7 @@ namespace SwarmOps.Optimizers
                     Tools.Initialize(ref w, Globals.Random.Uniform(FMid - FRange, FMid + FRange));
                 }
 
-                for (j = 0; j < numAgents && Problem.RunCondition.Continue(i, gFitness); j++, i++)
+                for (j = 0; j < numAgents && Problem.Continue(i, gFitness, gFeasible); j++, i++)
                 {
                     // Perform dithering of differential weight, depending on dither variant wanted.
                     if (_dither == DitherVariant.Vector)
@@ -482,44 +580,51 @@ namespace SwarmOps.Optimizers
                     // Refer to the j'th agent as x.
                     double[] x = agents[j];
 
-                    // Store old position of agent x.
-                    x.CopyTo(t, 0);
-
                     // Perform crossover.
-                    DECrossover.DoCrossover(_crossover, CR, n, w, ref x, g, agents, randomSet);
+                    DECrossover.DoCrossover(_crossover, CR, n, w, x, ref y, g, agents, randomSet);
 
-                    // Enforce bounds before computing new fitness.
-                    Tools.Bound(ref x, lowerBound, upperBound);
+                    // Enforce constraints and evaluate feasibility.
+                    bool newFeasible = Problem.EnforceConstraints(ref y);
 
-                    // Compute new fitness.
-                    double newFitness = Problem.Fitness(x, agentFitness[j]);
-
-                    // Update agent in case of fitness improvement.
-                    if (newFitness < agentFitness[j])
+                    // Compute fitness if feasibility (constraint satisfaction) is same or better.
+                    if (Tools.BetterFeasible(feasible[j], newFeasible))
                     {
-                        // Update agent's fitness. Position is already updated.
-                        agentFitness[j] = newFitness;
+                        // Compute new fitness.
+                        double newFitness = Problem.Fitness(y, fitness[j], feasible[j], newFeasible);
 
-                        // Update swarm's best known position.
-                        if (newFitness < gFitness)
+                        // Update agent in case of fitness improvement.
+                        if (Tools.BetterFeasibleFitness(feasible[j], newFeasible, fitness[j], newFitness))
                         {
-                            g = x;
-                            gFitness = newFitness;
+                            // Update agent's position.
+                            y.CopyTo(agents[j], 0);
+
+                            // Update agent's fitness.
+                            fitness[j] = newFitness;
+
+                            // Update agent's feasibility.
+                            feasible[j] = newFeasible;
+
+                            // Update population's best known position,
+                            // if feasibility is same or better and fitness is an improvement.
+                            if (Tools.BetterFeasibleFitness(gFeasible, newFeasible, gFitness, newFitness))
+                            {
+                                g = agents[j];
+                                gFitness = newFitness;
+                                gFeasible = newFeasible;
+                            }
                         }
-                    }
-                    else // Fitness was not an improvement.
-                    {
-                        // Restore old position.
-                        t.CopyTo(x, 0);
                     }
 
                     // Trace fitness of best found solution.
-                    Trace(i, gFitness);
+                    Trace(i, gFitness, gFeasible);
                 }
             }
 
+            // Signal end of optimization run.
+            Problem.EndOptimizationRun();
+
             // Return best-found solution and fitness.
-            return new Result(g, gFitness, i);
+            return new Result(g, gFitness, gFeasible, i);
         }
         #endregion
     }

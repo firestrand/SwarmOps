@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -19,29 +18,59 @@ namespace SwarmOps
     /// same methods as the the optimizer itself, but stores the
     /// optimization results so as to compute the statistics.
     /// </summary>
-    public class Statistics : Optimizer
+    public class Statistics : OptimizerWrapper
     {
         #region Constructors.
         /// <summary>
         /// Create a Statistics-object.
         /// </summary>
         /// <param name="optimizer">Optimizer-object being wrapped.</param>
-        public Statistics(Optimizer optimizer)
-            : base()
+        /// <param name="onlyFeasible">Only use feasible results.</param>
+        public Statistics(Optimizer optimizer, bool onlyFeasible)
+            : base(optimizer)
         {
-            Optimizer = optimizer;
+            OnlyFeasible = onlyFeasible;
             Results = new List<Result>();
         }
         #endregion
 
         #region Public fields.
         /// <summary>
-        /// The optimizer that is being wrapped.
+        /// Only use feasible results.
         /// </summary>
-        public Optimizer Optimizer
+        public bool OnlyFeasible
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Number of results regardless of feasibility.
+        /// </summary>
+        public int Count
+        {
+            get;
+            protected set;
+        }
+
+        /// <summary>
+        /// Number of feasible results.
+        /// </summary>
+        public int CountFeasible
+        {
+            get;
+            protected set;
+        }
+
+        /// <summary>
+        /// Fraction of results that are feasible (satisfy constraints).
+        /// </summary>
+        public double FeasibleFraction
+        {
+            get
+            {
+                return (double)CountFeasible / Count;
+            }
         }
 
         /// <summary>
@@ -54,8 +83,8 @@ namespace SwarmOps
         }
 
         /// <summary>
-        /// Best optimization results. There may be several, equally good results.
-        /// To get the first call BestResult instead.
+        /// Best optimization results based on fitness alone. There may be several,
+        /// equally good results. To get the first call BestResult instead.
         /// </summary>
         public IEnumerable<Result> BestResults
         {
@@ -64,7 +93,7 @@ namespace SwarmOps
         }
 
         /// <summary>
-        /// Best optimization result achieved.
+        /// Best optimization result achieved, based on fitness alone.
         /// </summary>
         public Result BestResult
         {
@@ -99,7 +128,7 @@ namespace SwarmOps
         /// <summary>
         /// Fitness for best solution found.
         /// </summary>
-        public double FitnessMin
+        public double? FitnessMin
         {
             get { return FitnessQuartiles.Min; }
         }
@@ -107,7 +136,7 @@ namespace SwarmOps
         /// <summary>
         /// Fitness for worst solution found.
         /// </summary>
-        public double FitnessMax
+        public double? FitnessMax
         {
             get { return FitnessQuartiles.Max; }
         }
@@ -115,7 +144,7 @@ namespace SwarmOps
         /// <summary>
         /// Fitness mean or average for all optimization results.
         /// </summary>
-        public double FitnessMean
+        public double? FitnessMean
         {
             get;
             private set;
@@ -124,7 +153,7 @@ namespace SwarmOps
         /// <summary>
         /// Standard deviation of fitness for all optimization results.
         /// </summary>
-        public double FitnessStdDev
+        public double? FitnessStdDev
         {
             get;
             private set;
@@ -142,7 +171,7 @@ namespace SwarmOps
         /// <summary>
         /// Lowest number of iterations used in a single optimization run.
         /// </summary>
-        public double IterationsMin
+        public double? IterationsMin
         {
             get { return IterationsQuartiles.Min; }
         }
@@ -150,7 +179,7 @@ namespace SwarmOps
         /// <summary>
         /// Highest number of iterations used in a single optimization run.
         /// </summary>
-        public double IterationsMax
+        public double? IterationsMax
         {
             get { return IterationsQuartiles.Max; }
         }
@@ -158,7 +187,7 @@ namespace SwarmOps
         /// <summary>
         /// Mean number of iterations used in optimization runs.
         /// </summary>
-        public double IterationsMean
+        public double? IterationsMean
         {
             get;
             private set;
@@ -167,7 +196,7 @@ namespace SwarmOps
         /// <summary>
         /// Standard deviation for the number of iterations used in optimization runs.
         /// </summary>
-        public double IterationsStdDev
+        public double? IterationsStdDev
         {
             get;
             private set;
@@ -181,24 +210,37 @@ namespace SwarmOps
         /// </summary>
         public void Compute()
         {
-
-            // Fitness quartiles.
-            double[] fitnessArray = Results.Select(o => o.Fitness).ToArray();
             FitnessQuartiles = new Quartiles();
-            FitnessQuartiles.ComputeUnsortedInplace(fitnessArray);
-
-            // Fitness mean and stddev.
-            FitnessMean = Results.Average(o => o.Fitness);
-            FitnessStdDev = Results.StdDev(o => o.Fitness);
-
-            // Iterations quartiles.
-            double[] iterationsArray = Results.Select(o => o.Iterations).ToArray();
             IterationsQuartiles = new Quartiles();
-            IterationsQuartiles.ComputeUnsortedInplace(iterationsArray);
 
-            // Iterations mean and stddev.
-            IterationsMean = Results.Average(o => o.Iterations);
-            IterationsStdDev = Results.StdDev(o => o.Iterations);
+            if (Results.Count > 0)
+            {
+                // Fitness quartiles.
+                double[] fitnessArray = Results.Select(o => o.Fitness).ToArray();
+                FitnessQuartiles.ComputeUnsortedInplace(fitnessArray);
+
+                // Iterations quartiles.
+                double[] iterationsArray = Results.Select(o => o.Iterations).ToArray();
+                IterationsQuartiles.ComputeUnsortedInplace(iterationsArray);
+
+                // Fitness mean and stddev.
+                FitnessMean = Results.Average(o => o.Fitness);
+                FitnessStdDev = Results.StdDev(o => o.Fitness);
+
+                // Iterations mean and stddev.
+                IterationsMean = Results.Average(o => o.Iterations);
+                IterationsStdDev = Results.StdDev(o => o.Iterations);
+            }
+            else
+            {
+                // Fitness mean and stddev.
+                FitnessMean = null;
+                FitnessStdDev = null;
+
+                // Iterations mean and stddev.
+                IterationsMean = null;
+                IterationsStdDev = null;
+            }
 
             // Best results.
             BestResults = Results.Where(o => o.Fitness == FitnessMin);
@@ -210,91 +252,19 @@ namespace SwarmOps
         public void Clear()
         {
             Results.Clear();
+
+            Count = 0;
+            CountFeasible = 0;
         }
         #endregion
 
-        #region Problem base-class overrides.
-        /// <summary>
-        /// Used for determining whether or not to continue optimization.
-        /// </summary>
-        public override IRunCondition RunCondition
-        {
-            get { return Optimizer.RunCondition; }
-            set { Optimizer.RunCondition = value; }
-        }
-
+        #region Base-class overrides.
         /// <summary>
         /// Return the name of the problem.
         /// </summary>
         public override string Name
         {
             get { return "Statistics (" + Optimizer.Name + ")"; }
-        }
-
-        /// <summary>
-        /// Return LowerBound of Optimizer.
-        /// </summary>
-        public override double[] LowerBound
-        {
-            get { return Optimizer.LowerBound; }
-        }
-
-        /// <summary>
-        /// Return UpperBound of Optimizer.
-        /// </summary>
-        public override double[] UpperBound
-        {
-            get { return Optimizer.UpperBound; }
-        }
-
-        /// <summary>
-        /// Return LowerInit of Optimizer.
-        /// </summary>
-        public override double[] LowerInit
-        {
-            get { return Optimizer.LowerInit; }
-        }
-
-        /// <summary>
-        /// Return UpperInit of Optimizer.
-        /// </summary>
-        public override double[] UpperInit
-        {
-            get { return Optimizer.UpperInit; }
-        }
-
-        /// <summary>
-        /// Return Dimensionality of Optimizer.
-        /// </summary>
-        public override int Dimensionality
-        {
-            get { return Optimizer.Dimensionality; }
-        }
-
-        /// <summary>
-        /// Return MinFitness of Optimizer.
-        /// </summary>
-        public override double MinFitness
-        {
-            get { return Optimizer.MinFitness; }
-        }
-
-        /// <summary>
-        /// Return ParameterName of Optimizer.
-        /// </summary>
-        public override string[] ParameterName
-        {
-            get { return Optimizer.ParameterName; }
-        }
-        #endregion
-
-        #region Optimizer base-class overrides.
-        /// <summary>
-        /// Return DefaultParameters of Optimizer.
-        /// </summary>
-        public override double[] DefaultParameters
-        {
-            get { return Optimizer.DefaultParameters; }
         }
 
         /// <summary>
@@ -309,10 +279,23 @@ namespace SwarmOps
             // Call through to the Optimizer.
             Result result = Optimizer.Optimize(parameters, fitnessLimit);
 
-            // Store optimization results for later use by the Compute() method.
-            Results.Add(result);
+            // Store optimization result for later use by the Compute() method,
+            // if feasibility is required then only store feasible results.
+            if (!OnlyFeasible || result.Feasible)
+            {
+                Results.Add(result);
+            }
 
-            // Return results.
+            if (result.Feasible)
+            {
+                // Increase count of feasible results.
+                CountFeasible++;
+            }
+
+            // Increase total count of results, regardless of feasibility.
+            Count++;
+
+            // Return the optimization result.
             return result;
         }
         #endregion

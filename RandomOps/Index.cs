@@ -45,6 +45,7 @@ namespace RandomOps
         /// <summary>
         /// Draw two distinct integers from the set {0, .., n-1} with equal probability.
         /// </summary>
+        /// <param name="n">length of array</param>
         /// <param name="index1">Reference to the first integer drawn.</param>
         /// <param name="index2">Reference to the second integer drawn.</param>
         public virtual void Index2(int n, out int index1, out int index2)
@@ -73,7 +74,6 @@ namespace RandomOps
         /// Use this function if you only need to draw a few random numbers,
         /// otherwise create an IndexDistribution-object.
         /// </summary>
-        /// <param name="rand">RNG object to use for random drawing.</param>
         /// <param name="probabilities">Probability distribution.</param>
         public int Index(double[] probabilities)
         {

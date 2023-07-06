@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -70,10 +69,11 @@ namespace SwarmOps.Optimizers
         /// <param name="n">Dimensionality for problem.</param>
         /// <param name="w">Differential weight (vector).</param>
         /// <param name="x">Current agent position.</param>
+        /// <param name="y">Potentially new agent position.</param>
         /// <param name="g">Population's best known position.</param>
         /// <param name="agents">Entire population.</param>
         /// <param name="randomSet">Random-set used for drawing distinct agents.</param>
-        public static void DoCrossover(Variant crossover, double CR, int n, double[] w, ref double[] x, double[] g, double[][] agents, RandomOps.Set randomSet)
+        public static void DoCrossover(Variant crossover, double CR, int n, double[] w, double[] x, ref double[] y, double[] g, double[][] agents, RandomOps.Set randomSet)
         {
             // Agents used in crossover.
             double[] a, b, c;
@@ -120,7 +120,11 @@ namespace SwarmOps.Optimizers
             {
                 if (k == R || Globals.Random.Bool(CR))
                 {
-                    x[k] = a[k] + w[k] * (b[k] - c[k]);
+                    y[k] = a[k] + w[k] * (b[k] - c[k]);
+                }
+                else
+                {
+                    y[k] = x[k];
                 }
             }
         }

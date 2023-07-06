@@ -39,10 +39,8 @@ namespace RandomOps
         /// <param name="x">Array to hold the random point.</param>
         public virtual void Sphere3(ref double[] x)
         {
-            double v1, v2, s;
-
             // Pick two uniform numbers in the unit-radius 2-dim ball.
-            Disk(out v1, out v2, out s);
+            Disk(out var v1, out var v2, out var s);
 
             double a = Math.Sqrt(1 - s);
 
@@ -69,11 +67,9 @@ namespace RandomOps
         /// <param name="x">Array to hold the random point.</param>
         public virtual void Sphere4(ref double[] x)
         {
-            double v1, v2, v3, v4, s1, s2;
-
             // Pick uniform numbers in the unit-radius 2-dim ball.
-            Disk(out v1, out v2, out s1);
-            Disk(out v3, out v4, out s2);
+            Disk(out var v1, out var v2, out var s1);
+            Disk(out var v3, out var v4, out var s2);
 
             double a = Math.Sqrt((1 - s1) / s2);
 

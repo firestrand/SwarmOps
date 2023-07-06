@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -39,6 +38,35 @@ namespace SwarmOps
             {
                 Console.WriteLine("\tN/A");
             }
+        }
+
+        /// <summary>
+        /// Print parameters, fitness and feasibility to Console, and print a marking if
+        /// fitness was an improvement to fitnessLimit.
+        /// </summary>
+        public static void PrintSolution(double[] parameters, double fitness, double fitnessLimit, bool oldFeasible, bool newFeasible, bool formatAsArray)
+        {
+            // Convert parameters to a string.
+            string parametersStr = (formatAsArray) ? (Tools.ArrayToString(parameters)) : (Tools.ArrayToStringRaw(parameters));
+
+            Console.WriteLine("{0} \t{1} \t{2} {3}",
+                parametersStr,
+                Tools.FormatNumber(fitness),
+                (newFeasible) ? (1) : (0),
+                Tools.BetterFeasibleFitness(oldFeasible, newFeasible, fitnessLimit, fitness) ? ("***") : (""));
+
+            // Flush stdout, this is useful if piping the output and you wish
+            // to study the the output before the entire optimization run is complete.
+            Console.Out.Flush();
+        }
+
+        /// <summary>
+        /// Print a newline to Console.
+        /// </summary>
+        public static void PrintNewline()
+        {
+            Console.WriteLine();
+            Console.Out.Flush();
         }
     }
 }

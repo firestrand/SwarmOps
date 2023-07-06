@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -58,60 +57,59 @@ namespace SwarmOps.Problems
         /// </summary>
         /// <param name="id">Benchmark problem ID.</param>
         /// <param name="dimensionality">Dimensionality of problem.</param>
-        /// <param name="displaceOptimum">Displace optimum?</param>
         /// <returns></returns>
-        public static Benchmark CreateInstance(this ID id, int dimensionality, bool displaceOptimum, IRunCondition runCondition)
+        public static Benchmark CreateInstance(this ID id, int dimensionality, int maxIterations)
         {
             Benchmark benchmark;
 
             switch (id)
             {
                 case ID.Ackley:
-                    benchmark = new Ackley(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Ackley(dimensionality, maxIterations);
                     break;
 
                 case ID.Griewank:
-                    benchmark = new Griewank(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Griewank(dimensionality, maxIterations);
                     break;
 
                 case ID.Penalized1:
-                    benchmark = new Penalized1(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Penalized1(dimensionality, maxIterations);
                     break;
 
                 case ID.Penalized2:
-                    benchmark = new Penalized2(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Penalized2(dimensionality, maxIterations);
                     break;
 
                 case ID.QuarticNoise:
-                    benchmark = new QuarticNoise(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new QuarticNoise(dimensionality, maxIterations);
                     break;
 
                 case ID.Rastrigin:
-                    benchmark = new Rastrigin(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Rastrigin(dimensionality, maxIterations);
                     break;
 
                 case ID.Rosenbrock:
-                    benchmark = new Rosenbrock(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Rosenbrock(dimensionality, maxIterations);
                     break;
 
                 case ID.Schwefel12:
-                    benchmark = new Schwefel12(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Schwefel12(dimensionality, maxIterations);
                     break;
 
                 case ID.Schwefel221:
-                    benchmark = new Schwefel221(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Schwefel221(dimensionality, maxIterations);
                     break;
 
                 case ID.Schwefel222:
-                    benchmark = new Schwefel222(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Schwefel222(dimensionality, maxIterations);
                     break;
 
                 case ID.Sphere:
-                    benchmark = new Sphere(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Sphere(dimensionality, maxIterations);
                     break;
 
                 case ID.Step:
-                    benchmark = new Step(dimensionality, displaceOptimum, runCondition);
+                    benchmark = new Step(dimensionality, maxIterations);
                     break;
 
                 default:

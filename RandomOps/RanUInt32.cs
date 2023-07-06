@@ -26,7 +26,6 @@ namespace RandomOps
         /// Constructs the PRNG-object.
         /// </summary>
         public RanUInt32()
-            : base()
         {
             _randMaxHalf = RandMax / 2;
             _randInv = 1.0 / ((double)RandMax + 2);
@@ -37,24 +36,24 @@ namespace RandomOps
         /// <summary>
         /// Used in Bool(), for convenience and speed.
         /// </summary>
-        UInt32 _randMaxHalf;
+        readonly uint _randMaxHalf;
 
         /// <summary>
         /// Used in Uniform(), for convenience and speed.
         /// </summary>
-        double _randInv;
+        readonly double _randInv;
         #endregion
 
         #region PRNG Implementation.
         /// <summary>
         /// Draw a random number in inclusive range {0, .., RandMax}
         /// </summary>
-        public abstract UInt32 Rand();
+        public abstract uint Rand();
 
         /// <summary>
         /// The maximum possible value returned by Rand().
         /// </summary>
-        public abstract UInt32 RandMax
+        public abstract uint RandMax
         {
             get;
         }
@@ -64,7 +63,7 @@ namespace RandomOps
         /// </summary>
         protected virtual void Seed()
         {
-            UInt32 seed = (UInt32)(DateTime.Now.Ticks % (long)RandMax);
+            uint seed = (uint)(DateTime.Now.Ticks % RandMax);
 
             Seed(seed);
         }
@@ -72,7 +71,7 @@ namespace RandomOps
         /// <summary>
         /// Seed with an integer.
         /// </summary>
-        protected virtual void Seed(UInt32 seed)
+        protected virtual void Seed(uint seed)
         {
             throw new NotImplementedException();
         }
@@ -90,7 +89,7 @@ namespace RandomOps
             double rand = (double) Rand() + 1;
             double value = rand * _randInv;
 
-            Debug.Assert(value > 0 && value < 1);
+            Debug.Assert(value is > 0 and < 1);
 
             return value;
         }
@@ -112,10 +111,10 @@ namespace RandomOps
         /// </remarks>
         public override byte Byte()
         {
-            UInt32 r = Rand();
-            UInt32 value = r >> 24;
+            uint r = Rand();
+            uint value = r >> 24;
 
-            Debug.Assert(value >= 0 && value <= System.Byte.MaxValue);
+            Debug.Assert(value is >= 0 and <= byte.MaxValue);
 
             byte b = (byte)value;
 

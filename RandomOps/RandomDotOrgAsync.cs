@@ -44,19 +44,13 @@ namespace RandomOps
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "Random.Org Async"; }
-        }
+        public override string Name => "Random.Org Async";
 
         /// <summary>
         /// The www.random.org website only allows 10000 elements
         /// to be retrieved at once.
         /// </summary>
-        protected override int MaxRetrieveLength
-        {
-            get { return 10000; }
-        }
+        protected override int MaxRetrieveLength => 10000;
 
         /// <summary>
         /// Called from ByteStream to request the retrieval of random bytes.

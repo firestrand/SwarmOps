@@ -1,6 +1,5 @@
 SwarmOps - Numeric and heuristic optimization for C#
-Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-Published under the GNU Lesser General Public License.
+Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 Please see the file license.txt for license details.
 SwarmOps on the internet: http://www.Hvass-Labs.org/
 
@@ -20,7 +19,7 @@ To install SwarmOps follow these simple steps:
 Requirements:
 
 SwarmOps requires a Random Number Generator (RNG) and by
-default uses the RandomOps library version 1 or later,
+default uses the RandomOps library version 2 or later,
 which must be installed before SwarmOps can be used. If
 you wish to use another RNG, then the easiest thing is
 to make a wrapper for that RNG in RandomOps, so you do
@@ -31,11 +30,46 @@ http://www.Hvass-Labs.org/
 
 Compiler Compatibility:
 
-SwarmOps was developed in MS Visual C# 2008 with .NET
-framework v3.5 SP1.
+SwarmOps was developed in MS Visual C# 2010 with .NET
+framework v4.
 
 
 Update History:
+
+Version 3.1:
+- Fixed PS and LUS initialization to use LowerInit
+  and UpperInit instead of LowerBound and UpperBound.
+- Various cleanup.
+
+Version 3:
+- Added constraint handling to optimizers and framework.
+- Added methods BeginOptimizationRun and EndOptimizationRun.
+- Added Mangler-class for mangling search-space of benchmark
+  problems instead of search-space displacement.
+- Added OptimizerWrapper-class.
+- Fixed preemptive fitness limit in MOL initialization.
+- Streamlined notation in several optimizers.
+- Removed GED optimizer.
+- Removed Multi-class.
+- Removed RunCondition-classes, integrated in Problem-class.
+- Fixed bug in FitnessTrace-classes when trace was short.
+
+Version 2.2:
+- Added FitnessComparer to Solution-class.
+- Fixed bug in LogSolutions.
+- Changed software license to a simpler one.
+
+Version 2.1:
+- Added Mask to MESH-optimizer so as to hold fixed some parameters.
+- Added several parameter sets to PSO, MOL and DE-Rand1Bin (DESuite).
+
+Version 2:
+- Added parallel version of the optimizers: DE, DESuite, MOL, PSO.
+- Added parallel version of MetaFitness.
+- Changed FitnessTrace to allow optimization runs that are longer
+  than assumed without causing a crash.
+- Changed GD so it doesn't add time-complexity-factor because it
+  is incompatible with FitnessTrace and causes a crash.
 
 Version 1.1:
 - Added weights to MetaFitness to be used in TestMetaBenchmarks2.

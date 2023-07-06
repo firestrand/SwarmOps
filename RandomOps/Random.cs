@@ -82,7 +82,7 @@ namespace RandomOps
         public virtual byte Byte()
         {
             // Re-use the Index() method.
-            return (byte)Index((int)System.Byte.MaxValue + 1);
+            return (byte)Index(byte.MaxValue + 1);
         }
 
         /// <summary>

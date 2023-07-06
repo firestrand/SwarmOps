@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -13,23 +12,16 @@ namespace SwarmOps.Problems
     /// <summary>
     /// Penalized1 benchmark problem.
     /// </summary>
-    public class Penalized1 : Benchmark
+    public class Penalized1 : Penalized
     {
         #region Constructors.
         /// <summary>
         /// Construct the object.
         /// </summary>
         /// <param name="dimensionality">Dimensionality of the problem (e.g. 20)</param>
-        /// <param name="displaceOptimum">Displace optimum?</param>
-        /// <param name="runCondition">
-        /// Determines for how long to continue optimization.
-        /// </param>
-        /// <remarks>
-        /// Optimum displacement disabled for this problem because
-        /// of the penalty function.
-        /// </remarks>
-        public Penalized1(int dimensionality, bool displaceOptimum, IRunCondition runCondition)
-            : base(dimensionality, -50, 50, 5, 50, 0, false, runCondition)
+        /// <param name="maxIterations">Max optimization iterations to perform.</param>
+        public Penalized1(int dimensionality, int maxIterations)
+            : base(dimensionality, -50, 50, 5, 50, maxIterations)
         {
         }
         #endregion
@@ -86,16 +78,16 @@ namespace SwarmOps.Problems
             {
                 double elm = x[i];
 
-                penalty += Penalized.U(elm, 10.0, 100.0, 4.0);
+                penalty += U(elm, 10.0, 100.0, 4.0);
             }
 
             return System.Math.PI * value / Dimensionality + penalty;
         }
         #endregion
 
-        #region Protected methods.
+        #region Helper methods.
         /// <summary>
-        /// Helper-method used in the Fitness-method.
+        /// Helper-method used in Fitness method.
         /// </summary>
         protected double GetY(double x)
         {
@@ -103,7 +95,7 @@ namespace SwarmOps.Problems
         }
 
         /// <summary>
-        /// Helper-method used in the Fitness-method.
+        /// Helper-method used in Fitness method.
         /// </summary>
         protected double GetSinY(double x)
         {
@@ -112,6 +104,7 @@ namespace SwarmOps.Problems
 
             return 10 * elmSinY * elmSinY;
         }
+
         #endregion
     }
 }

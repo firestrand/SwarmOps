@@ -26,9 +26,8 @@ namespace RandomOps
         /// This is what you will mostly want to use.
         /// </summary>
         public RanSystem()
-            : base()
         {
-            Rand = new System.Random();
+            _rand = new System.Random();
         }
 
         /// <summary>
@@ -37,9 +36,8 @@ namespace RandomOps
         /// same sequence of pseudo-random numbers.
         /// </summary>
         public RanSystem(int seed)
-            : base()
         {
-            Rand = new System.Random(seed);
+            _rand = new System.Random(seed);
         }
         #endregion
 
@@ -47,17 +45,14 @@ namespace RandomOps
         /// <summary>
         /// The .NET PRNG-object.
         /// </summary>
-        System.Random Rand;
+        readonly System.Random _rand;
         #endregion
 
         #region Base-class overrides.
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "RanSystem"; }
-        }
+        public override string Name => "RanSystem";
 
         /// <summary>
         /// Draw a uniform random number in the exclusive range (0,1)
@@ -65,7 +60,7 @@ namespace RandomOps
         /// <returns></returns>
         public sealed override double Uniform()
         {
-            return Rand.NextDouble();
+            return _rand.NextDouble();
         }
 
         /// <summary>
@@ -74,7 +69,7 @@ namespace RandomOps
         /// <returns></returns>
         public sealed override bool Bool()
         {
-            return Rand.Next(2) == 0;
+            return _rand.Next(2) == 0;
         }
 
         /// <summary>
@@ -84,7 +79,7 @@ namespace RandomOps
         /// <returns></returns>
         public sealed override int Index(int n)
         {
-            return Rand.Next(n);
+            return _rand.Next(n);
         }
 
         /// <summary>
@@ -104,7 +99,7 @@ namespace RandomOps
         {
             byte[] arr = new byte[length];
 
-            Rand.NextBytes(arr);
+            _rand.NextBytes(arr);
 
             return arr;
         }

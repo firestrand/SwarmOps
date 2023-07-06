@@ -342,7 +342,7 @@ namespace Test
 
         static void TestRanQD()
         {
-            RandomOps.RanQD rand = new RandomOps.RanQD();
+            RandomOps.RanQd rand = new RandomOps.RanQd();
 
             Test(rand);
         }
@@ -380,21 +380,21 @@ namespace Test
 
         static void TestMWC256()
         {
-            RandomOps.MWC256 rand = new RandomOps.MWC256();
+            RandomOps.Mwc256 rand = new RandomOps.Mwc256();
 
             TestArraySeed(rand);
         }
 
         static void TestCMWC4096()
         {
-            RandomOps.CMWC4096 rand = new RandomOps.CMWC4096();
+            RandomOps.Cmwc4096 rand = new RandomOps.Cmwc4096();
 
             TestArraySeed(rand);
         }
 
         static void TestKISS()
         {
-            RandomOps.KISS rand = new RandomOps.KISS();
+            RandomOps.Kiss rand = new RandomOps.Kiss();
 
             TestArraySeed(rand);
         }
@@ -402,8 +402,8 @@ namespace Test
         static void TestSum()
         {
             RandomOps.Ran2 randSeeder = new RandomOps.Ran2();
-            RandomOps.KISS rand1 = new RandomOps.KISS(randSeeder);
-            RandomOps.CMWC4096 rand2 = new RandomOps.CMWC4096(randSeeder);
+            RandomOps.Kiss rand1 = new RandomOps.Kiss(randSeeder);
+            RandomOps.Cmwc4096 rand2 = new RandomOps.Cmwc4096(randSeeder);
             RandomOps.RanUInt32[] rands = { rand1, rand2 };
             RandomOps.SumUInt32 rand = new RandomOps.SumUInt32(rands);
 
@@ -419,7 +419,7 @@ namespace Test
 
         static void TestSwitcher()
         {
-            RandomOps.RanQD ranQD = new RandomOps.RanQD();
+            RandomOps.RanQd ranQD = new RandomOps.RanQd();
             RandomOps.Ran2 ran2 = new RandomOps.Ran2();
             RandomOps.RanSystem ranSystem = new RandomOps.RanSystem();
             RandomOps.Switcher rand = new RandomOps.Switcher(ranQD, new RandomOps.Random[2] { ran2, ranSystem });

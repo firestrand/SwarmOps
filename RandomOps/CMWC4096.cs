@@ -22,15 +22,14 @@ namespace RandomOps
     /// in the newsgroup comp.lang.c by George Marsaglia, published
     /// here with Marsaglia's authorization under the GNU LGPL license.
     /// </remarks>
-    public class CMWC4096 : RanUInt32Array
+    public class Cmwc4096 : RanUInt32Array
     {
         #region Constructors.
         /// <summary>
         /// Constructs the PRNG-object without a seed. Remember
         /// to seed it before drawing random numbers.
         /// </summary>
-        public CMWC4096()
-            : base()
+        public Cmwc4096()
         {
         }
 
@@ -39,7 +38,7 @@ namespace RandomOps
         /// This is useful if you want to repeat experiments with the
         /// same sequence of pseudo-random numbers.
         /// </summary>
-        public CMWC4096(UInt32[] seed)
+        public Cmwc4096(uint[] seed)
             : base(seed)
         {
         }
@@ -47,7 +46,7 @@ namespace RandomOps
         /// <summary>
         /// Constructs the PRNG-object and uses another RNG for seeding.
         /// </summary>
-        public CMWC4096(Random rand)
+        public Cmwc4096(Random rand)
             : base(rand)
         {
         }
@@ -57,48 +56,48 @@ namespace RandomOps
         /// <summary>
         /// Iterator array.
         /// </summary>
-        UInt32[] Q = new UInt32[4096];
+        readonly uint[] _q = new uint[4096];
 
         /// <summary>
         /// Carry variable.
         /// </summary>
-        UInt32 C;
+        uint _c;
 
         /// <summary>
         /// Iteration counter.
         /// </summary>
-        uint Counter = 4095;
+        uint _counter = 4095;
 
         /// <summary>
         /// Is PRNG ready for use?
         /// </summary>
-        bool IsReady = false;
+        bool _isReady;
         #endregion
 
         #region PRNG Implementation.
         /// <summary>
         /// Draw a random number in inclusive range {0, .., RandMax}
         /// </summary>
-        public sealed override UInt32 Rand()
+        public sealed override uint Rand()
         {
-            Debug.Assert(IsReady);
+            Debug.Assert(_isReady);
 
-            Counter = (Counter + 1) & 4095;
+            _counter = (_counter + 1) & 4095;
 
-            UInt64 t = (UInt64)18782 * Q[Counter] + C;
+            ulong t = (ulong)18782 * _q[_counter] + _c;
             
-            C = (UInt32)(t >> 32);
+            _c = (uint)(t >> 32);
 
-            UInt32 x = (UInt32)(t + C);
+            uint x = (uint)(t + _c);
             
-            if (x < C)
+            if (x < _c)
             {
                 x++;
-                C++;
+                _c++;
             }
 
-            UInt32 retVal = 0xfffffffe - x;
-            Q[Counter] = retVal;
+            uint retVal = 0xfffffffe - x;
+            _q[_counter] = retVal;
 
             return retVal;
         }
@@ -106,36 +105,30 @@ namespace RandomOps
         /// <summary>
         /// The maximum possible value returned by Rand().
         /// </summary>
-        public sealed override UInt32 RandMax
-        {
-            get { return UInt32.MaxValue; }
-        }
+        public sealed override uint RandMax => uint.MaxValue;
 
         /// <summary>
         /// Length of seed-array.
         /// </summary>
-        public sealed override int SeedLength
-        {
-            get { return 4097; }
-        }
+        public sealed override int SeedLength => 4097;
 
         /// <summary>
         /// Seed with an integer.
         /// </summary>
-        public sealed override void Seed(UInt32[] seed)
+        public sealed override void Seed(uint[] seed)
         {
             Debug.Assert(seed.Length == SeedLength);
 
             // First seed is used for C.
-            C = seed[0] % 809430660;
+            _c = seed[0] % 809430660;
 
             // Remaining seeds are used for Q.
             for (int i = 1; i < SeedLength; i++)
             {
-                Q[i-1] = seed[i];
+                _q[i-1] = seed[i];
             }
 
-            IsReady = true;
+            _isReady = true;
         }
         #endregion
 
@@ -143,10 +136,8 @@ namespace RandomOps
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "CMWC4096"; }
-        }
+        public override string Name => "CMWC4096";
+
         #endregion
     }
 }

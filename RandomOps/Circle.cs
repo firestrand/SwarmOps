@@ -6,9 +6,6 @@
 /// RandomOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
 
-using System;
-using System.Diagnostics;
-
 namespace RandomOps
 {
     /// <remarks>
@@ -38,9 +35,7 @@ namespace RandomOps
         /// <param name="y">Random point y</param>
         public virtual void Circle(out double x, out double y)
         {
-            double v1, v2, s;
-
-            Disk(out v1, out v2, out s);
+            Disk(out var v1, out var v2, out var s);
 
             x = (v1 * v1 - v2 * v2) / s;
             y = 2 * v1 * v2 / s;

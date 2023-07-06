@@ -31,7 +31,6 @@ namespace RandomOps
         /// This is what you will mostly want to use.
         /// </summary>
         public Ran2()
-            : base()
         {
             Seed();
         }
@@ -41,8 +40,7 @@ namespace RandomOps
         /// This is useful if you want to repeat experiments with the
         /// same sequence of pseudo-random numbers.
         /// </summary>
-        public Ran2(Int32 seed)
-            : base()
+        public Ran2(int seed)
         {
             Seed(seed);
         }
@@ -51,38 +49,41 @@ namespace RandomOps
         #region Iterator-class (internal use only).
         class Iterator
         {
-            Int32 IM, IA, IQ, IR;
+            readonly int _im;
+            readonly int _ia;
+            readonly int _iq;
+            readonly int _ir;
 
-            public Int32 Idum
+            public int Idum
             {
                 get;
                 private set;
             }
 
-            public Iterator(Int32 im, Int32 ia, Int32 iq, Int32 ir)
+            public Iterator(int im, int ia, int iq, int ir)
             {
-                IM = im;
-                IA = ia;
-                IQ = iq;
-                IR = ir;
+                _im = im;
+                _ia = ia;
+                _iq = iq;
+                _ir = ir;
             }
 
-            public void Seed(Int32 seed)
+            public void Seed(int seed)
             {
                 Idum = seed;
             }
 
-            public Int32 DoRand()
+            public int DoRand()
             {
-                Int32 k;
+                int k;
 
-                k = Idum / IQ;
+                k = Idum / _iq;
 
-                Idum = IA * (Idum - k * IQ) - IR * k;
+                Idum = _ia * (Idum - k * _iq) - _ir * k;
 
                 if (Idum < 0)
                 {
-                    Idum += IM;
+                    Idum += _im;
                 }
 
                 return Idum;
@@ -91,76 +92,73 @@ namespace RandomOps
         #endregion
 
         #region Internal definitions and variables.
-        static readonly Int32 IM0 = 2147483563;
-        static readonly Int32 IM1 = 2147483399;
-        static readonly Int32 IA0 = 40014;
-        static readonly Int32 IA1 = 40692;
-        static readonly Int32 IQ0 = 53668;
-        static readonly Int32 IQ1 = 52774;
-        static readonly Int32 IR0 = 12211;
-        static readonly Int32 IR1 = 3791;
-        static readonly Int32 NTAB = 32;
-        static readonly Int32 IMM = IM0 - 1;
-        static readonly Int32 NDIV = 1 + IMM / NTAB;
-        static readonly Int32 WARMUP = 1024 + 8;
-        static readonly Int32 WARMUP2 = 200;
+        static readonly int Im0 = 2147483563;
+        static readonly int Im1 = 2147483399;
+        static readonly int Ia0 = 40014;
+        static readonly int Ia1 = 40692;
+        static readonly int Iq0 = 53668;
+        static readonly int Iq1 = 52774;
+        static readonly int Ir0 = 12211;
+        static readonly int Ir1 = 3791;
+        static readonly int Ntab = 32;
+        static readonly int Imm = Im0 - 1;
+        static readonly int Ndiv = 1 + Imm / Ntab;
+        static readonly int Warmup = 1024 + 8;
+        static readonly int Warmup2 = 200;
 
-        Iterator[] Iterators = { new Iterator(IM0, IA0, IQ0, IR0), new Iterator(IM1, IA1, IQ1, IR1) };
+        readonly Iterator[] _iterators = { new(Im0, Ia0, Iq0, Ir0), new(Im1, Ia1, Iq1, Ir1) };
 
-        Int32 iy = 0;
-        Int32[] iv = new Int32[NTAB];
+        int _iy;
+        readonly int[] _iv = new int[Ntab];
 
         /// <summary>
         /// Is PRNG ready for use?
         /// </summary>
-        bool IsReady = false;
+        bool _isReady;
         #endregion
 
         #region PRNG Implementation.
         /// <summary>
         /// Draw a random number in inclusive range {0, .., RandMax}
         /// </summary>
-        public sealed override Int32 Rand()
+        public sealed override int Rand()
         {
-            Debug.Assert(IsReady);
+            Debug.Assert(_isReady);
 
-            Iterators[0].DoRand();
-            Iterators[1].DoRand();
+            _iterators[0].DoRand();
+            _iterators[1].DoRand();
 
             {
                 // Will be in the range 0..NTAB-1.
-                int j = iy / NDIV;
+                int j = _iy / Ndiv;
 
-                Debug.Assert(j >= 0 && j < NTAB);
+                Debug.Assert(j >= 0 && j < Ntab);
 
                 // Idum is shuffled, idum0 and idum1 are
                 // combined to generate output.
-                iy = iv[j] - Iterators[1].Idum;
-                iv[j] = Iterators[0].Idum;
+                _iy = _iv[j] - _iterators[1].Idum;
+                _iv[j] = _iterators[0].Idum;
 
-                if (iy < 1)
+                if (_iy < 1)
                 {
-                    iy += IMM;
+                    _iy += Imm;
                 }
             }
 
-            Debug.Assert(iy >= 0 && iy <= RandMax);
+            Debug.Assert(_iy >= 0 && _iy <= RandMax);
 
-            return iy;
+            return _iy;
         }
 
         /// <summary>
         /// The maximum possible value returned by Rand().
         /// </summary>
-        public sealed override Int32 RandMax
-        {
-            get { return IM0 - 1; }
-        }
+        public sealed override int RandMax => Im0 - 1;
 
         /// <summary>
         /// Seed with an integer.
         /// </summary>
-        protected sealed override void Seed(Int32 seed)
+        protected sealed override void Seed(int seed)
         {
             int j;
 
@@ -174,27 +172,27 @@ namespace RandomOps
                 seed = -seed;
             }
 
-            Iterators[0].Seed(seed);
-            Iterators[1].Seed(seed);
+            _iterators[0].Seed(seed);
+            _iterators[1].Seed(seed);
 
             // Perform initial warm-ups.
-            for (j = 0; j < WARMUP; j++)
+            for (j = 0; j < Warmup; j++)
             {
-                Iterators[0].DoRand();
+                _iterators[0].DoRand();
             }
 
-            for (j = NTAB - 1; j >= 0; j--)
+            for (j = Ntab - 1; j >= 0; j--)
             {
-                iv[j] = Iterators[0].DoRand();
+                _iv[j] = _iterators[0].DoRand();
             }
 
-            iy = iv[0];
+            _iy = _iv[0];
 
             // PRNG is now ready for use.
-            IsReady = true;
+            _isReady = true;
 
             // Perform additional warm-ups.
-            for (j = 0; j < WARMUP2; j++)
+            for (j = 0; j < Warmup2; j++)
             {
                 Rand();
             }
@@ -205,10 +203,8 @@ namespace RandomOps
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "Ran2"; }
-        }
+        public override string Name => "Ran2";
+
         #endregion
     }
 }

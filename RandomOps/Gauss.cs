@@ -23,7 +23,7 @@ namespace RandomOps
         /// <summary>
         /// Does _gaussian hold a value?
         /// </summary>
-        bool _gaussReady = false;
+        bool _gaussReady;
 
         /// <summary>
         /// Draw a Gaussian (or normally) distributed random number, with designated
@@ -51,10 +51,8 @@ namespace RandomOps
             }
             else
             {
-                double v1, v2, rsq;
-
                 // Pick two uniform numbers in the unit-radius 2-dim ball.
-                Disk(out v1, out v2, out rsq);
+                Disk(out var v1, out var v2, out var rsq);
 
                 double fac = Math.Sqrt(-2.0 * Math.Log(rsq) / rsq);
 

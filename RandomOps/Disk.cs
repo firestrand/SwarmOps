@@ -6,9 +6,6 @@
 /// RandomOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
 
-using System;
-using System.Diagnostics;
-
 namespace RandomOps
 {
     /// <remarks>
@@ -23,9 +20,7 @@ namespace RandomOps
         {
             double[] x = new double[2];
 
-            double sumSquares;
-
-            Disk(out x[0], out x[1], out sumSquares);
+            Disk(out x[0], out x[1], out _);
 
             return x;
         }

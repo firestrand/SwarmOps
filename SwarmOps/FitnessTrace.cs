@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -89,22 +88,24 @@ namespace SwarmOps
         /// </summary>
         /// <param name="iteration">Iteration number of fitness.</param>
         /// <param name="fitness">Fitness value to be traced.</param>
-        public void Add(int iteration, double fitness)
+        /// <param name="feasible">Feasibility (constraint satisfaction) to be traced.</param>
+        public void Add(int iteration, double fitness, bool feasible)
         {
             // If the optimization-iteration falls on an interval then log the fitness.
             if ((iteration - Offset) % Stride == 0)
             {
                 int index = (iteration - Offset) / Stride;
 
-                Debug.Assert(index < MaxIntervals);
-
-                Log(index, fitness);
+                if (index < MaxIntervals)
+                {
+                    Log(index, fitness, feasible);
+                }
             }
 
             // Call chained fitness-tracer.
             if (ChainedFitnessTrace != null)
             {
-                ChainedFitnessTrace.Add(iteration, fitness);
+                ChainedFitnessTrace.Add(iteration, fitness, feasible);
             }
         }
 
@@ -131,7 +132,8 @@ namespace SwarmOps
         /// </summary>
         /// <param name="index">Index into fitness-trace, mapped from optimization iteration.</param>
         /// <param name="fitness">Fitness value to log.</param>
-        protected abstract void Log(int index, double fitness);
+        /// <param name="feasible">Feasibility (constraint satisfaction) to log.</param>
+        protected abstract void Log(int index, double fitness, bool feasible);
 
         /// <summary>
         /// Map fitness-trace index to optimization iteration.

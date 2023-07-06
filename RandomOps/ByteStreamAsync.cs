@@ -40,7 +40,7 @@ namespace RandomOps
         public ByteStreamAsync(int size, int retrieveTrigger, Random randFallback, int numFallback)
             : base(size, randFallback, numFallback)
         {
-            RetrieveTrigger = retrieveTrigger;
+            _retrieveTrigger = retrieveTrigger;
 
             _workerThread = new Thread(Work);
             _workerThread.Start();
@@ -61,12 +61,12 @@ namespace RandomOps
             if (FallbackCount > 0)
             {
                 // Decrease the fallback-counter, thread-safe.
-                lock (FallbackCountLock)
+                lock (_fallbackCountLock)
                 {
-                    FallbackCount = System.Math.Max(0, FallbackCount - numBytes);
+                    FallbackCount = Math.Max(0, FallbackCount - numBytes);
                 }
             }
-            else if (queueCount < numBytes || queueCount < RetrieveTrigger)
+            else if (queueCount < numBytes || queueCount < _retrieveTrigger)
             {
                 // Resize buffer if more bytes are suddenly requested than it
                 // has capacity for.
@@ -87,30 +87,30 @@ namespace RandomOps
         /// <summary>
         /// Refill buffer asynchronously when its size falls below this.
         /// </summary>
-        int RetrieveTrigger;
+        readonly int _retrieveTrigger;
 
         /// <summary>
         /// Lock used for thread-safe updating of FallbackCount.
         /// </summary>
-        Object FallbackCountLock = new Object();
+        readonly object _fallbackCountLock = new();
         #endregion
 
         #region Worker Thread.
         /// <summary>
         /// The thread on which the buffer-filling is to be executed.
         /// </summary>
-        Thread _workerThread;
+        readonly Thread _workerThread;
 
         /// <summary>
         /// The signal used for waking up the worker-thread when it
         /// must fill the buffer.
         /// </summary>
-        EventWaitHandle _waitHandle = new AutoResetEvent(false);
+        readonly EventWaitHandle _waitHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// Should worker-thread abort execution?
         /// </summary>
-        bool _abortPending = false;
+        bool _abortPending;
 
         /// <summary>
         /// Eternal-worker method.
@@ -166,7 +166,7 @@ namespace RandomOps
             {
                 while (fillCount > 0)
                 {
-                    DoFillBuffer(System.Math.Min(fillCount, MaxRetrieveLength));
+                    DoFillBuffer(Math.Min(fillCount, MaxRetrieveLength));
 
                     fillCount -= MaxRetrieveLength;
                 }
@@ -177,7 +177,7 @@ namespace RandomOps
                 // and let the fallback RNG generate numbers instead
                 // when the byte-buffer is discovered to be empty.
 
-                lock (FallbackCountLock)
+                lock (_fallbackCountLock)
                 {
                     FallbackCount = NumFallback;
                 }

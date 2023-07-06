@@ -15,15 +15,14 @@ namespace RandomOps
     /// Pseudo-Random Number Generator (PRNG) based on the RanQD1 (Quick and Dirty)
     /// algorithm from the book: 'Numerical Recipes in C' chapter 7.1.
     /// </summary>
-    public class RanQD : RanUInt32
+    public class RanQd : RanUInt32
     {
         #region Constructors.
         /// <summary>
         /// Constructs the PRNG-object and seeds the PRNG with the current time of day.
         /// This is what you will mostly want to use.
         /// </summary>
-        public RanQD()
-            : base()
+        public RanQd()
         {
             Seed();
         }
@@ -33,58 +32,54 @@ namespace RandomOps
         /// This is useful if you want to repeat experiments with the
         /// same sequence of pseudo-random numbers.
         /// </summary>
-        public RanQD(UInt32 seed)
-            : base()
+        public RanQd(uint seed)
         {
             Seed(seed);
         }
         #endregion
 
         #region Internal definitions and variables
-        static readonly UInt32 L1 = 1664525;
-        static readonly UInt32 L2 = 1013904223;
+        static readonly uint L1 = 1664525;
+        static readonly uint L2 = 1013904223;
 
         /// <summary>
         /// Is PRNG ready for use?
         /// </summary>
-        bool IsReady = false;
+        bool _isReady;
 
         /// <summary>
         /// Iterator-variable.
         /// </summary>
-        UInt32 Iter = 0;
+        uint _iter;
         #endregion
 
         #region PRNG Implementation.
         /// <summary>
         /// Draw a random number in inclusive range {0, .., RandMax}
         /// </summary>
-        public sealed override UInt32 Rand()
+        public sealed override uint Rand()
         {
-            Debug.Assert(IsReady);
+            Debug.Assert(_isReady);
 
-            Iter = L1 * Iter + L2;
+            _iter = L1 * _iter + L2;
 
-            Debug.Assert(Iter >= 0 && Iter <= RandMax);
+            Debug.Assert(_iter >= 0 && _iter <= RandMax);
 
-            return Iter;
+            return _iter;
         }
 
         /// <summary>
         /// The maximum possible value returned by Rand().
         /// </summary>
-        public sealed override UInt32 RandMax
-        {
-            get { return UInt32.MaxValue; }
-        }
+        public sealed override uint RandMax => uint.MaxValue;
 
         /// <summary>
         /// Seed with an integer.
         /// </summary>
-        protected sealed override void Seed(UInt32 seed)
+        protected sealed override void Seed(uint seed)
         {
-            Iter = seed;
-            IsReady = true;
+            _iter = seed;
+            _isReady = true;
         }
         #endregion
 
@@ -92,10 +87,8 @@ namespace RandomOps
         /// <summary>
         /// Name of the RNG.
         /// </summary>
-        public override string Name
-        {
-            get { return "RanQD"; }
-        }
+        public override string Name => "RanQD";
+
         #endregion
     }
 }

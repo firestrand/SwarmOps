@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -10,7 +9,8 @@ namespace SwarmOps
 {
     /// <summary>
     /// Performs a number of optimization runs and returns the
-    /// minimum fitness found.
+    /// minimum fitness found. Respects feasibility (constraint
+    /// satisfaction.)
     /// This does NOT allow for Preemptive Fitness Evaluation!
     /// </summary>
     public class RepeatMin : Repeat
@@ -55,7 +55,10 @@ namespace SwarmOps
         public override double Fitness(double[] parameters, double fitnessLimit)
         {
             // Best fitness found so far is initialized to the worst possible fitness.
-            double fitnessMin = Optimizer.MaxFitness;
+            double fitness = Optimizer.MaxFitness;
+
+            // Best feasibility found so far is initialized to the worst possible (infeasible).
+            bool feasible = false;
 
             // Perform a number of optimization runs.
             for (int i = 0; i < NumRuns; i++)
@@ -64,13 +67,14 @@ namespace SwarmOps
                 Result result = Optimizer.Optimize(parameters, fitnessLimit);
 
                 // Update the best fitness found so far, if improvement.
-                if (result.Fitness < fitnessMin)
+                if (Tools.BetterFeasibleFitness(feasible, result.Feasible, fitness, result.Fitness))
                 {
-                    fitnessMin = result.Fitness;
+                    fitness = result.Fitness;
+                    feasible = result.Feasible;
                 }
             }
 
-            return fitnessMin;
+            return fitness;
         }
         #endregion
     }

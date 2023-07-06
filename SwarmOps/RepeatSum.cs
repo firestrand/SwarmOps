@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -12,8 +11,9 @@ namespace SwarmOps
 {
     /// <summary>
     /// Performs a number of optimization runs and returns the
-    /// sum of the fitnesses. This allows for Preemptive Fitness
-    /// Evaluation.
+    /// sum of the fitnesses. Ignores feasibility (constraint
+    /// satisfaction.)
+    /// This allows for Preemptive Fitness Evaluation.
     /// </summary>
     public class RepeatSum : Repeat
     {

@@ -1,7 +1,6 @@
 ﻿/// ------------------------------------------------------
 /// SwarmOps - Numeric and heuristic optimization for C#
-/// Copyright (C) 2003-2009 Magnus Erik Hvass Pedersen.
-/// Published under the GNU Lesser General Public License.
+/// Copyright (C) 2003-2011 Magnus Erik Hvass Pedersen.
 /// Please see the file license.txt for license details.
 /// SwarmOps on the internet: http://www.Hvass-Labs.org/
 /// ------------------------------------------------------
@@ -34,15 +33,14 @@ namespace TestCurveFitting
         static readonly double MaxB = Y.Max()*2;
 
         // Create object for curve-fitting problem.
-        //static CurveFitting Problem = new CurveFittingLin(X, Y, MinA, MaxA, MinB, MaxB);
-        static CurveFitting Problem = new CurveFittingExp(X, Y, MinA, MaxA, MinB, MaxB);
+        static CurveFitting Problem = new CurveFittingLin(X, Y, MinA, MaxA, MinB, MaxB);
+        //static CurveFitting Problem = new CurveFittingExp(X, Y, MinA, MaxA, MinB, MaxB);
 
         // Optimization settings.
         static readonly int NumRuns = 1000;
         static readonly int Dim = Problem.Dimensionality;
         static readonly int DimFactor = 50;
         static readonly int NumIterations = DimFactor * Dim;
-        static IRunCondition RunCondition = new RunConditionFitness(NumIterations, Problem.AcceptableFitness);
 
         // Create optimizer.
         static Optimizer Optimizer = new PS(Problem);
@@ -52,11 +50,12 @@ namespace TestCurveFitting
             // Create and initialize PRNG.
             Globals.Random = new RandomOps.MersenneTwister();
 
-            // Assign run-condition to problem.
-            Problem.RunCondition = RunCondition;
+            // Set the max number of optimization iterations to perform.
+            Problem.MaxIterations = NumIterations;
 
             // Wrap the optimizer in a logger of result-statistics.
-            Statistics Statistics = new Statistics(Optimizer);
+            bool StatisticsOnlyFeasible = true;
+            Statistics Statistics = new Statistics(Optimizer, StatisticsOnlyFeasible);
 
             // Wrap it again in a repeater.
             Repeat repeat = new RepeatSum(Statistics, NumRuns);
@@ -100,7 +99,10 @@ namespace TestCurveFitting
                 double y = Y[i];
                 double computedY = Problem.ComputeY(Statistics.BestParameters, x);
 
-                Console.WriteLine("{0}\t{1}\t{2}", x, y, computedY);
+                Console.WriteLine("{0}\t{1}\t{2}",
+                    Tools.FormatNumber(x),
+                    Tools.FormatNumber(y),
+                    Tools.FormatNumber(computedY));
             }
         }
     }
