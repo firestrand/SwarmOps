@@ -27,3 +27,8 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
+/.vs/SwarmOps/DesignTimeBuild
+/.vs/SwarmOps/FileContentIndex
+/.vs
+/Backup
+/UpgradeLog.htm
