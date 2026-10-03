@@ -91,7 +91,8 @@ class Runner
             }
         }
         if (!SwarmOps.Tools.BetweenBounds(Array.Empty<double>(), Array.Empty<double>(), Array.Empty<double>())) throw new Exception("Empty bounds changed"); checks++;
-        Study.Save(args[0], checks, measurements, "Prefix sums, shared velocity-bound setup, and bounds simplification. Fitnesses and full PSO/MOL/sequential/parallel evaluation traces match exactly for 30 seeds, 5000 evaluations per run; parallel comparisons use one worker for deterministic evaluation order. Nine alternating timing trials after warmup.");
+        int traceChecks = TraceRegression.Run();
+        Study.Save(args[0], checks, measurements, "Prefix sums, shared velocity-bound setup, and bounds simplification. Fitnesses and full PSO/MOL/sequential/parallel evaluation traces match exactly for 30 seeds, 5000 evaluations per run; parallel comparisons use one worker for deterministic evaluation order. Nine alternating timing trials after warmup.", traceChecks);
     }
     class OldTrace : Old.Problems.Schwefel12
     {
@@ -161,12 +162,12 @@ static class Study
             speedup = sortedOld[4] / sortedNew[4], baselineBytesPerCall = oldBytes[4] / (double)iterations,
             candidateBytesPerCall = newBytes[4] / (double)iterations };
     }
-    public static void Save(string path, int checks, List<object> measurements, string notes)
+    public static void Save(string path, int checks, List<object> measurements, string notes, int traceBehaviorChecks = 0)
     {
         File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(new {
             runtime = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription,
             architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString(),
-            numericalChecks = checks, maximumAbsoluteError = 0, maximumRelativeError = 0,
+            numericalChecks = checks, traceBehaviorChecks, maximumAbsoluteError = 0, maximumRelativeError = 0,
             measurements, notes
         }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }) + "\n");
         Console.WriteLine($"PASS: {checks} exact numerical checks; results: {path}");

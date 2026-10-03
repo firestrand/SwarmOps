@@ -104,7 +104,7 @@ namespace SwarmOps
         }
 
         /// <summary>
-        /// Write fitness-trace to a TextWriter stream.
+        /// Write fitness-trace to a caller-owned stream, leaving it open.
         /// </summary>
         public override void Write(TextWriter writer)
         {
@@ -136,7 +136,6 @@ namespace SwarmOps
                 }
             }
 
-            writer.Close();
         }
         #endregion
 

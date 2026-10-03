@@ -136,13 +136,8 @@ namespace SwarmOps
         /// <param name="x">Un-sorted array of values.</param>
         public void ComputeUnsorted(double[] x)
         {
-            double[] y = new double[x.Length];
-
-            x.CopyTo(y, 0);
-
-            System.Array.Sort(y);
-
-            Compute(y);
+            double[] sorted = (double[])x.Clone();
+            ComputeUnsortedInplace(sorted);
         }
 
         /// <summary>

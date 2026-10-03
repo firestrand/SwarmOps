@@ -39,11 +39,7 @@ namespace SwarmOps
             : base(chainedFitnessTrace, numIterations, numIntervals, 0)
         {
             // Allocate trace.
-            Trace = new StatisticsAccumulator[MaxIntervals];
-            for (int i = 0; i < MaxIntervals; i++)
-            {
-                Trace[i] = new StatisticsAccumulator();
-            }
+            Trace = AccumulatorTraceStorage.Create(MaxIntervals);
         }
         #endregion
 
@@ -53,10 +49,7 @@ namespace SwarmOps
         /// </summary>
         public void Clear()
         {
-            for (int i = 0; i < Trace.Length; i++)
-            {
-                Trace[i].Clear();
-            }
+            AccumulatorTraceStorage.Clear(Trace);
         }
         #endregion
 
@@ -73,7 +66,7 @@ namespace SwarmOps
         }
 
         /// <summary>
-        /// Write fitness-trace to a TextWriter stream.
+        /// Write the trace to a caller-owned stream, leaving it open.
         /// </summary>
         public override void Write(TextWriter writer)
         {
@@ -105,7 +98,6 @@ namespace SwarmOps
                 }
             }
 
-            writer.Close();
         }
         #endregion
 

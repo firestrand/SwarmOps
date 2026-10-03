@@ -1,4 +1,7 @@
 {
   "baseline": "6639fb7",
-  "project": "SwarmOps/SwarmOps.csproj"
+  "project": "SwarmOps/SwarmOps.csproj",
+  "helpers": [
+    "TraceRegression.cs"
+  ]
 }

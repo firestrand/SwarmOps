@@ -13,6 +13,7 @@ namespace SwarmOps
     /// <summary>
     /// Base-class for tracing fitness progress during
     /// optimization.
+    /// </summary>
     public abstract class FitnessTrace
     {
         #region Constructors.
@@ -21,6 +22,11 @@ namespace SwarmOps
         /// </summary>
         public FitnessTrace(FitnessTrace chainedFitnessTrace, int numIterations, int numIntervals, double offset)
         {
+            if (numIterations <= 0)
+                throw new System.ArgumentOutOfRangeException(nameof(numIterations));
+            if (numIntervals <= 0)
+                throw new System.ArgumentOutOfRangeException(nameof(numIntervals));
+
             ChainedFitnessTrace = chainedFitnessTrace;
 
             // The number of intervals at which to log/show fitness cannot
@@ -91,26 +97,21 @@ namespace SwarmOps
         /// <param name="feasible">Feasibility (constraint satisfaction) to be traced.</param>
         public void Add(int iteration, double fitness, bool feasible)
         {
-            // If the optimization-iteration falls on an interval then log the fitness.
-            if ((iteration - Offset) % Stride == 0)
+            int relativeIteration = iteration - Offset;
+            if (iteration >= Offset && relativeIteration % Stride == 0)
             {
-                int index = (iteration - Offset) / Stride;
-
-                if (index < MaxIntervals)
+                int index = relativeIteration / Stride;
+                if (index >= 0 && index < MaxIntervals)
                 {
                     Log(index, fitness, feasible);
                 }
             }
 
-            // Call chained fitness-tracer.
-            if (ChainedFitnessTrace != null)
-            {
-                ChainedFitnessTrace.Add(iteration, fitness, feasible);
-            }
+            ChainedFitnessTrace?.Add(iteration, fitness, feasible);
         }
 
         /// <summary>
-        /// Write fitness-trace to a TextWriter stream.
+        /// Write fitness-trace to a caller-owned stream, leaving it open.
         /// </summary>
         public abstract void Write(TextWriter writer);
 
@@ -120,9 +121,10 @@ namespace SwarmOps
         /// <param name="filename">Name of file.</param>
         public void WriteToFile(string filename)
         {
-            TextWriter writer = new StreamWriter(filename);
-
-            Write(writer);
+            using (TextWriter writer = new StreamWriter(filename))
+            {
+                Write(writer);
+            }
         }
         #endregion
 
