@@ -52,18 +52,11 @@ namespace SwarmOps.Problems
             Debug.Assert(x != null && x.Length == Dimensionality);
 
             double value = 0;
+            double sum = 0;
 
             for (int i = 0; i < Dimensionality; i++)
             {
-                double sum = 0;
-
-                for (int j = 0; j <= i; j++)
-                {
-                    double elm = x[j];
-
-                    sum += elm;
-                }
-
+                sum += x[i];
                 value += sum * sum;
             }
 

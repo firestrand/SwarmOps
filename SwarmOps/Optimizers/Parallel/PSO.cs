@@ -239,13 +239,7 @@ namespace SwarmOps.Optimizers.Parallel
             bool gFeasible = false;
 
             // Initialize velocity boundaries.
-            for (k = 0; k < n; k++)
-            {
-                double range = System.Math.Abs(upperBound[k] - lowerBound[k]);
-
-                velocityLowerBound[k] = -range;
-                velocityUpperBound[k] = range;
-            }
+            Tools.InitializeVelocityBounds(n, lowerBound, upperBound, velocityLowerBound, velocityUpperBound);
 
             // Initialize all agents.
             // This counts as iterations below.

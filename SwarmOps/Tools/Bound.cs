@@ -66,14 +66,15 @@ namespace SwarmOps
         {
             Debug.Assert(x.Length == lower.Length && x.Length == upper.Length);
 
-            bool retVal = true;
-
-            for (int i = 0; retVal && i < x.Length; i++)
+            for (int i = 0; i < x.Length; i++)
             {
-                retVal = retVal && x[i] >= lower[i] && x[i] <= upper[i]; 
+                if (!(x[i] >= lower[i] && x[i] <= upper[i]))
+                {
+                    return false;
+                }
             }
 
-            return retVal;
+            return true;
         }
     }
 }

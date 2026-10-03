@@ -12,6 +12,20 @@ namespace SwarmOps
     public static partial class Tools
     {
         /// <summary>
+        /// Initialize symmetric velocity bounds from the search-space widths.
+        /// </summary>
+        internal static void InitializeVelocityBounds(int dimensionality, double[] lower, double[] upper,
+            double[] velocityLower, double[] velocityUpper)
+        {
+            for (int i = 0; i < dimensionality; i++)
+            {
+                double range = System.Math.Abs(upper[i] - lower[i]);
+                velocityLower[i] = -range;
+                velocityUpper[i] = range;
+            }
+        }
+
+        /// <summary>
         /// Initialize array with value.
         /// </summary>
         /// <param name="x">Array to be initialized.</param>

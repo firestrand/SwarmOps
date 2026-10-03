@@ -32,3 +32,7 @@ _ReSharper*/
 /.vs
 /Backup
 /UpgradeLog.htm
+
+# Local numerical-study measurements and Python bytecode
+verification/results.json
+__pycache__/
